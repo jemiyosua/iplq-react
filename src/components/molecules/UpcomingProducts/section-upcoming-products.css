@@ -1,0 +1,37 @@
+.image-container {
+    position: relative; /* Sets the container as a reference for absolute positioning */
+    /* margin: 0 auto; */
+    /* width: 100%; */
+}
+  
+.text-overlay {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust to exact center */
+    color: white; /* Text color */
+    font-size: 64; /* Responsive font size */
+    font-weight: 400; /* Bold text */
+    text-align: center; /* Center-align text */ 
+    padding: 10px 20px; /* Add padding around the text */
+}
+
+.full-width-image-container-up {
+    position: relative;
+    width: 100%; /* Container takes full width of its parent */
+    overflow: hidden; /* Prevent image overflow if aspect ratio is different */
+}
+  
+.full-width-image-up {
+    width: 100%; /* Image takes full width of its container */
+    display: block; /* Prevents a small space below the image */
+    object-fit: cover; /* or contain, depending on your needs */
+    height: auto;
+}
+
+@media only screen and (min-width: 1024px) {
+    .text-overlay {
+      font-size: 64px; /* Smaller font for smaller screens */
+      padding: 8px 16px; /* Adjust padding */
+    }
+}

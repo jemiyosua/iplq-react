@@ -1,0 +1,108 @@
+/* Container Layout */
+.layout-container-section-3 {
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.layout-container-section-3-responsive {
+    padding: 20px;
+    width: 100%;
+    /* background-color: red; */
+}
+
+.layout-content-section-3-left {
+    background-color: #F8F8F8;
+    width: 50%;
+    padding: 20px;
+    text-align: left;
+    padding-left: 20px;
+    transition: padding-left 0.5s ease-in-out, background-color 0.5s ease-in;
+}
+
+.layout-content-section-3-left:hover {
+    background-color: lightgray;
+    padding-left: 30px;
+    text-align: left;
+    transition: background-color 0.5s ease-out, padding-left 0.5s ease-in-out;
+}
+
+.layout-content-section-3-left-responsive {
+    background-color: #F8F8F8;
+    width: 100%;
+    padding: 20px;
+    text-align: left;
+    padding-left: 20px;
+    transition: padding-left 0.5s ease-in-out, background-color 0.5s ease-in;
+}
+
+.layout-content-section-3-left-responsive:hover {
+    background-color: lightgray;
+    padding-left: 30px;
+    text-align: left;
+    transition: background-color 0.5s ease-out, padding-left 0.5s ease-in-out;
+}
+
+.layout-content-section-3-right {
+    background-color: #F8F8F8;
+    width: 50%;
+    padding: 20px;
+    text-align: left;
+    padding-left: 20px;
+    transition: padding-left 0.5s ease-in-out, background-color 0.5s ease-in;
+}
+
+.layout-content-section-3-right:hover {
+    background-color: lightgray;
+    padding-left: 30px;
+    text-align: left;
+    transition: background-color 0.5s ease-out, padding-left 0.5s ease-in-out;
+}
+
+.layout-content-section-3-right-responsive {
+    background-color: #F8F8F8;
+    width: 100%;
+    padding: 20px;
+    text-align: left;
+}
+
+.content-section-3-title {
+    width: 40%;
+    color: #632B2B;
+    font-size: 64px;
+    font-weight: 400;
+}
+
+.content-section-3-title-responsive {
+    color: #632B2B;
+    font-size: 40px;
+    font-weight: 400;
+    width: 20%;
+}
+
+.content-section-3-desc {
+    width: 60%;
+    color: #333333;
+    font-size: 24px;
+    font-weight: 400;
+}
+
+.content-section-3-desc-responsive {
+    width: 60%;
+    color: #333333;
+    font-size: 17px;
+    font-weight: 400;
+}
+
+.box {
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.box.show {
+    transform: translateY(0);
+    opacity: 1;
+}

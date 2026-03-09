@@ -1,0 +1,78 @@
+.table-container{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 5px 20px rgba(0,0,0,0.05);
+}
+
+.table-search{
+padding:8px 12px;
+border:1px solid #e5e7eb;
+border-radius:8px;
+margin-bottom:15px;
+}
+
+.data-table{
+width:100%;
+border-collapse:collapse;
+font-size:14px;
+}
+
+.data-table th{
+text-align:left;
+padding:12px;
+background:#f9fafb;
+color:#6b7280;
+font-weight:600;
+border-bottom:1px solid #e5e7eb;
+}
+
+.data-table td{
+padding:12px;
+border-bottom:1px solid #f1f5f9;
+}
+
+.data-table tr:hover{
+background:#f9fafb;
+}
+
+.btn-edit{
+background:#e0f2fe;
+color:#0369a1;
+border:none;
+padding:6px 10px;
+border-radius:6px;
+margin-right:5px;
+cursor:pointer;
+}
+
+.btn-delete{
+background:#fee2e2;
+color:#b91c1c;
+border:none;
+padding:6px 10px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.table-pagination{
+display:flex;
+justify-content:flex-end;
+align-items:center;
+gap:10px;
+margin-top:15px;
+}
+
+.table-pagination button{
+padding:6px 12px;
+border:none;
+background:#22c55e;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.table-pagination button:disabled{
+    background:#d1d5db;
+    cursor:not-allowed;
+}

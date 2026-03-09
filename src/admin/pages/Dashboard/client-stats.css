@@ -1,0 +1,45 @@
+.client-analytics{
+    background:white;
+    border-radius:16px;
+    padding:25px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.05);
+    width: 100%;
+}
+
+.analytics-container{
+    display:grid;
+    /* grid-template-columns:350px 1fr; */
+    gap:40px;
+    align-items:center;
+    /* background-color: red; */
+}
+
+.chart-container{
+    width:300px;
+    margin:auto;
+}
+
+.client-stats{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+.client-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:14px;
+}
+
+.dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    margin-right:10px;
+}
+
+.aktif{background:#51CF66;}
+.trial{background:#74C0FC;}
+.nonaktif{background:#FF8787;}
+.baru{background:#FFD43B;}

@@ -1,0 +1,59 @@
+.image-container {
+    position: relative; /* Needed for absolute positioning of the popup */
+    cursor: pointer; /* Make the image clickable */
+}
+
+.clickable-image {
+    max-width: 100%; /* Or a specific width if needed */
+    height: auto;
+    display: block; /* Prevents a small space below the image */
+    cursor: pointer;
+}
+
+.popup {
+    position: fixed; /* Stay in viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 1000; /* Ensure it's on top */
+}
+
+.popup-content {
+    /* background-color: white;
+    padding: 10px; */
+    border-radius: 20px;
+    max-width: 90%; /* Adjust as needed */
+    max-height: 90%; /* Adjust as needed */
+    overflow: auto; /* Add scrollbars if image is too large */
+    position: relative; /* Needed for close button positioning */
+}
+
+.popup-content img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    margin: 0 auto; /* Center the image within the popup */
+}
+
+.popup-close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.popup-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}

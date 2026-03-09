@@ -1,0 +1,195 @@
+@media only screen and (max-width: 1024px) {
+	/* Static Text Overlay */
+	.carousel-text {
+		position: absolute;
+		top: 50%;
+		left: 55%;
+		transform: translate(-50%, -50%);
+		text-align: left;
+		width: 100%;
+		color: white;
+		font-size: 64px;
+		font-weight: 400;
+		z-index: 10;
+		opacity: 1;
+		transition: opacity 0.5s ease, transform 0.5s ease;
+	}
+
+	.carousel-text .text-content-desc {
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		text-align: left;
+		width: 100%;
+		color: white;
+		font-size: 20px;
+		font-weight: 400;
+		z-index: 10;
+		opacity: 1;
+		transition: opacity 0.5s ease, transform 0.5s ease;
+	}
+}
+
+@media only screen and (min-width: 1024px) and (max-width: 1440px) {
+	/* Static Text Overlay */
+	.carousel-text {
+		position: absolute;
+		top: 50%;
+		left: 55%;
+		transform: translate(-50%, -50%);
+		text-align: left;
+		width: 100%;
+		color: white;
+		font-size: 64px;
+		font-weight: 400;
+		z-index: 10;
+		opacity: 1;
+		transition: opacity 0.5s ease, transform 0.5s ease;
+	}
+
+	.carousel-text .text-content-desc {
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		text-align: left;
+		width: 100%;
+		color: white;
+		font-size: 20px;
+		font-weight: 400;
+		z-index: 10;
+		opacity: 1;
+		transition: opacity 0.5s ease, transform 0.5s ease;
+	}
+}
+
+@media only screen and (min-width: 1441px) {
+	/* Static Text Overlay */
+	.carousel-text {
+		position: absolute;
+		top: 50%;
+		left: 55%;
+		transform: translate(-50%, -50%);
+		text-align: left;
+		width: 100%;
+		color: white;
+		font-size: 64px;
+		font-weight: 400;
+		z-index: 10;
+		opacity: 1;
+		transition: opacity 0.5s ease, transform 0.5s ease;
+	}
+
+	.carousel-text .text-content-desc {
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		text-align: left;
+		width: 100%;
+		color: white;
+		font-size: 20px;
+		font-weight: 400;
+		z-index: 10;
+		opacity: 1;
+		transition: opacity 0.5s ease, transform 0.5s ease;
+	}
+}
+
+.carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+	transform: scale(1.2); /* Initial zoomed-in state */
+  	transition: transform 0.5s ease-in-out; /* Transition on transform */
+	/* background-color: green; */
+}
+
+.carousel.mounted {
+    transform: scale(1); /* Zoom out to normal size */
+}
+
+.carousel-tracks {
+	display: flex;
+	width: 100%;
+}
+
+.carousel-image {
+	min-width: 100%;
+	height: 100vh; /* Adjust to your required height */
+}
+
+.carousel-image img {
+	width: 100%; /* Make the image fill the width of the container */
+	height: 100%; /* Ensure it fills the height as well */
+	object-fit: cover; /* Maintain aspect ratio and cover the container */
+}
+
+.carousel-text .text-content {
+  	animation: slideIn 0.5s ease forwards;
+}
+
+.carousel-text .text-content-desc {
+	animation: slideIn 0.5s ease forwards;
+}
+
+.carousel-button {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	background: rgba(0, 0, 0, 0.5);
+	color: white;
+	border: none;
+	font-size: 24px;
+	padding: 10px 15px;
+	cursor: pointer;
+	z-index: 10;
+	border-radius: 50%;
+}
+
+.carousel-button.prev {
+  	left: 10px;
+}
+
+.carousel-button.next {
+  	right: 10px;
+}
+
+.carousel-button:hover {
+  	background: rgba(0, 0, 0, 0.8);
+}
+
+/* Dots Section */
+.carousel-dots {
+    position: absolute;
+    bottom: 100px;
+    left: 5%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+    /* margin: 0 5px; */
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.dot.active {
+    background: #632B2B;
+}
+
+/* Keyframes for Slide-In Animation */
+@keyframes slideIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}

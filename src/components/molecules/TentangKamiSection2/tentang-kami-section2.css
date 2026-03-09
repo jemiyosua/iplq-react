@@ -1,0 +1,120 @@
+/* Container Layout */
+.layout-container-section {
+    display: flex;
+    justify-content: space-between;
+}
+
+.layout-container-left {
+    width: 100%;
+    /* background-color: red; */
+}
+
+.layout-container-center {
+    width: 100%;
+    /* background-color: green; */
+}
+
+.layout-container-right {
+    width: 100%;
+    /* background-color: yellow; */
+}
+
+.content-title-section {
+    text-align: left;
+    font-size: 96px;
+    font-weight: 400;
+    font-family: sans-serif;
+}
+
+.content-title-section-responsive {
+    text-align: left;
+    font-size: 60px;
+    font-weight: 400;
+    font-family: sans-serif;
+}
+
+.content-text-section {
+    text-align: left;
+    font-size: 20px;
+    font-weight: 400;
+    font-family: sans-serif;
+}
+
+.box-title-stats {
+    position: relative;
+    left: -200px; /* Initially hidden to the left */
+    opacity: 0;
+    transition: left 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.box-title-stats.show {
+    left: 0;
+    opacity: 1;
+}
+
+.box-img-stats {
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.box-img-stats.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.box-img-2-stats {
+    transform: translateY(50px);
+    opacity: 0;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.box-img-2-stats.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.image-gallery-stats {
+    display: flex; /* Use flexbox for layout */
+    justify-content: flex-start; /* Distribute space evenly between images */
+    align-items: center; /* Vertically center images */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    padding: 20px; /* Add some padding around the gallery */
+    /* background-color: red; */
+}
+  
+.image-container-stats {
+    flex: 1; /* Each image takes equal space */
+    min-width: 200px; /* Minimum width to prevent images from becoming too small */
+    margin: 10px; /* Add some margin between images */
+    overflow: hidden; /* Hide overflowing content (if images are larger) */
+    /* background-color: green; */
+}
+  
+/* Media query for smaller screens */
+@media (max-width: 1000px) { /* Adjust breakpoint as needed */
+    /* .image-gallery {
+        flex-direction: column;
+        align-items: center;
+    } */
+
+    .image-gallery {
+        width: 30%;
+    }
+
+    .content-title-section {
+        text-align: left;
+        font-size: 60px;
+        font-weight: 400;
+        font-family: sans-serif;
+    }
+}
+    
+@media (max-width: 1340px) { /* Adjust breakpoint as needed */
+    .content-title-section {
+        text-align: left;
+        font-size: 60px;
+        font-weight: 400;
+        font-family: sans-serif;
+    }
+}

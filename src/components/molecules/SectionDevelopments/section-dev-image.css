@@ -1,0 +1,148 @@
+/* Container Layout */
+.layout-container-full {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Large image and small images */
+    gap: 20px;
+    padding: 20px;
+}
+
+.layout-container-responsive {
+    padding: 20px;
+}
+
+/* Large Image */
+.large-image {
+    position: relative;
+    /* height: 80%; */
+}
+
+.large-image-responsive {
+    position: relative;
+    height: 80%;
+    /* position: relative; */
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.large-image:hover {
+    position: relative;
+    background-color: lightgray;
+    /* height: 85%; */
+}
+
+.large-image img {
+  width: 100%;
+  height: auto;
+}
+
+.large-image-responsive img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.large-image .caption {
+    position: absolute;
+    /* bottom: 20px; */
+    /* left: 20px; */
+    color: #333;
+    text-align: left;
+    /* background-color: red; */
+    width: 100%;
+    /* padding: 20px; */
+    padding-top: 20px;
+    /* padding-left: 20px; */
+    transition: padding-left 0.5s ease-in-out, background-color 0.5s ease-in-out;
+}
+
+.large-image .caption:hover {
+    padding-left: 30px;
+    transition: padding-left 0.5s ease-in-out, background-color 0.5s ease-in-out;
+}
+
+.large-image .caption h2 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.large-image .caption p {
+    font-size: 16px;
+    color: #888;
+}
+
+.large-image-responsive .caption-responsive {
+    position: absolute;
+    bottom: 20px;
+    left: 40px;
+    color: white;
+    text-align: left;
+}
+
+.large-image-responsive .caption-responsive h2 {
+    font-size: 24px;
+    margin: 0;
+}
+  
+.large-image-responsive .caption-responsive p {
+    font-size: 16px;
+    color: white;
+}
+
+.large-image-responsive img:hover {
+    transform: scale(1.1); /* Scale up on hover */
+}
+
+/* Right Grid Images */
+.grid-container {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.grid-item {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.grid-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.grid-item img:hover {
+    transform: scale(1.1); /* Scale up on hover */
+}
+
+/* Optional: Add hover effect for overlay text */
+.grid-item .overlay-text,
+.large-image .caption .caption-responsive {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* .grid-item:hover .overlay-text {
+    transform: translateY(-5px);
+    opacity: 1;
+} */
+
+.grid-item .overlay-text {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    color: #fff;
+}
+
+.grid-item .overlay-text h3 {
+  margin: 0;
+  font-size: 18px;
+  text-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.grid-item .overlay-text p {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+  text-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+}

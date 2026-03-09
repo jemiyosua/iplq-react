@@ -1,0 +1,45 @@
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: #68b35c;
+    position: fixed;
+    width: 92%;
+}
+
+.header .logo-app{
+    font-size: 20px;
+    font-weight: bold;
+    color:white;
+    margin: 0px;
+}
+
+.header .menu-item{
+    font-size: 18px;
+    color: white;
+    text-decoration: underline;
+    cursor: pointer;
+    margin: 0px;
+}
+
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+@media only screen and (max-width: 768px) {
+    .divDownloadApp{
+        display: none;
+    }
+    .divHeight{
+        height:100px;
+    }
+}
+
+@media only screen and (min-width: 769px) and (max-width: 1200px) {
+}
+
+@media only screen and (min-width: 1201px) {
+}

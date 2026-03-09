@@ -1,0 +1,74 @@
+section, button {
+    --bg: white;
+}
+
+button[role=tab] {
+    --shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    --height: 2rem;
+    --radius: 1rem;
+    background: var(--bg);
+    border-radius: var(--radius) var(--radius) 0 0;
+    /* box-shadow: var(--shadow); */
+    height: var(--height);
+    padding: 0 2rem;
+    border: none;
+    position: relative;   
+
+    font-weight: 600;
+}
+
+button[role=tab]::after {
+    width: calc(var(--height) / 2);
+    height: calc(var(--height) / 2);
+    background: radial-gradient(transparent 70%, var(--bg) 70%);
+    background-size: var(--height) var(--height);
+    background-position: bottom left;
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 100%;
+}
+
+button[role2=tab2] {
+    --shadow: rgba(0, 0.35, 0, 0.35) 0px 5px 15px;
+    --height: 2rem;
+    --radius: 1rem;
+    background: var(--bg);
+    border-radius: var(--radius) var(--radius) 0 0;
+    /* box-shadow: var(--shadow); */
+    height: var(--height);
+    padding: 0 2rem;
+    border: none;
+    position: relative;
+    font-weight: 600;
+}
+
+button[role2=tab2]::after {
+    width: calc(var(--height) / 2);
+    height: calc(var(--height) / 2);
+    background: radial-gradient(transparent 70%, var(--bg) 70%);
+    background-size: var(--height) var(--height);
+    background-position: bottom right;
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 100%;
+}
+
+div[role=tab2]::after { 
+    width: calc(var(--height) / 2);
+    height: calc(var(--height) / 2);
+    background: radial-gradient(transparent 70%, var(--bg) 70%);
+    background-size: var(--height) var(--height);
+    background-position: bottom left;
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 100%;
+}
+
+section {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}

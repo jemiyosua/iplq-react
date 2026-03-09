@@ -1,0 +1,16 @@
+.hero{
+    position: relative;
+    height: 500px;
+    overflow: hidden; /* penting supaya tidak keluar container */   
+    margin-top:120px;
+}
+
+.phone-image{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    bottom: -200px; /* bikin setengah keluar layar */
+    
+    width: 350px;
+}

@@ -1,0 +1,47 @@
+body {
+    background-color: #ffffff;
+}
+
+/* .container {
+    width: 90%;
+    height: 500px;
+    margin: 5%;
+} */
+
+
+
+@media only screen and (max-width: 768px) {
+    .slick-slide {
+        height: 160px;
+    }
+    
+    .slick-slide img {
+        height: auto;
+        width: 100%;
+        padding: 20px;
+    }
+}
+
+@media only screen and (min-width: 769px) and (max-width: 1200px) {
+    .slick-slide {
+        height: 260px;
+    }
+    
+    .slick-slide img {
+        height: auto;
+        width: 100%;
+        padding: 20px;
+    }
+}
+
+@media only screen and (min-width: 1201px) {
+    .slick-slide {
+        height: 350px;
+    }
+    
+    .slick-slide img {
+        height: auto;
+        width: 100%;
+        padding: 20px;
+    }
+}

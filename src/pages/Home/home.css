@@ -1,0 +1,1037 @@
+@media only screen and (max-width: 300px){
+    .divProdukHome{
+        align-items: center;
+        background-color: #F8F9FD;
+        width: 100%;
+        height: 280px;
+        margin-bottom: 20px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center; 
+        cursor: pointer;
+        margin-top:0px;
+    }
+    .divProdukKategori{
+        align-items: center;
+        background-color: #F8F9FD;
+        width: 160px;
+        height: 160px;
+        margin-bottom: 20px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+    .divProdukKategori{
+        align-items: center;
+        background-color: #F8F9FD;
+        width: 220px;
+        height: 280px;
+        margin-bottom: 20px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+    .divProdukFavHome{
+        align-items: center;
+        background-color: #F8F9FD;
+        width: 100%;
+        height: 280px;
+        margin-bottom: 20px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        cursor: pointer;
+    }
+    .divKomitmen{
+        background-color: #FFFFFF;
+        width: 100%;
+        height: 90%;
+        padding-bottom: 10;
+        margin-right:30px;
+        margin-bottom: 30px;
+        padding:15px;
+        border-radius: 20px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .imgProduk{
+        width: 150px;
+        padding:20px;
+    }
+    .imgProdukKategori{
+        width: 150px;
+        padding:20px;
+        margin-top: 50px;
+    }
+    .imgProdukFav{
+        width: 150px;
+        padding:20px;
+    }
+    .txtDivProduk{
+        font-size: 12px;
+        text-align: left;
+        padding-left: 30px;
+    }
+    .divPartnerLg{
+        display: none;
+    }
+    .divPartnerXs{
+        display: block;
+    }
+    .txtHeaderHome1{
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .txtHeaderHome2{
+        font-size: 12px;
+        margin-bottom: 0px;
+    }
+    .txtHeaderBisnisHome1{
+        font-size: 14px;
+        color:red;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+    .txtHeaderBisnisHome2{
+        font-size: 20px;
+        margin-bottom: 0;
+        font-weight: bold;
+    }
+    .txtHeaderBisnisHome3{
+        font-size: 14px;
+        color:#545454;
+        margin-bottom: 5px;
+    }
+    .imgBisnisLg{
+        display: none;
+    }
+    .imgBisnisMd{
+        display: none;
+    }
+    .divBisnisLg{
+        display: none;
+    }
+    .divIframe{
+        width: 250px;
+        height: 150px;
+    }
+    .imgBannerKanan{
+        display: none;
+    }
+    .txtHeaderAutoproLg{
+        display: none;
+    }
+    .txtHeaderProdukXs{
+        display: flex;
+        flex-direction:row;
+        justify-content:space-between;
+        padding-top:10px;
+        padding-bottom: 10px;
+    }
+    .txtHeaderProdukLg{
+        display: none;
+    }
+    .txtDukungan1{
+        font-size: 14px;
+    }
+    .txtDukungan2{
+        width: 90%;
+        font-size: 10px;
+    }
+    .txtHeader{
+        font-size: 16px;
+    }
+    .txtContent{
+        font-size: 14px;
+    }
+    .divProdukMd{
+        display: none;
+    }
+    .btnSubmitSubs{
+        margin-top: 35px;
+        width:70px;
+        height:40px;
+    }
+    .txtHeaderAutoproXs{
+        padding:0px;
+    }
+    .txtBeritaLg{
+        display: none;
+    }
+    .divHref{
+        padding-bottom: 30px;
+    }
+}
+
+@media only screen and (min-width: 301px) and (max-width: 500px) {
+    .divProdukHome{
+        background-color: #F8F9FD;
+        height: 280px;
+        width: 100%;
+        margin-bottom: 20px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        cursor: pointer;
+        margin-top: 0px;
+    }  
+    .divProdukKategori{
+        background-color: #F8F9FD;
+        height: 280px;
+        width: 280px;
+        margin-bottom: 20px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }  
+    .divProdukFavHome{
+        background-color: #F8F9FD;
+        height: 340px;
+        width: 100%;
+        margin-bottom: 20px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        cursor: pointer;
+    } 
+    .divKomitmen{
+        background-color: #FFFFFF;
+        width: 100%;
+        height: 90%;
+        margin-right:30px;
+        margin-bottom: 30px;
+        padding:15px;
+        border-radius: 20px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .imgProduk{
+        width: 200px;
+        padding:20px;
+    }
+    .imgProdukKategori{
+        width: 200px;
+        padding:20px;
+        margin-top: 30px;
+    }
+    .imgProdukFav{
+        width: 200px;
+        padding:20px;
+    }
+    .txtDivProduk{
+        font-size: 16px;
+        text-align: left;
+        padding-left: 30px;
+    }
+    .divPartnerLg{
+        display: none;
+    }
+    .divPartnerXs{
+        display: block;
+    }
+    .txtHeaderHome1{
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .txtHeaderHome2{
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+    .txtHeaderBisnisHome1{
+        font-size: 14px;
+        color:red;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+    .txtHeaderBisnisHome2{
+        font-size: 18px;
+        margin-bottom: 0;
+        font-weight: bold;
+    }
+    .txtHeaderBisnisHome3{
+        font-size: 16px;
+        color:#545454;
+        margin-bottom: 5px;
+    }
+    .imgBisnisLg{
+        display: none;
+    }
+    .imgBisnisMd{
+        display: none;
+    }
+    .divBisnisLg{
+        display: none;
+    }
+    .divIframe{
+        width: 280px;
+        height: 200px;
+    }
+    .imgBannerKanan{
+        display: none;
+    }
+    .txtHeaderAutoproLg{
+        display: none;
+    }
+    .txtHeaderProdukXs{
+        display: flex;
+        flex-direction:row;
+        justify-content:space-between;
+        padding-top:10px;
+        padding-bottom: 10px;
+    }
+    .txtHeaderProdukLg{
+        display: none;
+    }
+    .txtDukungan1{
+        font-size: 12px;
+    }
+    .txtDukungan2{
+        width: 90%;
+        font-size: 10px;
+    }
+    .txtHeader{
+        font-size: 18px;
+    }
+    .txtContent{
+        font-size: 16px;
+    }
+    .divProdukMd{
+        display: none;
+    }
+    .btnSubmitSubs{
+        margin-top: 35px;
+        width:70px;
+        height:40px;
+    }
+    .txtHeaderAutoproXs{
+        padding:20px;
+    }
+    .txtBeritaLg{
+        display: none;
+    }
+    .divHref{
+        padding-bottom: 30px;
+    }
+}
+
+@media only screen and (min-width: 501px) and (max-width: 767px) {
+    .divProdukHome{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 250px;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        cursor: pointer;
+        margin-top: 0px;
+    }
+    .divProdukKategori{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 250px;
+        width: 250px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+    .divProdukFavHome{
+        background-color: #F8F9FD;
+        margin-bottom:30px;
+        height: 410px;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        cursor: pointer;
+    }
+    .divKomitmen{
+        background-color: #FFFFFF;
+        width: 100%;
+        height: 90%;
+        margin-right:30px;
+        margin-bottom: 30px;
+        padding:30px;
+        border-radius: 20px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .imgProduk{
+        width: 170px;
+        padding:20px;
+    }
+    .imgProdukKategori{
+        width: 170px;
+        padding:20px;
+        margin-top: 30px;
+    }
+    .imgProdukFav{
+        width: 250px;
+        padding:20px;
+    }
+    .txtDivProduk{
+        font-size: 16px;
+        text-align: left;
+        padding-left: 30px;
+    }
+    .divPartnerLg{
+        display: none;
+    }
+    .divPartnerXs{
+        display: block;
+    }
+    .txtHeaderHome1{
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .txtHeaderHome2{
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+    .txtHeaderBisnisHome1{
+        font-size: 14px;
+        color:red;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+    .txtHeaderBisnisHome2{
+        font-size: 20px;
+        margin-bottom: 0;
+        font-weight: bold;
+    }
+    .txtHeaderBisnisHome3{
+        font-size: 14px;
+        color:#545454;
+        margin-bottom: 5px;
+    }
+    .imgBisnisLg{
+        display: none;
+    }
+    .imgBisnisMd{
+        display: none;
+    }
+    .divBisnisLg{
+        display: none;
+    }
+    .divIframe{
+        width: 450px;
+        height: 260px;
+    }
+    .imgBannerKanan{
+        display: none;
+    }
+    .txtHeaderAutoproLg{
+        display: none;
+    }
+    .txtHeaderProdukXs{
+        display: flex;
+        flex-direction:row;
+        justify-content:space-between;
+        padding-top:10px;
+        padding-bottom: 10px;
+    }
+    .txtHeaderProdukLg{
+        display: none;
+    }
+    .txtDukungan1{
+        font-size: 18px;
+    }
+    .txtDukungan2{
+        width: 90%;
+        font-size: 14px;
+    }
+    .txtHeader{
+        font-size: 20px;
+    }
+    .txtContent{
+        font-size: 16px;
+    }
+    .divProdukLg{
+        display: none;
+    }
+    .btnSubmitSubs{
+        margin-top: 35px;
+        width:100px;
+        height:40px;
+    }
+    .txtHeaderAutoproXs{
+        padding:20px;
+    }
+    .txtBeritaXs{
+        display: none;
+    }
+    .divHref{
+        padding-bottom: 30px;
+    }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1200px) {
+    .divProdukHome{
+        background-color: #F8F9FD;
+        margin-bottom:30px;
+        height: 220px;
+        width: 180px;
+        align-items: center;
+        align-content: center;
+        text-align: center;
+        cursor: pointer;
+    }
+    .divProduk{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 180px;
+        width: 180px;
+        align-items: center;
+        align-content: center;
+        text-align: center;
+        cursor: pointer;
+    }
+    .divProdukKategori{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 180px;
+        width: 180px;
+        align-items: center;
+        align-content: center;
+        text-align: center;
+    }
+    .divProdukFavHome{
+        background-color: #F8F9FD;
+        height: 470px;
+        width: 375px;
+        align-items: center;
+        align-content: center;
+        text-align: center;
+        cursor: pointer;
+    }
+    .divKomitmen{
+        background-color: #FFFFFF;
+        width: 100%;
+        height: 100%;
+        margin-right:30px;
+        padding:30px;
+        border-radius: 20px;
+    }
+    .imgProduk{
+        width: 120px;
+        padding:20px;
+    }
+    .imgProdukKategori{
+        width: 120px;
+        padding:20px;
+        margin-top: 25px;
+    }
+    .imgProdukFav{
+        width: 320px;
+        padding:20px;
+    }
+    .txtDivProduk{
+        font-size: 16px;
+        text-align: left;
+        padding-left: 30px;
+    }
+    .txtNamaProduk{
+        font-weight: bold;
+        font-size: 18px;
+    }
+    .txtBrandProduk{
+        font-size: 12px;
+    }
+    .txtNamaProdukFav{
+        font-weight: bold;
+        font-size: 26px;
+    }
+    .txtBrandProdukFav{
+        font-size: 18px;
+    }
+    .divPartnerLg{
+        display: none;
+    }
+    .divPartnerXs{
+        display: block;
+    }
+    .txtHeaderHome1{
+        font-size: 35px;
+        font-weight: bold;
+    }
+    .txtHeaderHome2{
+        font-size: 18px;
+    }
+    .txtHeaderBisnisHome1{
+        font-size: 10px;
+        color:red;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+    .txtHeaderBisnisHome2{
+        font-size: 16px;
+        margin-bottom: 0;
+        font-weight: bold;
+    }
+    .txtHeaderBisnisHome3{
+        font-size: 14px;
+        color:#545454;
+        margin-bottom: 5px;
+    }
+    .imgBisnisLg{
+        display: none;
+    }
+    .imgBisnisMd{
+        margin-top: 50px;
+    }
+    .imgBisnisXs{
+        display: none;
+    }
+    .divBisnisXs{
+        display: none;
+    }
+    .divIframe{
+        width: 750px;
+        height: 380px;
+    }
+    /* .txtHeaderAutoproLg{
+        display: none;
+    } */
+    .txtHeaderAutoproXs{
+        display:none;
+    }
+    .btnSubmitSubs{
+        margin-top: 25px;
+        width:150px;
+        height:50px;
+    }
+    .txtHeaderProdukXs{
+        display: none;
+    }
+    .txtHeaderProdukLg{
+        display: flex;
+        flex-direction:row;
+        justify-content:space-between;
+        padding-top:30px;
+        padding-bottom: 30px;
+    }
+    .txtDukungan1{
+        font-size: 24px;
+    }
+    .txtDukungan2{
+        width: 90%;
+        font-size: 16px;
+    }
+    .txtHeader{
+        font-size: 30px;
+    }
+    .txtContent{
+        font-size: 20px;
+    }
+    .divProdukMd{
+        display: none;
+    }
+    .txtBeritaXs{
+        display: none;
+    }
+    .divHref{
+        padding-bottom: 20px;
+    }
+}
+
+@media only screen and (min-width: 1201px) and (max-width: 1500px) {
+    .divProdukHome{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 310px;
+        width: 250px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        cursor: pointer;
+    }
+    .divProduk{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 260px;
+        width: 250px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        cursor: pointer;
+    }
+    .divProdukKategori{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 250px;
+        width: 250px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+    .divProdukFavHome{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 680px;
+        width: 530px;
+        align-items: center;
+        align-content: center;
+        text-align: center;
+        cursor: pointer;
+    }
+    .divKomitmen{
+        background-color: #FFFFFF;
+        width: 100%;
+        height: 360px;
+        margin-right:30px;
+        padding:30px;
+        border-radius: 20px;
+    }
+    .imgProduk{
+        width: 100%;
+        min-height: 200px;
+        min-width: 200px;
+        max-height: 200px;
+        max-width: 200px;
+        padding:20px;
+    }
+    .imgProdukKategori{
+        width: 200px;
+        padding:20px;
+        margin-top: 20px;
+    }
+    .imgProdukFav{
+        padding:20px;
+        width: 440px;
+    }
+    .txtDivProduk{
+        text-align: left;
+        padding-left: 30px;
+        padding-top:30px;
+    }
+    .txtNamaProduk{
+        font-weight: bold;
+        font-size: 18px;
+    }
+    .txtBrandProduk{
+        font-size: 16px;
+    }
+    .txtNamaProdukFav{
+        font-weight: bold;
+        font-size: 22px;
+    }
+    .txtBrandProdukFav{
+        font-size: 18px;
+    }
+    .divPartnerLg{
+        display: block;
+    }
+    .divPartnerXs{
+        display: none;
+    }
+    .txtHeaderHome1{
+        font-size: 40px;
+        font-weight: bold;
+    }
+    .txtHeaderHome2{
+        font-size: 18px;
+    }
+    .txtHeaderBisnisHome1{
+        font-size: 14px;
+        color:red;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+    .txtHeaderBisnisHome2{
+        font-size: 24px;
+        margin-bottom: 0;
+        font-weight: bold;
+    }
+    .txtHeaderBisnisHome3{
+        font-size: 18px;
+        color:#545454;
+        margin-bottom: 5px;
+    }
+    .imgBisnisMd{
+        display: none;
+    }
+    .imgBisnisXs{
+        display: none;
+    }
+    .divBisnisXs{
+        display: none;
+    }
+    .divIframe{
+        width: 853px;
+        height: 480px;
+    }
+    .txtHeaderAutoproXs{
+        display: none;
+    }
+    .txtHeaderProdukXs{
+        display: none;
+    }
+    .txtHeaderProdukLg{
+        display: flex;
+        flex-direction:row;
+        justify-content:space-between;
+        padding-top:30px;
+        padding-bottom: 30px;
+    }
+    .txtDukungan1{
+        font-size: 24px;
+    }
+    .txtDukungan2{
+        width: 90%;
+        font-size: 16px;
+    }
+    .txtHeader{
+        font-size: 28px;
+    }
+    .txtContent{
+        font-size: 20px;
+    }
+    .divProdukMd{
+        display: none;
+    }
+    .divHref{
+        padding-bottom: 20px;
+    }
+}
+
+@media only screen and (min-width: 1501px) {
+    .divProdukHome{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 320px;
+        width: 340px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        cursor: pointer;
+    }
+    .divProduk{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 280px;
+        width: 340px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        cursor: pointer;
+    }
+    .divProdukKategori{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 280px;
+        width: 280px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+    .divProdukFavHome{
+        background-color: #F8F9FD;
+        margin:30px;
+        height: 700px;
+        width: 640px;
+        align-items: center;
+        align-content: center;
+        text-align: center;
+        cursor: pointer;
+    }
+    .divKomitmen{
+        background-color: #FFFFFF;
+        width: 100%;
+        height: 90%;
+        margin-right:30px;
+        padding:30px;
+        border-radius: 20px;
+    }
+    .imgProduk{
+        /* width: 250px;
+        padding:20px; */
+        width: 100%;
+        min-height: 200px;
+        min-width: 200px;
+        max-height: 200px;
+        max-width: 200px;
+        padding:20px;
+    }
+    .imgProdukKategori{
+        width: 200px;
+        padding:20px;
+        margin-top: 30px;
+    }
+    .imgProdukFav{
+        padding:20px;
+        width: 500px;
+    }
+    .txtDivProduk{
+        text-align: left;
+        padding-left: 30px;
+        padding-top:30px;
+    }
+    .txtNamaProduk{
+        font-weight: bold;
+        font-size: 20px;
+    }
+    .txtBrandProduk{
+        font-size: 16px;
+    }
+    .txtNamaProdukFav{
+        font-weight: bold;
+        font-size: 24px;
+    }
+    .txtBrandProdukFav{
+        font-size: 18px;
+    }
+    .divPartnerLg{
+        display: block;
+    }
+    .divPartnerXs{
+        display: none;
+    }
+    .txtHeaderHome1{
+        font-size: 40px;
+        font-weight: bold;
+    }
+    .txtHeaderHome2{
+        font-size: 20px;
+    }
+    .txtHeaderBisnisHome1{
+        color:red;
+        font-weight: bold;
+        margin-bottom: 0;
+    }
+    .txtHeaderBisnisHome2{
+        font-size: 32px;
+        margin-bottom: 0;
+        font-weight: bold;
+    }
+    .txtHeaderBisnisHome2{
+        font-size: 28px;
+        margin-bottom: 0;
+        font-weight: bold;
+    }
+    .txtHeaderBisnisHome3{
+        font-size: 20px;
+        color:#545454;
+        margin-bottom: 5px;
+    }
+    .imgBisnisMd{
+        display: none;
+    }
+    .imgBisnisXs{
+        display: none;
+    }
+    .divBisnisXs{
+        display: none;
+    }
+    .divIframe{
+        width: 853px;
+        height: 480px;
+    }
+    .txtHeaderAutoproXs{
+        display: none;
+    }
+    .txtHeaderProdukXs{
+        display: none;
+    }
+    .txtHeaderProdukLg{
+        display: flex;
+        flex-direction:row;
+        justify-content:space-between;
+        padding-top:30px;
+        padding-bottom: 30px;
+    }
+    .txtDukungan1{
+        font-size: 24px;
+    }
+    .txtDukungan2{
+        width: 90%;
+        font-size: 16px;
+    }
+    .txtHeader{
+        font-size: 28px;
+    }
+    .txtContent{
+        font-size: 20px;
+    }
+    .divProdukMd{
+        display: none;
+    }
+    .divHref{
+        padding-bottom: 20px;
+    }
+}
+
+/* START CAROUSEL */
+/* Carousel Container */
+.carousel-container {
+    position: relative;
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    width: 100%;
+  }
+  
+  .carousel-card {
+    min-width: 100%;
+    flex-shrink: 0;
+    text-align: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.5s ease;
+  }
+  
+  .carousel-card.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+  
+  .carousel-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+  
+  .carousel-card h3 {
+    margin-top: 10px;
+    font-size: 1.2rem;
+  }
+  
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    z-index: 10;
+  }
+  
+  .prev-btn {
+    left: 10px;
+  }
+  
+  .next-btn {
+    right: 10px;
+  }
+  
+/* END OF CAROUSEL */
+
+.section {
+    padding: 100px 20px;
+    margin: 20px 0;
+    background-color: white;
+    border: none;
+}
