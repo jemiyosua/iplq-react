@@ -120,7 +120,7 @@ const Login = () => {
                     if (data.error_code === "0") {
                         const date = new Date();
                         date.setDate(date.getDate() + 1);
-                        setCookie('varCookie', data.username + "|" + data.paramkey + "|" + data.access + "|" + data.access_name, {path: '/', expires: new Date(date)})
+                        setCookie('varCookie', data.username + "|" + data.paramkey + "|" + data.access + "|" + data.access_name + "|" + data.cluster + "|" + data.cluster_id, {path: '/', expires: new Date(date)})
                         window.location.href = "/admin/dashboard"
 
                     } else {

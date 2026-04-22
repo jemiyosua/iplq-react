@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Gap, Header, Footer, CarouselHome, SectionDevelopments, SectionProducts, UpcomingProducts, Hero } from '../../components';
+import { Header, Footer, Hero, About, VisiMisi, Features, CTAForm, Pricing, TargetUser } from '../../components';
 import { useDispatch } from 'react-redux';
 import { fetchStatus, generateSignature, historyConfig } from '../../utils/functions';
 import { useCookies } from 'react-cookie';
@@ -44,9 +44,19 @@ const Home = () => {
                 onClickSection={() => scrollToSection("section-dev")}
             />
 
-            {/* <div style={{ height:'100vh', backgroundColor:'#FFFFFF' }}></div> */}
-
             <Hero />
+
+            <About />
+
+            <TargetUser />
+
+            <VisiMisi />
+
+            <Features />
+
+            <Pricing />
+
+            <CTAForm />
 
             {/* <div style={{ paddingTop:50 }} /> */}
 

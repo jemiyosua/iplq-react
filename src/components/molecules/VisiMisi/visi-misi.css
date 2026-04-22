@@ -1,93 +1,172 @@
-/* Container Layout */
-.layout-container-visi-misi {
+.vm {
+  padding: 100px 10%;
+  /* background: radial-gradient(circle at center, rgba(92,255,157,0.1), #02140d); */
+  background: 
+    radial-gradient(circle at 50% 20%, rgba(0, 44, 0, 100), transparent 40%),
+    
+    #02140d;
+  color: white;
+}
+
+/* HEADER */
+.vm-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.vm-header h2 {
+  font-size: 52px;
+  font-weight: 800;
+  /* font-family: "Bitcount Prop Double", system-ui; */
+}
+
+.vm-header h2 span {
+  /* color: #9AE800; */
+  color: #9AE800;
+  /* text-shadow: 0 0 20px rgba(92,255,157,0.4); */
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(92,255,157,0.1);
+  color: #9AE800;
+  margin-bottom: 15px;
+}
+
+/* CONTAINER */
+.vm-container {
+  display: flex;
+  gap: 40px;
+}
+
+/* CARD */
+.vm-card {
+  flex: 1;
+  padding: 30px;
+  border-radius: 20px;
+  /* background: rgba(255,255,255,0.04); */
+  border: 1px solid rgba(92,255,157,0.2);
+  backdrop-filter: blur(20px);
+  transition: 0.3s;
+
+  background: rgba(0, 20, 10, 0.6); /* DARK glass */
+  border: 1px solid rgba(92,255,157,0.2);
+  backdrop-filter: blur(20px);
+}
+
+.vm-card:first-child {
+  border-left: 3px solid #9AE800;
+}
+
+.vm-card:hover {
+  transform: translateY(-5px);
+  /* box-shadow: 0 0 40px rgba(92,255,157,0.15); */
+  box-shadow: 0 0 40px #9AE800;
+}
+
+/* TITLE */
+.vm-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.vm-title h3 {
+  font-size: 22px;
+  /* font-family: "Bitcount Prop Double", system-ui; */
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(92,255,157,0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+}
+
+.vm-card p,
+.vm-list li {
+  color: rgba(255,255,255,0.8);
+}
+
+/* TEXT */
+.vm-card p {
+  /* color: #ccc; */
+  line-height: 1.7;
+}
+
+/* LIST */
+.vm-list {
+  list-style: none;
+  padding: 0;
+}
+
+.vm-list li {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 15px;
+  color: #ccc;
+}
+
+.vm-list li::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #9AE800;
+}
+
+.vm::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 30%, #02140d 80%);
+  z-index: 0;
+}
+
+.vm-container,
+.vm-header {
+  position: relative;
+  z-index: 1;
+}
+
+/* TABLET */
+@media (max-width: 1024px) {
+  .vm-container {
+    flex-direction: column;
+  }
+
+  .vm-header h2 {
+    font-size: 42px;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .vm {
+    padding: 60px 20px;
+  }
+
+  .vm-header h2 {
+    font-size: 32px;
+  }
+
+  .vm-card {
     padding: 20px;
-    width: 100%;
+  }
+
+  .vm-list li {
+    font-size: 14px;
+  }
 }
 
-.layout-container-visi-misi-responsive {
-    padding: 20px;
-    width: 100%;
-    /* background-color: red; */
-}
-
-.layout-content-visi-misi-right {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-    text-align: left;
-}
-
-.layout-content-visi-misi-right-responsive {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-    text-align: left;
-}
-
-.content-visi-misi-title {
-    text-align: left;
-    font-size: 96px;
-}
-
-.content-visi-misi-title-responsive {
-    text-align: left;
-    font-size: 60px;
-}
-
-.content-title-visi-misi {
-    font-size: 64px;
-    font-weight: 400;
-    font-family: sans-serif;
-}
-
-.content-title-visi-misi-responsive {
-    font-size: 40px;
-    font-weight: 400;
-    font-family: sans-serif;
-}
-
-.content-desc-visi-misi {
-    font-size: 24px;
-    font-weight: 400;
-    font-family: sans-serif;
-}
-
-.content-desc-visi-misi-responsive {
-    font-size: 17px;
-    font-weight: 400;
-    font-family: sans-serif;
-}
-
-.box-title-vm {
-    transform: translateY(-100px);
-    opacity: 0;
-    transition: transform 0.5s ease, opacity 0.5s ease;
-}
-
-.box-title-vm.show {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.box-desc-vm {
-    transform: translateY(100px);
-    opacity: 0;
-    transition: transform 0.5s ease, opacity 0.5s ease;
-}
-
-.box-desc-vm.show {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.box-title-core-value {
-    position: relative;
-    left: -200px; /* Initially hidden to the left */
-    opacity: 0;
-    transition: left 1s ease-in-out, opacity 0.5s ease-in-out;
-}
-
-.box-title-core-value.show {
-    left: 0;
-    opacity: 1;
+/* SMALL MOBILE */
+@media (max-width: 480px) {
+  .vm-header h2 {
+    font-size: 26px;
+  }
 }

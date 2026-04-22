@@ -1,0 +1,114 @@
+.features {
+  padding: 100px 10%;
+  /* background: #02140d; */
+  background: radial-gradient(circle at center, rgba(0, 44, 0, 100), transparent 40%),#02140d;
+  color: white;
+}
+
+/* HEADER */
+.features-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.features-header h2 {
+  font-size: 52px;
+  font-weight: 800;
+  /* font-family: "Bitcount Prop Double", system-ui; */
+}
+
+.features-header h2 span {
+  color: #9AE800;
+}
+
+.features-header p {
+  color: #aaa;
+  margin-top: 15px;
+}
+
+/* BADGE */
+.badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(92,255,157,0.1);
+  color: #9AE800;
+  margin-bottom: 15px;
+}
+
+/* GRID */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+/* CARD */
+.feature-card {
+	padding: 25px;
+	border-radius: 20px;
+	background: rgba(0, 30, 15, 0.6);
+	border: 1px solid rgba(92,255,157,0.15);
+	transition: 0.3s;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  /* box-shadow: 0 0 30px rgba(92,255,157,0.2); */
+  box-shadow: 0 0 30px #9AE800;
+}
+
+/* ICON */
+.icon {
+    width: 50px !important;
+    height: 50px !important; 
+    background: rgba(92,255,157,0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.icon-img {
+	width: 25px;
+	height: 25px;
+}
+
+/* TEXT */
+.feature-card h3 {
+  margin-bottom: 10px;
+}
+
+.feature-card p {
+  font-size: 14px;
+  color: #aaa;
+  line-height: 1.6;
+}
+
+/* TABLET */
+@media (max-width: 1024px) {
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .features-header h2 {
+    font-size: 44px;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .features {
+    padding: 60px 20px;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .features-header h2 {
+    font-size: 32px;
+  }
+}

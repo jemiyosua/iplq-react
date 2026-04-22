@@ -1,43 +1,89 @@
-
-.leftMenu{
-    width: 250px;
-    background-color:white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    box-sizing: border-box;
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background: #f5f7f5;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: 0.3s;
 }
 
-.leftMenu .title{
-    font-size: 20px;
-    font-weight: bold;
-    color: #2d2d2d;
+.sidebar.collapsed {
+  width: 80px;
 }
 
-.loader-container {
-    width: 100%;
-    height: 200px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* background: rgba(0, 0, 0, 0.834); */
-    z-index: 1;
+/* HEADER */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  font-weight: bold;
+  color: #0f2f0f;
 }
 
-.spinner {
-    width: 64px;
-    height: 64px;
-    border: 8px solid;
-    border-color: #3d5af1 transparent #3d5af1 transparent;
-    border-radius: 50%;
-    animation: spin-anim 1.2s linear infinite;
+/* MENU */
+.menu {
+  flex: 1;
+  padding: 10px;
 }
 
-@keyframes spin-anim {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #2f4f2f;
+}
+
+.menu-item:hover {
+  background: #eaf5ea;
+}
+
+.menu-item.active {
+  background: #e6f9e6;
+  color: #84cc16;
+  border-left: 4px solid #84cc16;
+}
+
+/* SUBMENU */
+.submenu {
+  padding-left: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #5f7a5f;
+  margin-top: 5px;
+}
+
+/* FOOTER */
+.sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.sidebar-footer div {
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.logout {
+  color: #ef4444;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
 }

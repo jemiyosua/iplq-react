@@ -1,305 +1,166 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useCookies } from 'react-cookie';
-import { useHistory, Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { AlertMessage, paths } from '../../../utils'
-import { historyConfig, generateSignature, fetchStatus } from '../../../utils/functions';
-import { setForm } from '../../../redux';
-import SweetAlert from 'react-bootstrap-sweetalert';
+import React, { useEffect, useState } from 'react';
 import './LeftMenu.css';
-import { FaServer, FaMicrosoft, FaBuilding, FaMicrochip, FaHandHoldingHeart, FaHandshake, FaSortUp, FaSortDown, FaArrowRight, FaWhatsapp, FaWhatsappSquare, FaHornbill, FaWater, FaChartArea, FaPeopleCarry } from 'react-icons/fa';
-import { GrConfigure, GrMoney, GrTransaction } from "react-icons/gr";
-import { IoLogoWhatsapp } from "react-icons/io";
-import { FaPeopleGroup, FaPeopleRoof } from "react-icons/fa6";
-import { FcAdvance, FcApproval, FcAssistant, FcCellPhone, FcDam, FcDataConfiguration, FcDownRight, FcFeedIn, FcFilingCabinet, FcHome, FcMoneyTransfer, FcPodiumWithSpeaker, FcRadarPlot, FcReadingEbook, FcSettings, FcSupport, FcTodoList } from "react-icons/fc";
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
-import { Menu, MenuItem, Sidebar, SubMenu, useProSidebar } from 'react-pro-sidebar';
-import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import { IconMidtrans } from '../../../assets';
-import { MdDashboard, MdOutlineDashboard } from 'react-icons/md';
-import { CiMoneyBill } from "react-icons/ci";
-import { IoDocumentAttachOutline } from "react-icons/io5";
+import { useHistory } from "react-router-dom";
+import { IconDashboardLeftMenu, IconLogoIPLQ } from '../../../assets';
+import { FaArrowAltCircleLeft, FaBuilding, FaDashcube, FaDoorClosed, FaHandHolding, FaMoneyBill, FaMoneyCheck, FaUser } from 'react-icons/fa';
+import { FaBilibili, FaHandHoldingDollar, FaMoneyBill1Wave, FaMoneyBillTransfer, FaMoneyBillWheat, FaPeopleGroup } from 'react-icons/fa6';
+import { useSelector } from 'react-redux';
+import { useCookies } from 'react-cookie';
+import { Gap } from '../../atoms';
 
-const LeftMenu = () => {
-	const history = useHistory(historyConfig);
-    const dispatch = useDispatch();
-    const containerRef = useRef(null);
-	const [cookies, setCookie, removeCookie] = useCookies(['user']);
-	const [LoadingMenuSidebar, setLoadingMenuSidebar] = useState(false)
-	const [ListMenuSidebar, setListMenuSidebar] = useState([])
-	const [Loading, setLoading] = useState(false)
-	const { form }=useSelector(state=>state.PaketReducer);
-	const { collapseSidebar } = useProSidebar();
-	const [PageActive, setPageActive] = useState(1)
+const LeftMenu = ({ children }) => {
+	const {form}=useSelector(state=>state.PaketReducer);
+	const [cookies, setCookie,removeCookie] = useCookies(['user']);
+
+	const [OpenMenuTagihan, setOpenMenuTagihan] = useState(true);
+	const [OpenMenuTransaksi, setOpenMenuTransaksi] = useState(true);
+	const [Collapsed, setCollapsed] = useState(false);
+	const [Open, setOpen] = useState(false);
 	
-	const [ShowAlert, setShowAlert] = useState(true)
-    const [SessionMessage, setSessionMessage] = useState("")
-    const [SuccessMessage, setSuccessMessage] = useState("")
-    const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
-    const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
-
-	const [IdMenu, setIdMenu] = useState("")
-	const [IsSubMenuOpen, setIsSubMenuOpen] = useState(false)
+	const history = useHistory();
 
 	useEffect(() => {
-		window.scrollTo(0, 0)
-		getLeftMenu()
-	},[])
 
-	const logout = ()=>{
-        removeCookie('varCookie', { path: '/'})
-        // dispatch(setForm("ParamKey",''))
-        // dispatch(setForm("Username",''))
-        // dispatch(setForm("Name",''))
-        // dispatch(setForm("Role",''))
-        if (window) {
+		console.log(form)
+		
+		// console.log(pageActive);
+		console.log(form.PageActive)
+	}, [])
+
+	const handleToggleSidebar = () => {
+		if (window.innerWidth < 768) {
+			setOpen(true); // mobile → open overlay
+		} else {
+			setCollapsed(!Collapsed); // desktop → collapse
+		}
+	};
+
+	const page = (menu) => {
+		setOpen(false)
+	}
+
+	const handleLogout = () => {
+		removeCookie('varCookie', { path: '/'})
+		if(window){
             sessionStorage.clear();
 		}
-		history.push('/admin/login')
-		return
-    }
-
-	const getCookie = (tipe) => {
-		var SecretCookie = cookies.varCookie;
-		if (SecretCookie !== "" && SecretCookie != null && typeof SecretCookie=="string") {
-			var LongSecretCookie = SecretCookie.split("|");
-			var username = LongSecretCookie[0];
-			var paramKey = LongSecretCookie[1];
-			var accessLogin = parseInt(LongSecretCookie[2]);
-			var accessName = LongSecretCookie[3];
-		
-			if (tipe === "username") {
-				return username;
-			} else if (tipe === "paramkey") {
-				return paramKey;
-			} else if (tipe === "access") {
-				return accessLogin;
-			} else if (tipe === "access_name") {
-				return accessName;
-			} else {
-				return null;
-			}
-		} else {
-			return null;
-		}
+		window.location.href = '/admin/login'
 	}
 
-	const getLeftMenu = () => {
-		var cookieUsername = getCookie("username");
-		var cookieParamKey = getCookie("paramkey");
-        var cookieAccessLogin = getCookie("access");
+	return (
+		<div className="layout">
 
-		var requestBody = JSON.stringify({
-			"username": cookieUsername,
-			"paramkey": cookieParamKey,
-			"method": "SELECT",
-			"access": cookieAccessLogin,
-			"page": 1,
-			"row_page": -1,
-			"order_by": "",
-			"order": ""
-		});
+			{/* SIDEBAR */}
+			<div className={`sidebar ${Collapsed ? "collapsed" : ""} ${Open ? "open" : ""}`}>
+				
+				<div className="sidebar-header">
+					{!Collapsed && <img src={IconLogoIPLQ} alt="logo" style={{ height:40 }} />}
+				</div>
 
-		setLoadingMenuSidebar(true)
+				<div className="menu">
+					<div className={`menu-item ${form.PageActive == "DASHBOARD" && "active"}`} onClick={() => {
+						setOpen(false)
+						window.location.href = "/admin/dashboard"
+					}}>
+						{/* <img src={IconDashboardLeftMenu} alt="logo" style={{ height:15, color:'#FFFFFF' }} /> {!collapsed && "Dashboard"} */}
+						<FaDashcube /> {!Collapsed && "Dashboard"}
+					</div>
 
-		var url = paths.URL_API_ADMIN + 'LeftMenu';
-		var Signature  = generateSignature(requestBody)
+					<Gap height={15} />
 
-		fetch(url, {
-			method: "POST",
-			body: requestBody,
-			headers: {
-				'Content-Type': 'application/json',
-				'Signature': Signature
-			},
-		})
-		.then(fetchStatus)
-		.then(response => response.json())
-		.then((data) => {
+					<div className="menu-item" onClick={() => setOpenMenuTagihan(!OpenMenuTagihan)}>
+						<FaMoneyBill1Wave /> {!Collapsed && "Tagihan"}
+					</div>
 
-			setLoadingMenuSidebar(false)
+					{OpenMenuTagihan && !Collapsed && (
+						<div className="submenu">
+							<div className={`submenu-item ${form.PageActive == "IPL" && "active"}`} onClick={() => {
+								setOpen(false)
+								window.location.href = "/admin/ipl"
+							}} style={{ cursor:'pointer' }}><FaMoneyBillTransfer /> Tagihan IPL</div>
+							<div className={`submenu-item ${form.PageActive == "IURAN" && "active"}`} onClick={() => {
+								setOpen(false)
+								window.location.href = "/admin/iuran"
+							}} style={{ cursor:'pointer' }}><FaMoneyBillWheat /> Iuran Warga</div>
+							<div className="submenu-item" onClick={() => setOpen(false)}><FaHandHoldingDollar /> Donasi</div>
+							<div className="submenu-item" onClick={() => setOpen(false)}><FaMoneyCheck /> Keuangan</div>
+						</div>
+					)}
 
-			if (data.error_code === "0") {
-				setListMenuSidebar(data.result)
-				return
-			} else {
-				if (data.error_code === "2") {
-					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
-                    setShowAlert(true);
-					return;
-				} else {
-					setErrorMessageAlert(data.error_message);
-					setShowAlert(true);
-					return;
-				}
-			}
-		})
-		.catch((error) => {
-			setLoading(false)
-			if (error.message === 401) {
-				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
-				setShowAlert(true);
-				return false;
-			} else if (error.message !== 401) {
-				setErrorMessageAlert(AlertMessage.failedConnect);
-				setShowAlert(true);
-				return false;
-			}
-		});
-    }
+					<Gap height={15} />
 
-	const handlePage = (urlPage) => {
-		// history.push(urlPage)
-		window.location.href=urlPage;
-		// return
-	}
+					<div className="menu-item" onClick={() => setOpenMenuTransaksi(!OpenMenuTransaksi)}>
+						<FaMoneyBill1Wave /> {!Collapsed && "Transaksi"}
+					</div>
 
-	const handleOpenSubmenu = (id) => {
-		console.log("id : ", id)
-		if (id == "") {
-			if (IdMenu == id) {
-				setIsSubMenuOpen(true)
-			} else {
-				setIsSubMenuOpen(false)
-			}
-		} else {
-			console.log("masuk sini")
-			setIsSubMenuOpen(false)
-		}
-	}
-    
-    return (
-        <div style={{ display: 'flex', height: '100vh', overflow: 'scroll initial', backgroundColor:'#FFFFFF' }}>
+					{OpenMenuTransaksi && !Collapsed && (
+						<div className="submenu">
+							<div className={`submenu-item ${form.PageActive == "TRANSAKSI_IPL" && "active"}`} onClick={() => {
+								setOpen(false)
+								window.location.href = "/admin/transaksi-ipl"
+							}} style={{ cursor:'pointer' }}><FaMoneyBillTransfer /> Transaksi IPL</div>
+							<div className={`submenu-item ${form.PageActive == "TRANSAKSI_IURAN" && "active"}`} onClick={() => {
+								setOpen(false)
+								window.location.href = "/admin/transaksi-iuran"
+							}} style={{ cursor:'pointer' }}><FaMoneyBillWheat /> Transaksi Iuran</div>
+						</div>
+					)}
 
-			{SessionMessage !== "" ?
-			<SweetAlert
-				warning 
-				show={ShowAlert}
-				onConfirm={() => {
-					setShowAlert(false)
-					logout()
-					window.location.href="/";
-				}}
-				btnSize="sm">
-				{SessionMessage}
-			</SweetAlert>
-			:""}
+					<Gap height={15} />
 
-			{SuccessMessage !== "" ?
-			<SweetAlert 
-				success 
-				show={ShowAlert}
-				onConfirm={() => {
-					setShowAlert(false)
-					setSuccessMessage("")
-					history.replace("/overview")
-				}}
-				btnSize="sm">
-				{SuccessMessage}
-			</SweetAlert>
-			:""}          
+					<div className={`menu-item ${form.PageActive == "DATA-WARGA" && "active"}`} onClick={() => setOpen(false)}>
+						<FaPeopleGroup /> {!Collapsed && "Data Warga"}
+					</div>
 
-			{ErrorMessageAlert !== "" ?
-			<SweetAlert 
-				danger 
-				show={ShowAlert}
-				onConfirm={() => {
-					setShowAlert(false)
-					setErrorMessageAlert("")
-				}}
-				btnSize="sm">
-				{ErrorMessageAlert}
-			</SweetAlert>
-			:""}
+					<Gap height={15} />
 
-			{ErrorMessageAlertLogout !== "" ?
-			<SweetAlert 
-				danger 
-				show={ShowAlert}
-				onConfirm={() => {
-					setShowAlert(false)
-					setErrorMessageAlertLogout("")
-					window.location.href="admin/login";
-				}}
-				btnSize="sm">
-				{ErrorMessageAlertLogout}
-			</SweetAlert>
-			:""}
-			
-			<Sidebar style={{height:"100vh"}}>
-				<Menu>
-					<MenuItem
-						icon={<MenuOutlinedIcon />}
-						onClick={() => {
-							collapseSidebar();
-						}}
-					><h5 style={{fontWeight:'bold'}}>IPLQ {getCookie("access_name")}</h5>
-					</MenuItem>
+					<div className={`menu-item ${form.PageActive == "MASTER-CLUSTER" && "active"}`} onClick={() => setOpen(false)}>
+						<FaBuilding /> {!Collapsed && "Master Cluster"}
+					</div>
 
-					{LoadingMenuSidebar ?
-					<Skeleton count={ListMenuSidebar?.length} />
-					:
-					ListMenuSidebar?.length > 0 && ListMenuSidebar.map((item,index) => {
-						var icon = ""
-						if (item.menu === "Dashboard") {
-							icon = <MdOutlineDashboard />
-						} else if (item.menu === "Integrasi Whatsapp") {
-							icon = <FaWhatsapp />
-						} else if (item.menu === "Aset") {
-							icon = <IoDocumentAttachOutline />
-						} else if (item.menu === "Billing") {
-							icon = <CiMoneyBill />
-						} else if (item.menu === "Konfigurasi") {
-							icon = <GrConfigure />
-						} else if (item.menu === "Kepengurusan") {
-							icon = <FaPeopleGroup />
-						} else if (item.menu === "Penghuni") {
-							icon = <FaPeopleRoof />
-						} else if (item.menu === "Keuangan") {
-							icon = <GrMoney />
-						} else if (item.menu === "Pengelola Air") {
-							icon = <FaWater />
-						} else if (item.menu === "Lingkungan") {
-							icon = <FaChartArea />
-						} else if (item.menu === "Karyawan") {
-							icon = <FaPeopleCarry />
-						} else if (item.menu === "Midtrans") {
-							icon = <GrTransaction />
-						}
-						return <>
-							{item.list_sub_menu?.length > 0 ?
-							<SubMenu 
-								label={item.menu}
-								icon={icon}
-								open={item.id == IdMenu || form.pageActive == item.page_active ? true : false}
-								onOpenChange={() => {
-									handleOpenSubmenu(item.id)
-									setIdMenu(item.id)
-								}}
-							>
-							{item.list_sub_menu?.length > 0 && item.list_sub_menu?.map((item2,index2) => {
-								return <MenuItem
-									icon={<FcDownRight />}
-									style={{ color:form.SubPageActive == item2.page_active ? '#004372' : '#000000', fontWeight:form.SubPageActive == item2.page_active ? 'bold' : '' }}
-									onClick={() => handlePage(item2.href)}
-								>{item2.sub_menu}</MenuItem>
-							})}
-							</SubMenu>
-							:
-							<MenuItem 
-								icon={icon}
-								onClick={() => handlePage(item.href)}
-								style={{backgroundColor:form.PageActive == item.page_active && '#e8f7ef',color:form.PageActive == item.page_active && '#18a957'}}
-							>{item.menu == "Midtrans" ? <img src={IconMidtrans} style={{height:75}} /> : item.menu}</MenuItem>
-							}
-						</>
-					})}
-				</Menu>
-			</Sidebar>
+					<Gap height={15} />
+
+					<div className={`menu-item ${form.PageActive == "MANAJEMEN-USER" && "active"}`} onClick={() => setOpen(false)}>
+						<FaUser /> {!Collapsed && "Manajemen User"}
+					</div>
+				</div>
+
+				<div className="sidebar-footer">
+				<div onClick={() => setCollapsed(!Collapsed)}>
+					<FaArrowAltCircleLeft /> {!Collapsed && "Perkecil"}
+				</div>
+				<div className="logout" onClick={() => handleLogout()}><FaDoorClosed/> {!Collapsed && "Keluar"}</div>
+				</div>
+			</div>
+
+			{/* MAIN */}
+			<div className="main">
+
+				{/* TOPBAR */}
+				<div className="topbar">
+					<div className="left">
+						<div onClick={handleToggleSidebar}>
+						☰
+						</div>
+						{/* <h2 className="logo-text">ResidentHub</h2> */}
+					</div>
+
+					<div>👤 SuperAdmin</div>
+				</div>
+
+				{/* CONTENT */}
+				<div className="content">
+				{children}
+				</div>
+			</div>
+
+			{/* OVERLAY (MOBILE) */}
+			{Open && (
+				<div className="overlay" onClick={() => setOpen(false)}></div>
+			)}
 
 		</div>
-    )
-}
+	);
+};
 
 export default LeftMenu;

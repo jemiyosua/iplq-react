@@ -1,0 +1,241 @@
+.pricing {
+  padding: 120px 10%;
+  text-align: center;
+  color: white;
+
+  background:
+    radial-gradient(circle at center, rgba(92,255,157,0.15), transparent 50%),
+    #02140d;
+}
+
+/* HEADER */
+.pricing-header h2 {
+  font-size: 52px;
+  font-weight: 800;
+  /* font-family: "Bitcount Prop Double", system-ui; */
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.pricing-header h2 span {
+  color: #9AE800;
+}
+
+.pricing-header p {
+  margin-top: 15px;
+  color: #aaa;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* TOGGLE */
+.toggle {
+  margin-top: 25px;
+  display: inline-flex;
+  background: rgba(255,255,255,0.05);
+  border-radius: 30px;
+  padding: 5px;
+}
+
+.toggle button {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: #aaa;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.toggle .active {
+  background: #9AE800;
+  color: #02140d;
+  font-weight: bold;
+}
+
+/* CARDS */
+.pricing-cards {
+  margin-top: 60px;
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+}
+
+/* CARD */
+.card-pricing {
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(92,255,157,0.1) !important;
+    border-radius: 20px !important;
+    padding: 30px;
+    width: 300px;
+    text-align: left;
+    position: relative !important;
+}
+
+.card-pricing:hover {
+  transform: translateY(-8px);
+  border-color: #9AE800;
+}
+
+/* ACTIVE CARD */
+.card-pricing.active {
+  border: 2px solid #9AE800;
+  transform: scale(1.05);
+  /* box-shadow: 0 0 40px rgba(92,255,157,0.3); */
+  box-shadow: 0 0 20px #9AE800;
+}
+
+/* POPULAR */
+.popular {
+	position: absolute;
+	top: -12px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: #9AE800;
+	color: #02140d;
+	padding: 5px 12px;
+	border-radius: 20px;
+	font-size: 12px;
+}
+
+/* TEXT */
+.card-pricing h3 {
+	font-size: 22px;
+	color: #FFFFFF;
+	/* font-family: "Bitcount Prop Double", system-ui; */
+}
+
+.sub {
+  /* color: #888; */
+  color: #ffffff80;
+  font-size: 14px;
+}
+
+.card-pricing h1 {
+  margin: 20px 0;
+  font-size: 32px;
+  color: #9AE800;
+  /* font-family: "Bitcount Prop Double", system-ui; */
+}
+
+.card-pricing h1 span {
+  font-size: 14px;
+  color: #aaa;
+}
+
+.desc {
+  color: #777;
+  font-size: 14px;
+}
+
+/* BUTTON */
+.btn-primary {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 30px;
+  background: #9AE800;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-outline {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 30px;
+  border: 1px solid #9AE800;
+  background: transparent;
+  color: #9AE800;
+}
+
+/* LIST */
+.card-pricing ul {
+  margin-top: 20px;
+  list-style: none;
+  padding: 0;
+}
+
+.card-pricing li {
+  margin-bottom: 10px;
+  color: #FFFFFF;
+}
+
+.service-point {
+	background: #9AE800;
+	width: 20px;
+	height: 20px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	font-size: 12px;
+	color: #111111;
+  	text-shadow: 0 0 10px rgba(92,255,157,0.8);
+	padding: 10px;
+}
+
+.card-pricing .disabled {
+  color: #555;
+}
+
+/* NOTE */
+.pricing-note {
+  margin-top: 60px;
+  padding: 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  color: #aaa;
+}
+
+.feature-list {
+    list-style: none; /* ❌ hilangin bullet default */
+    padding: 0;
+    margin: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: flex-start; /* 🔥 penting biar sejajar */
+    gap: 12px;
+
+    color: #ddd;
+    line-height: 1.6;
+    font-size: 16px;
+
+	padding: 8px 10px;
+	border-radius: 10px;
+	transition: 0.3s;
+}
+
+.feature-list li:hover {
+ 	background: rgba(92,255,157,0.05);
+}
+
+/* ICON */
+.feature-list li svg {
+    color: #9AE800;
+    min-width: 20px;
+    margin-top: 4px; /* 🔥 biar sejajar sama text */
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .pricing-header h2 {
+      font-size: 36px;
+    }
+
+    .pricing-cards {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card-pricing.active {
+      transform: none;
+    }
+}

@@ -1,27 +1,27 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
-import { Header, Footer, Input, Button, Gap } from '../../components';
+import { Header, Footer, Input, Button, Gap, CardDashboard } from '../../components';
 import './dashboard.css'
-import './stats.css'
-import './payment-stats.css'
-import './client-stats.css'
 import { useDispatch } from 'react-redux';
 import { AlertMessage, paths } from '../../utils'
 import { historyConfig, generateSignature, fetchStatus } from '../../utils/functions';
 import { setForm } from '../../redux';
 import SweetAlert from 'react-bootstrap-sweetalert';
-import { FaBars, FaBell, FaCheckCircle, FaClock, FaCreditCard, FaHome, FaMoneyBill, FaPercent, FaTimesCircle, FaUserCircle, FaUserClock, FaUserPlus, FaUsers, FaUserSlash } from 'react-icons/fa';
+import { FaBars, FaBell, FaCheckCircle, FaClock, FaCreditCard, FaHome, FaMoneyBill, FaMoneyCheck, FaPercent, FaTimesCircle, FaUserCircle, FaUserClock, FaUserFriends, FaUserPlus, FaUsers, FaUserSlash } from 'react-icons/fa';
 import { FcFactory, FcHome } from 'react-icons/fc';
-import { FaPeopleGroup } from 'react-icons/fa6';
+import { FaBilibili, FaHandHoldingDollar, FaHouseChimneyUser, FaMoneyBill1Wave, FaMoneyBillTransfer, FaMoneyBillWheat, FaPeopleGroup } from 'react-icons/fa6';
 import { HiOutlineHomeModern } from "react-icons/hi2";
 import { BsHouseDoor } from "react-icons/bs";
 import { MdOutlinePayments, MdOutlinePercent, MdPeopleOutline } from "react-icons/md";
 import { GrTransaction } from 'react-icons/gr';
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 import { Doughnut } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-ChartJS.register(ArcElement, Tooltip, Legend);
+// import { Chart as ChartJS, ArcElement, Legend } from "chart.js";
+// ChartJS.register(ArcElement, Tooltip, Legend);
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 
 const Dashboard = () => {
     const history = useHistory(historyConfig);
@@ -43,139 +43,43 @@ const Dashboard = () => {
 
 	const [open,setOpen] = useState(true)
 
+	const [ListTunggakan, setListTunggakan] = useState([])
 	const [TotalCluster, setTotalCluster] = useState(0)
 	const [TotalRumah, setTotalRumah] = useState(0)
 	const [TotalWarga, setTotalWarga] = useState(0)
 	const [TotalTransaksi, setTotalTransaksi] = useState(0)
-	const [TotalPembayaran, setTotalPembayaran] = useState(0)
+	const [TotalTransaksiPending, setTotalTransaksiPending] = useState(0)
+	const [TotalTransaksiSettlement, setTotalTransaksiSettlement] = useState(0)
+	const [TotalTagihan, setTotalTagihan] = useState(0)
+	const [TotalTagihanTerkumpul, setTotalTagihanTerkumpul] = useState(0)
+	const [TotalTagihanTertunda, setTotalTagihanTertunda] = useState(0)
+	const [CollectionRate, setCollectionRate] = useState(0)
 
-	const COLORS = ["#16a34a","#f59e0b","#ef4444"];
-
-    const handleScroll = (scrollOffset) => {
-        if (containerRef.current) {
-          	containerRef.current.scrollLeft += scrollOffset;
-        }
-    };
-
-	const data_global = [
-		{ title: "Total Cluster", value: 120, icon: <HiOutlineHomeModern style={{width:23,height:23}}/>},
-		{ title: "Total Rumah", value: 12540, icon: <BsHouseDoor style={{width:23,height:23}}/> },
-		{ title: "Total Warga", value: 38200, icon: <MdPeopleOutline style={{width:23,height:23}}/> },
-		{ title: "Growth", value: "+12%", icon: <MdOutlinePercent style={{width:23,height:23}}/> },
+    const dataBar = [
+		{ name: "Jan", pemasukan: 130, pengeluaran: 90 },
+		{ name: "Feb", pemasukan: 140, pengeluaran: 100 },
+		{ name: "Mar", pemasukan: 125, pengeluaran: 85 },
+		{ name: "Apr", pemasukan: 145, pengeluaran: 95 },
+		{ name: "May", pemasukan: 135, pengeluaran: 90 },
+		{ name: "Jun", pemasukan: 140, pengeluaran: 100 },
 	];
 
-	const data_financial = [
-		{ title: "Total Transaksi", value: "Rp 1.2 Miliar", icon: <GrTransaction style={{width:23,height:23}}/> },
-		{ title: "Total Pembayaran", value: 8540, icon: <MdOutlinePayments style={{width:23,height:23}}/> }
+	const dataLine = [
+		{ name: "Jan", value: 132 },
+		{ name: "Feb", value: 138 },
+		{ name: "Mar", value: 125 },
+		{ name: "Apr", value: 142 },
+		{ name: "May", value: 135 },
+		{ name: "Jun", value: 140 },
 	];
 
-	const stats = [
-		{
-			title: "Client Aktif",
-			value: 120,
-			desc: "Active Client",
-			icon: <FaUsers />,
-			color: "#18a957",
-			background: "#e8f7ef"
-		},
-		{
-			title: "Client Trial",
-			value: 35,
-			desc: "Free Trial",
-			icon: <FaUserClock />,
-			color: "#3b82f6",
-			background: "#A5D8FF"
-		},
-		{
-			title: "Client Nonaktif",
-			value: 12,
-			desc: "Disabled",
-			icon: <FaUserSlash />,
-			color: "#ef4444",
-			background: "#FFA8A8"
-		},
-		{
-			title: "Client Baru",
-			value: 18,
-			desc: "This Month",
-			icon: <FaUserPlus />,
-			color: "#f59e0b",
-			background: "#FFF3BF"
-		}
-  	];
-
-	const data = [
-		{ month: "Jan", payment: 4000000 },
-		{ month: "Feb", payment: 5600000 },
-		{ month: "Mar", payment: 5800000 },
-		{ month: "Apr", payment: 6200000 }
+	const dataPie = [
+		{ name: "Lunas", value: 60 },
+		{ name: "Tertunda", value: 20 },
+		{ name: "Terlambat", value: 20 },
 	];
 
-	const growthData = [
-		{ month: "Jan", client: 100 },
-		{ month: "Feb", client: 150 },
-		{ month: "Mar", client: 100 },
-		{ month: "Apr", client: 150 },
-		{ month: "May", client: 200 },
-		{ month: "Jun", client: 200 }
-	];
-
-	const data_transaksi = [
-		{
-			title: "Total Transaksi Bulan Ini",
-			value: 240,
-			icon: <FaCreditCard className="stat-icon"/>,
-			type: "all"
-		},
-		{
-			title: "Pembayaran Berhasil",
-			value: 210,
-			icon: <FaCheckCircle className="stat-icon"/>,
-			type: "success"
-		},
-		{
-			title: "Pembayaran Pending",
-			value:20,
-			icon: <FaClock className="stat-icon"/>,
-			type: "pending"
-		},
-		{
-			title: "Pembayaran Gagal",
-			value: 10,
-			icon: <FaTimesCircle className="stat-icon"/>,
-			type: "failed"
-		}
-	]
-
-	const data_client = {
-		labels: [
-			"Client Aktif",
-			"Client Trial",
-			"Client Nonaktif",
-			"Client Baru"
-		],
-		datasets: [
-		{
-			data: [120, 35, 12, 18],
-			backgroundColor: [
-				"#51CF66", // hijau
-				"#74C0FC", // biru
-				"#FF8787", // merah
-				"#FFD43B"  // kuning
-			],
-			borderWidth: 0
-		}
-		]
-	};
-
-	const options_client = {
-		cutout: "70%", // membuat donut
-		plugins: {
-			legend: {
-				position: "bottom"
-			}
-		}
-	};
+	const COLORS = ["#84cc16", "#94a3b8", "#ef4444"];
 
 	useEffect(() => {
         window.scrollTo(0, 0)
@@ -208,6 +112,8 @@ const Dashboard = () => {
 			var paramKey = LongSecretCookie[1];
 			var accessLogin = parseInt(LongSecretCookie[2]);
 			var accessName = LongSecretCookie[3];
+			var cluster = LongSecretCookie[4];
+			var clusterId = LongSecretCookie[5];
 		
 			if (tipe === "username") {
 				return username;
@@ -217,6 +123,10 @@ const Dashboard = () => {
 				return accessLogin;
 			} else if (tipe === "access_name") {
 				return accessName;
+			} else if (tipe === "cluster") {
+				return cluster;
+			} else if (tipe === "cluster_id") {
+				return clusterId;
 			} else {
 				return null;
 			}
@@ -246,12 +156,21 @@ const Dashboard = () => {
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
 		var cookieAccessLogin = getCookie("access");
+		var cookieCluster = getCookie("cluster");
+		var cookieClusterId = getCookie("cluster_id");
 
 		var requestBody = JSON.stringify({
 			"username": cookieUsername,
 			"paramkey": cookieParamKey,
 			"method": "SELECT",
-			"access": cookieAccessLogin
+			"access": cookieAccessLogin,
+			"jenis_tagihan": 2,
+			"cluster_id": parseInt(cookieClusterId),
+			"page": 1,
+			"row_page": -1,
+			"order_by": "",
+			"order": ""
+
 		});
 
 		setLoadingDashboard(true)
@@ -273,12 +192,22 @@ const Dashboard = () => {
 			setLoadingDashboard(false)
 
 			if (data.error_code === "0") {
+				const collectionRate =
+					data.total_tagihan > 0
+						? (data.total_tagihan_terkumpul / data.total_tagihan) * 100
+						: 0;
+
+				setListTunggakan(data.result_top_tunggakan)
 				setTotalCluster(data.total_cluster)
 				setTotalRumah(data.total_rumah)
 				setTotalWarga(data.total_warga)
 				setTotalTransaksi(data.total_transaksi)
-				setTotalPembayaran(data.total_pembayaran)
-				return
+				setTotalTransaksiPending(data.total_transaksi_pending)
+				setTotalTransaksiSettlement(data.total_transaksi_settlement)
+				setTotalTagihan(data.total_tagihan)
+				setTotalTagihanTerkumpul(data.total_tagihan_terkumpul)
+				setTotalTagihanTertunda(data.total_tagihan_tertunda)
+				setCollectionRate(collectionRate)
 			} else {
 				if (data.error_code === "2") {
 					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
@@ -313,9 +242,98 @@ const Dashboard = () => {
 			minimumFractionDigits: 0
 		}).format(value);
 	}
-    
+
     return (
-		<div>
+		// <div className="container-fluid mt-3">
+
+		// 	<div>Dashbord</div>
+
+		// 	<div className="row g-3">
+
+		// 		{/* CARD 1 */}
+		// 		<div className="col-12 col-md-6 col-lg-3">
+		// 			<div className="card custom-card">
+		// 				<div className="card-body">
+  
+		// 					<div className="card-content">
+		// 						<div>
+		// 						<p className="label">TOTAL PENDAPATAN</p>
+		// 						<h3 className="value">Rp 132.000.000</h3>
+		// 						</div>
+
+		// 						<div className="d-flex align-items-center gap-2 mt-2">
+		// 						<span className="badge badge-success">+8.2%</span>
+		// 						<span className="subtext">Bulan Ini</span>
+		// 						</div>
+		// 					</div>
+
+		// 					<div className="icon-box">$</div>
+
+		// 				</div>
+		// 			</div>
+		// 		</div>
+
+		// 		{/* CARD 2 */}
+		// 		<div className="col-12 col-md-6 col-lg-3">
+		// 		<div className="card custom-card">
+		// 			<div className="card-body d-flex justify-content-between">
+		// 			<div>
+		// 				<p className="label">TOTAL WARGA</p>
+		// 				<h3 className="value">24</h3>
+
+		// 				<div className="d-flex align-items-center gap-2 mt-2">
+		// 				<span className="badge badge-success">+3.5%</span>
+		// 				<span className="subtext">Bulan Ini</span>
+		// 				</div>
+		// 			</div>
+
+		// 			<div className="icon-box">👥</div>
+		// 			</div>
+		// 		</div>
+		// 		</div>
+
+		// 		{/* CARD 3 */}
+		// 		<div className="col-12 col-md-6 col-lg-3">
+		// 		<div className="card custom-card">
+		// 			<div className="card-body d-flex justify-content-between">
+		// 			<div>
+		// 				<p className="label">TOTAL CLUSTER</p>
+		// 				<h3 className="value">4</h3>
+
+		// 				<div className="mt-2">
+		// 				<span className="badge badge-danger">0%</span>
+		// 				</div>
+		// 			</div>
+
+		// 			<div className="icon-box">🏢</div>
+		// 			</div>
+		// 		</div>
+		// 		</div>
+
+		// 		{/* CARD 4 */}
+		// 		<div className="col-12 col-md-6 col-lg-3">
+		// 		<div className="card custom-card">
+		// 			<div className="card-body d-flex justify-content-between">
+		// 			<div>
+		// 				<p className="label">TAGIHAN TERTUNDA</p>
+		// 				<h3 className="value">216</h3>
+
+		// 				<div className="d-flex align-items-center gap-2 mt-2">
+		// 				<span className="badge badge-danger">-12%</span>
+		// 				<span className="subtext">Bulan Lalu</span>
+		// 				</div>
+		// 			</div>
+
+		// 			<div className="icon-box">⚠️</div>
+		// 			</div>
+		// 		</div>
+		// 		</div>
+
+		// 	</div>
+		// </div>
+
+		<div className="container-fluid dashboard-page p-4">
+			
 			{SessionMessage !== "" ?
 			<SweetAlert 
 				warning 
@@ -323,7 +341,7 @@ const Dashboard = () => {
 				onConfirm={() => {
 					setShowAlert(false)
 					logout()
-					window.location.href="/";
+					window.location.href="/admin/login";
 				}}
 				btnSize="sm">
 				{SessionMessage}
@@ -337,7 +355,7 @@ const Dashboard = () => {
 				onConfirm={() => {
 					setShowAlert(false)
 					setSuccessMessage("")
-					history.replace("/overview")
+					history.replace("/dashboard")
 				}}
 				btnSize="sm">
 				{SuccessMessage}
@@ -364,207 +382,132 @@ const Dashboard = () => {
 				onConfirm={() => {
 					setShowAlert(false)
 					setErrorMessageAlertLogout("")
-					window.location.href="admin/login";
+					window.location.href="/admin/login";
 				}}
 				btnSize="sm">
 				{ErrorMessageAlertLogout}
 			</SweetAlert>
 			:""}
-			
-			<h3 className="section-title">Global Overview</h3>
-			<div className="dashboard-data-global-container">
-				{/* {data_global.map((item, index) => (
-					<div class="stat-card">
-						<div class="card-header">
-							<div class="icon green">
-								{item.icon}
-							</div>
 
-							<div class="title-card">{item.title}</div>
-						</div>
-
-						<div class="card-body">
-							<div class="value">{item.value}</div>
-							<div class="info">	
-								<span class="notif green">+20%</span>
-								<span class="desc">Last month total 1.050</span>
-							</div>
-						</div>
-					</div>
-				))} */}
-				<div class="stat-card">
-					<div class="card-header">
-						<div class="icon green">
-							<HiOutlineHomeModern style={{width:23,height:23}}/>
-						</div>
-
-						<div class="title-card">Total Cluster</div>
-					</div>
-
-					<div class="card-body">
-						<div class="value">{TotalCluster}</div>
-						<div class="info">	
-							<span class="notif green">+20%</span>
-							<span class="desc">Last month total 1.050</span>
-						</div>
-					</div>
-				</div>
-				<div class="stat-card">
-					<div class="card-header">
-						<div class="icon green">
-							<BsHouseDoor style={{width:23,height:23}}/>
-						</div>
-
-						<div class="title-card">Total Rumah</div>
-					</div>
-
-					<div class="card-body">
-						<div class="value">{TotalRumah}</div>
-						<div class="info">	
-							<span class="notif green">+20%</span>
-							<span class="desc">Last month total 1.050</span>
-						</div>
-					</div>
-				</div>
-				<div class="stat-card">
-					<div class="card-header">
-						<div class="icon green">
-							<MdPeopleOutline style={{width:23,height:23}}/>
-						</div>
-
-						<div class="title-card">Total Warga</div>
-					</div>
-
-					<div class="card-body">
-						<div class="value">{TotalWarga}</div>
-						<div class="info">	
-							<span class="notif green">+20%</span>
-							<span class="desc">Last month total 1.050</span>
-						</div>
-					</div>
-				</div>
-				<div class="stat-card">
-					<div class="card-header">
-						<div class="icon green">
-							<MdOutlinePercent style={{width:23,height:23}}/>
-						</div>
-
-						<div class="title-card">Growth</div>
-					</div>
-
-					<div class="card-body">
-						<div class="value">{0}</div>
-						<div class="info">	
-							<span class="notif green">+20%</span>
-							<span class="desc">Last month total 1.050</span>
-						</div>
-					</div>
-				</div>
+			{/* Header */}
+			<div className="mb-4">
+				<h3 className="fw-bold">Selamat Datang, Super Admin 👋</h3>
+				<p className="text-muted">Ringkasan data seluruh cluster hari ini</p>
 			</div>
 
-			<Gap height={20} />
-			
-			<h3 className="section-title">Financial Overview</h3>
-			<div className="dashboard-data-financial-container">
-				<div class="stat-card">
-					<div class="card-header">
-						<div class="icon green">
-							<GrTransaction style={{width:23,height:23}}/>
-						</div>
-
-						<div class="title-card">Total Transaksi</div>
-					</div>
-
-					<div class="card-body">
-						<div class="value">{formatRupiah(TotalTransaksi)}</div>
-						<div class="info">	
-							<span class="notif green">+20%</span>
-							<span class="desc">Last month total 1.050</span>
-						</div>
-					</div>
-				</div>
-
-				<div class="stat-card">
-					<div class="card-header">
-						<div class="icon green">
-							<MdOutlinePayments style={{width:23,height:23}}/>
-						</div>
-
-						<div class="title-card">Total Pembayaran</div>
-					</div>
-
-					<div class="card-body">
-						<div class="value">{formatRupiah(TotalPembayaran)}</div>
-						<div class="info">	
-							<span class="notif green">+20%</span>
-							<span class="desc">Last month total 1.050</span>
-						</div>
-					</div>
-				</div>
+			{/* Cards */}
+			<div className="row">
+				<CardDashboard title="Total Warga" value={TotalWarga} icon={<FaUserFriends style={{ width:30, height:30 }} />} />
+				<CardDashboard title="Total Cluster" value={TotalCluster} icon={<FaHouseChimneyUser style={{ width:30, height:30 }} />} />
+				<CardDashboard title="Total Rumah" value={TotalRumah} icon={<FaHome style={{ width:30, height:30 }} />} />
+			</div>
+			<div className="row">
+				<CardDashboard title="Total Tagihan" value={formatRupiah(TotalTagihan)} icon={<FaMoneyBill style={{ width:30, height:30 }} />} />
+				<CardDashboard title="Total Tagihan Terkumpul" value={formatRupiah(TotalTagihanTerkumpul)} icon={<FaHandHoldingDollar style={{ width:30, height:30 }} />} />
+				<CardDashboard title="Total Tagihan Tertunda" value={formatRupiah(TotalTagihanTertunda)} icon={<FaMoneyBillWheat style={{ width:30, height:30 }} />} />
+			</div>
+			<div className="row">
+				<CardDashboard title="Total Transaksi" value={TotalTransaksi} icon={<FaMoneyBillTransfer style={{ width:30, height:30 }} />} />
+				<CardDashboard title="Total Transaksi Pending" value={TotalTransaksiPending} icon={<FaTimesCircle style={{ width:30, height:30 }} />} />
+				<CardDashboard title="Total Transaksi Settlement" value={TotalTransaksiSettlement} icon={<FaCheckCircle style={{ width:30, height:30 }} />} />
 			</div>
 
-			<div className="dashboard-2-grid">
-				<div className="left">
-					<div className="payment-stats">
-						<div className="payment-grid">
-						{data_transaksi.map((item,index) => (
-							<div className={item.type == "all" ? "payment-card all" : item.type == "success" ? "payment-card success" : item.type == "pending" ? "payment-card pending" : "payment-card failed"}>
-								{item.icon}
-								<h3>{item.value}</h3>
-								<p>{item.title}</p>
+			{/* <div className="card shadow-sm border-0 rounded-4">
+				<div className="card-body d-flex justify-content-between align-items-center">
+					<div className="card p-3 rounded-4 shadow-sm">
+						<h6 className="fw-bold">Top Tunggakan</h6>
+
+						<div style={{ backgroundColor:'#84cc16', padding:1 }} />
+
+						{ListTunggakan.map((item, i) => (
+							<div key={i} className="d-flex justify-content-between">
+								<span style={{ fontWeight:'bold' }}>{item.nama} ({item.cluster})</span>
+								<span className="text-danger">
+									{formatRupiah(item.total)}
+								</span>
 							</div>
 						))}
-						</div>
 					</div>
 				</div>
+			</div> */}
 
-				<div className="right">
-					<div className="client-stats-wrapper">
-						<div className="client-analytics">
-							<h3 className="section-title">Client Statistics</h3>
-							<div className="analytics-container">
-
-								<div className="chart-container">
-									<Doughnut data={data_client} options={options_client} />
-								</div>
-
-								<div className="client-stats">
-									<div className="client-item">
-										<span className="dot aktif"></span>
-										Client Aktif
-										<strong>120</strong>
-									</div>
-									<div className="client-item">
-										<span className="dot trial"></span>
-										Client Trial
-										<strong>35</strong>
-									</div>
-									<div className="client-item">
-										<span className="dot nonaktif"></span>
-										Client Nonaktif
-										<strong>12</strong>
-									</div>
-									<div className="client-item">
-										<span className="dot baru"></span>
-										Client Baru
-										<strong>18</strong>
-									</div>
-								</div>
-
-							</div>
-
-						</div>
+			{/* Charts */}
+			{/* <div className="row mt-3">
+				<div className="col-md-6 mb-3">
+				<div className="card shadow-sm border-0 rounded-4">
+					<div className="card-body">
+					<h6 className="fw-bold mb-3">Keuangan per Cluster</h6>
+					<div className="text-center text-muted">(Bar Chart di sini)</div>
 					</div>
 				</div>
+				</div>
 
-			</div>
+				<div className="col-md-6 mb-3">
+				<div className="card shadow-sm border-0 rounded-4">
+					<div className="card-body">
+					<h6 className="fw-bold mb-3">Status Tagihan</h6>
+					<div className="text-center text-muted">(Donut Chart di sini)</div>
+					</div>
+				</div>
+				</div>
+			</div> */}
 
-			
+			{/* Bottom Section */}
+			{/* <div className="row">
+				<div className="col-md-6 mb-3">
+				<div className="card shadow-sm border-0 rounded-4">
+					<div className="card-body">
+					<h6 className="fw-bold mb-3">Tren Pemasukan Bulanan</h6>
+					<div className="text-center text-muted">(Line Chart di sini)</div>
+					</div>
+				</div>
+				</div>
 
-			
-			
+				<div className="col-md-6 mb-3">
+				<div className="card shadow-sm border-0 rounded-4">
+					<div className="card-body">
+					<h6 className="fw-bold mb-3">Ringkasan Cluster</h6>
+
+					<div className="list-group">
+						<div className="list-group-item d-flex justify-content-between align-items-center">
+						<div>
+							<strong>Cluster Harmony</strong>
+							<div className="text-muted small">156 warga • 142 rumah</div>
+						</div>
+						<span className="badge bg-success">Aktif</span>
+						</div>
+
+						<div className="list-group-item d-flex justify-content-between align-items-center">
+						<div>
+							<strong>Cluster Serenity</strong>
+							<div className="text-muted small">203 warga • 187 rumah</div>
+						</div>
+						<span className="badge bg-success">Aktif</span>
+						</div>
+
+						<div className="list-group-item d-flex justify-content-between align-items-center">
+						<div>
+							<strong>Cluster Prestige</strong>
+							<div className="text-muted small">98 warga • 91 rumah</div>
+						</div>
+						<span className="badge bg-success">Aktif</span>
+						</div>
+
+						<div className="list-group-item d-flex justify-content-between align-items-center">
+						<div>
+							<strong>Cluster Elite</strong>
+							<div className="text-muted small">134 warga • 120 rumah</div>
+						</div>
+						<span className="badge bg-danger">Nonaktif</span>
+						</div>
+					</div>
+
+					</div>
+				</div>
+				</div>
+			</div> */}
 		</div>
-    )
+	);
 }
 
 export default Dashboard;

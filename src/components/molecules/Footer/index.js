@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { MDBFooter, MDBRow, MDBCol } from 'mdb-react-ui-kit';
-import { IcWhatsapp, IcFacebook, IcInstagram, IcYoutube, IcTiktok, IcDownloadPlaystore, IcDownloadAppstore, IcBahasa, IcLippolandFooter,} from '../../../assets';
+import { IcWhatsapp, IcFacebook, IcInstagram, IcYoutube, IcTiktok, IcDownloadPlaystore, IcDownloadAppstore, IcBahasa, IcLippolandFooter, LogoIPLQTulisan,} from '../../../assets';
 import './footer.css';
 import { Gap, Input } from '../../atoms';
 import { fetchStatus, generateSignature, historyConfig } from '../../../utils/functions';
 import { paths } from '../../../utils';
 import { useHistory } from 'react-router-dom';
+import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter } from 'react-icons/fa';
+import { FiMail, FiMapPin, FiPhone } from "react-icons/fi";
 
 const Footer = ({ onClickSection }) => {
 
@@ -83,91 +85,72 @@ const Footer = ({ onClickSection }) => {
     }
 
 	return (
-		<div className={windowWidth > 1340 ? "custom-container" : "custom-container-responsive"}>
+		<footer className="footer">
 
-			<div className="container-content">
+			<div className="footer-container">
 
-				<div className="container-content-left">
-					<div style={{ fontSize:windowWidth > 1340 ? 36 : 25, fontWeight:400 }}>GET IN TOUCH</div>
+				{/* LEFT */}
+				<div className="footer-left">
+				<h2 className="logo">
+					<img src={LogoIPLQTulisan} style={{ width:55 }} /> IPL-Q
+				</h2>
 
-					<div style={{ padding:10 }} />
+				<p>
+					Platform manajemen hunian terpadu yang menghubungkan pengelola dan penghuni
+					perumahan melalui teknologi yang cerdas dan mudah digunakan.
+				</p>
 
-					<div style={{ fontSize:windowWidth > 1340 ? 24 : 20, fontWeight:400 }}>Golden Flower - Marigold Cluster</div>
-					<div style={{ fontSize:windowWidth > 1340 ? 18 : 15 }}>
-						Lippo Karawaci Central
-						<br/>
-						Tangerang, Banten, 15811
-						<br/>
-						Indonesia
-					</div>
-
-					<div style={{ padding:30 }} />
-
-					<div style={{ fontSize:windowWidth > 1340 ? 24 : 20, fontWeight:400 }}>Contact</div>
-					<div style={{ fontSize:windowWidth > 1340 ? 18 : 15, fontWeight:300 }}>+62 812-1002-0088</div>
-
-					{windowWidth <= 1340 &&
-					<>
-						<div style={{ padding:30 }} />
-						<div className="container-content-right">
-							<div style={{ fontSize:windowWidth > 1340 ? 20 : 15 }}>
-								{ListFooterMenuLeft.map((item,index) => {
-									return <>
-										<div style={{ cursor:'pointer' }} onClick={() => changePage(item.UrlPage, item.MenuName)}>{item.MenuName}</div>
-									</>
-								})}
-							</div>
-							<div style={{ fontSize:windowWidth > 1340 ? 20 : 15 }}>
-								{ListFooterMenuRigth.map((item,index) => {
-									return <>
-										<div style={{ cursor:'pointer' }} onClick={() => changePage(item.UrlPage, item.MenuName)}>{item.MenuName}</div>
-										<div style={{ padding:8 }} />
-									</>
-								})}
-							</div>
-						</div>
-					</>}
-					
+				<div className="socials">
+					<span><FaInstagram /></span>
+					<span><FaTwitter /></span>
+					<span><FaLinkedin /></span>
+					<span><FaFacebook /></span>
+				</div>
 				</div>
 
-				{windowWidth > 1340 &&
-				<div className="container-content-right">
-					<div>
-						{ListFooterMenuLeft.map((item,index) => {
-							return <>
-								<div style={{ cursor:'pointer' }} onClick={() => changePage(item.UrlPage, item.MenuName)}>{item.MenuName}</div>
-								<div style={{ padding:8 }} />
-							</>
-						})}
-					</div>
-					<div>
-						{ListFooterMenuRigth.map((item,index) => {
-							return <>
-								<div style={{ cursor:'pointer' }} onClick={() => changePage(item.UrlPage, item.MenuName)}>{item.MenuName}</div>
-								<div style={{ padding:8 }} />
-							</>
-						})}
-					</div>
-				</div>	
-				}
+				{/* MIDDLE */}
+				<div className="footer-col">
+				<h4>Produk</h4>
+				<a href="#features">Fitur Unggulan</a>
+				<a href="#pricing">Harga & Paket</a>
+				{/* <a href="#">Demo Produk</a> */}
+				<a href="#cta">Daftar Gratis</a>
+				</div>
+
+				{/* RIGHT */}
+				<div className="footer-col">
+				<h4>Kontak Kami</h4>
+
+				<div className="contact">
+					<FiMapPin />
+					<span>TBA</span>
+				</div>
+
+				<div className="contact">
+					<FiPhone />
+					<span>TBA</span>
+				</div>
+
+				<div className="contact">
+					<FiMail />
+					<span>TBA</span>
+				</div>
+				</div>
 
 			</div>
 
-			<div style={{ padding:50 }} />
+			{/* BOTTOM */}
+			<div className="footer-bottom">
+				<span>© 2026 IPL-Q. Hak Cipta Dilindungi.</span>
 
-			{windowWidth > 1340 ?
-			<div className="container-content-bottom">
-				<div style={{fontSize:100,fontWeight:'bold'}}>IPLQ</div>
-				<div style={{ fontSize:12, fontWeight:300 }}>IPLQ COPYRIGHT 2024. ALL RIGHTS RESERVED.</div>
+				<div className="footer-links">
+				<a href="#">Kebijakan Privasi</a>
+				<a href="#">Syarat & Ketentuan</a>
+				<a href="#">Bantuan</a>
+				</div>
 			</div>
-			:
-			<div className="container-content-bottom-responsive">
-				<img src={IcLippolandFooter} width={windowWidth > 1340 ? 100 : 300} />
-				<div style={{ padding:30 }} />
-				<div style={{ fontSize:windowWidth > 1340 ? 12 : 10, fontWeight:300 }}>IPLQ COPYRIGHT 2024. ALL RIGHTS RESERVED.</div>
-			</div>}
-			
-		</div>
+
+		</footer>
 	);
 }
 

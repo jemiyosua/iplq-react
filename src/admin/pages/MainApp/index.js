@@ -5,27 +5,12 @@ import { BrowserRouter , Route, Switch, useHistory, useRouteMatch } from 'react-
 import LeftMenu from '../../components/molecules/LeftMenu'
 import { historyConfig } from '../../utils/functions'
 import Dashboard from '../Dashboard'
-// import Gudang from '../Gudang'
-// import Kasir from '../Kasir'
-// import Keuangan from '../Keuangan'
-// import Others from '../Others'
-// import ImportProduct from '../Gudang/MasterProduct/ImportProduct'
-// import ScanProduct from '../Gudang/MasterProduct/ScanProduct'
-import HeroHome from '../HeroHome'
-import SectionDevHome from '../SectionDevHome'
-import ProductHome from '../ProductHome'
-import UpcomingProject from '../UpcomingProject'
-import CompanyOverview from '../CompanyOverview'
-import Statistic from '../Statistic'
-import VisionMision from '../VisionMision'
-import LeadershipInitaitive from '../LeadershipInitaitive'
-import Awards from '../Awards'
-import CoreValues from '../CoreValues'
-import HeaderLogo from '../HeaderLogo'
-import HeaderMenu from '../HeaderMenu'
-import { FaBars, FaUserCircle } from 'react-icons/fa'
 import Midtrans from '../Midtrans'
 import Billing from '../Billing'
+import IPL from '../Tagihan/IPL'
+import Iuran from '../Tagihan/Iuran'
+import { FaUserCircle } from 'react-icons/fa'
+import TransaksiIuran from '../Transaksi/TransaksiIuran'
 
 const MainApp = () => {
     const history = useHistory(historyConfig);
@@ -67,10 +52,9 @@ const MainApp = () => {
 
                 <LeftMenu />
 
-                <div style={{flex:1, display:'flex', flexDirection:'column'}}>
-                    <div style={styles.navbar}>
+                <div style={{ flex:1 }}>
+                    {/* <div style={styles.navbar}>
                         <div style={styles.left}>
-                            {/* <FaBars style={{cursor:"pointer"}} /> */}
                         </div>
 
                         <div style={styles.right}>
@@ -79,54 +63,23 @@ const MainApp = () => {
                                 <span>{getCookie("access_name")}</span>
                             </div>
                         </div>
-                    </div>
-                
+                    </div> */}
 
-                    <div className="content-wrapper" style={{ backgroundColor:'#F6FBFF', height:'100%', padding:30,  width:'100%' }}> 
+                    <div className="content-wrapper" style={{ paddingTop:70, paddingLeft:30, paddingRight:15, overflow:'hidden' }}> 
                         {/* <Header/> */}
                         <BrowserRouter basename="/admin">
                             <Switch>
                                 <Route exact path="/dashboard">
                                     <Dashboard />
                                 </Route>
-                                <Route path="/integrasi-wa">
-                                    <Dashboard />
+                                <Route path="/ipl">
+                                    <IPL />
                                 </Route>
-                                <Route path="/aset">
-                                    <Dashboard />
+                                <Route path="/iuran">
+                                    <Iuran />
                                 </Route>
-                                <Route path="/billing">
-                                    <Billing />
-                                </Route>
-                                 <Route path="/midtrans">
-                                    <Midtrans />
-                                </Route>
-                                <Route path="/konfigurasi">
-                                    <Dashboard />
-                                </Route>
-                                <Route path="/kepengurusan">
-                                    <Dashboard />
-                                </Route>
-                                <Route path="/penghuni">
-                                    <Dashboard />
-                                </Route>
-                                <Route path="/keuangan">
-                                    <Dashboard />
-                                </Route>
-                                <Route path="/pengelola-air">
-                                    <Dashboard />
-                                </Route>
-                                <Route path="/lingkungan">
-                                    <Dashboard />
-                                </Route>
-                                <Route path="/karyawan">
-                                    <Dashboard />
-                                </Route>
-                                <Route path="/syarat-ketentuan">
-                                    <Dashboard />
-                                </Route>
-                                <Route path="/kebijakan-privasi">
-                                    <Dashboard />
+                                <Route path="/transaksi-iuran">
+                                    <TransaksiIuran />
                                 </Route>
                             </Switch>
                         </BrowserRouter>

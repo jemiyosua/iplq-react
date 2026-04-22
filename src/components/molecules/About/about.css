@@ -1,0 +1,299 @@
+.about {
+    padding: 100px 10%;
+    background: 
+        /* radial-gradient(circle at 70% 30%, rgba(92,255,157,0.15), transparent 40%), */
+        radial-gradient(circle at 70% 30%, rgba(0, 44, 0, 100), transparent 40%),
+        #02140d;
+    color: white;
+}
+
+.about-container {
+    display: flex;
+    gap: 60px;
+    align-items: flex-start;
+
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* LEFT */
+.about-left {
+    flex: 1.2;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(92,255,157,0.1);
+    color: #9AE800;
+    margin-bottom: 20px;
+}
+
+.about-left h2 {
+    font-size: 56px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    /* font-family: "Bitcount Prop Double", system-ui; */
+}
+
+.about-left h2 span {
+    color: #9AE800;
+}
+
+.about-left p {
+    color: #ccc;
+    line-height: 1.7;
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+/* STATS */
+.stats {
+    display: flex;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.stat-card {
+    padding: 25px 35px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(92,255,157,0.2);
+    min-width: 180px;
+}
+
+.stat-card h3 {
+    color: #9AE800;
+    font-size: 28px;
+    /* font-family: "Bitcount Prop Double", system-ui; */
+}
+
+/* RIGHT */
+.about-right {
+    flex: 1;
+}
+
+/* FEATURE */
+.feature {
+    padding: 20px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(92,255,157,0.15);
+    margin-bottom: 20px;
+    transition: 0.3s;
+}
+
+.feature:hover {
+    transform: translateY(-5px);
+    border-color: #9AE800;
+    /* box-shadow: 0 0 30px rgba(92,255,157,0.2); */
+    box-shadow: 0 0 30px #9AE800;
+}
+
+/* FEATURE TOP */
+.highlight-features {
+    padding: 25px;
+}
+
+.top-feature {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    padding: 30px;
+
+    border-radius: 22px;
+
+    background: linear-gradient(
+        145deg,
+        rgba(92,255,157,0.12),
+        rgba(0,20,10,0.9)
+    );
+
+    border: 1px solid rgba(92,255,157,0.2);
+
+    margin-bottom: 30px;
+}
+
+.feature,
+.top-feature {
+    backdrop-filter: blur(20px);
+}
+
+/* GRID */
+.feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.card-feature {
+    padding: 30px;
+
+    border-radius: 20px;
+
+    background: linear-gradient(
+        145deg,
+        rgba(92,255,157,0.08),
+        rgba(0,20,10,0.9)
+    );
+
+    border: 1px solid rgba(92,255,157,0.15);
+
+    transition: 0.3s ease;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.card-feature:hover {
+    transform: translateY(-6px);
+
+    border-color: rgba(92,255,157,0.4);
+
+    box-shadow: 
+        /* 0 0 40px rgba(92,255,157,0.2),
+        0 0 80px rgba(92,255,157,0.1); */
+        0 0 20px #9AE800,
+        /* 0 0 80px #9AE800; */
+}
+
+.feature h4 {
+    margin-bottom: 8px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    /* font-family: "Bitcount Prop Double", system-ui; */
+}
+
+.feature p {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+
+    border-radius: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(92,255,157,0.15);
+    color: #9AE800;
+
+    /* box-shadow: 0 0 20px rgba(92,255,157,0.25); */
+    box-shadow: 0 0 20px #9AE800;
+
+    flex-shrink: 0;
+}
+
+.feature-icon svg {
+    width: 26px;
+    height: 26px;
+}
+
+.feature-icon.small {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 15px;
+}
+
+/* ========================= */
+/* 📱 TABLET (max 1024px) */
+/* ========================= */
+@media (max-width: 1024px) {
+    .about-container {
+        flex-direction: column;
+    }
+
+    .about-left,
+    .about-right {
+        width: 100%;
+    }
+
+    .badge {
+        background-color: red;
+    }
+
+    .about-left h2 {
+        font-size: 44px;
+        text-align: center !important;
+        /* font-family: "Bitcount Prop Double", system-ui; */
+    }
+
+    .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ========================= */
+/* 📱 MOBILE (max 768px) */
+/* ========================= */
+@media (max-width: 768px) {
+    .about {
+        padding: 60px 20px;
+    }
+
+    .about-left h2 {
+        font-size: 34px;
+        line-height: 1.2;
+        text-align: center !important;
+    }
+
+    .about-left p {
+        font-size: 14px;
+    }
+
+    .stats {
+        flex-direction: column;
+    }
+
+    .stat-card {
+        width: 100%;
+    }
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .feature {
+        padding: 18px;
+    }
+
+    .top-feature {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* ========================= */
+/* 📱 SMALL MOBILE (max 480px) */
+/* ========================= */
+@media (max-width: 480px) {
+  .about-left h2 {
+    font-size: 28px;
+    text-align: center !important;
+  }
+
+  .badge {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  .stat-card h3 {
+    font-size: 22px;
+  }
+
+  .feature h4 {
+    font-size: 16px;
+  }
+
+  .feature p {
+    font-size: 13px;
+  }
+}

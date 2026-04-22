@@ -20,5 +20,7 @@ import ModalUpdateCoreValues from './ModalUpdateCoreValues';
 import ModalUpdateHeaderLogo from './ModalUpdateHeaderLogo';
 import ModalUpdateHeaderMenu from './ModalUpdateHeaderMenu';
 import PopupImagePreview from './PopupImagePreview';
+import Pagination from './Pagination';
+import CardDashboard from './CardDashboard';
 
-export { Header, SlideShow, Alert, ModalAddNewHero, ModalUpdateHero, ModalAddNewCategoryDev, ModalUpdateCategoryDev, ModalAddNewImageDev, ModalUpdateImageDev, ModalAddNewOurProduct, ModalUpdateOurProduct, ModalUpdateUpcomingProject, ModalUpdateCompanyOverview, ModalUpdateStatistic, ModalUpdateVisionMision, ModalUpdateLeadershipInitiative, PopupImagePreview, ModalAddNewAwards, ModalUpdateAwards, ModalUpdateCoreValues, ModalUpdateHeaderLogo, ModalUpdateHeaderMenu };
+export { Header, SlideShow, Alert, ModalAddNewHero, ModalUpdateHero, ModalAddNewCategoryDev, ModalUpdateCategoryDev, ModalAddNewImageDev, ModalUpdateImageDev, ModalAddNewOurProduct, ModalUpdateOurProduct, ModalUpdateUpcomingProject, ModalUpdateCompanyOverview, ModalUpdateStatistic, ModalUpdateVisionMision, ModalUpdateLeadershipInitiative, PopupImagePreview, ModalAddNewAwards, ModalUpdateAwards, ModalUpdateCoreValues, ModalUpdateHeaderLogo, ModalUpdateHeaderMenu, Pagination, CardDashboard };

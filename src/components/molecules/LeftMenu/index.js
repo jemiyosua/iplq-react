@@ -35,6 +35,9 @@ const LeftMenu = () => {
     const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
     const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
 
+	const [openMenu, setOpenMenu] = useState(true);
+	const [collapsed, setCollapsed] = useState(false);
+
 	useEffect(() => {
 		window.scrollTo(0, 0)
 
@@ -141,109 +144,128 @@ const LeftMenu = () => {
     }
     
     return (
-        <div style={{ display: 'flex', height: '100vh', overflow: 'scroll initial' }}>
+        // <div style={{ display: 'flex', height: '100vh', overflow: 'scroll initial' }}>
 			
-			<Sidebar style={{ height: "100vh", backgroundColor:'#E3E3E3' }}>
-				<Menu>
-					<MenuItem
-						icon={<MenuOutlinedIcon />}
-						onClick={() => {
-						collapseSidebar();
-						}}
-					>
-						{" "}
-						<h5>Gudang Apps</h5>
-					</MenuItem>
+		// 	<Sidebar style={{ height: "100vh", backgroundColor:'#E3E3E3' }}>
+		// 		<Menu>
+		// 			<MenuItem
+		// 				icon={<MenuOutlinedIcon />}
+		// 				onClick={() => {
+		// 				collapseSidebar();
+		// 				}}
+		// 			>
+		// 				{" "}
+		// 				<h5>Gudang Apps</h5>
+		// 			</MenuItem>
 
-					{LoadingMenuSidebar ?
-					<Skeleton count={ListMenuSidebar.length} />
-					:
-					ListMenuSidebar.length > 0 && ListMenuSidebar.map((item,index) => {
-						var Icon = ""
-						var PageActive = ""
-						if (item.Menu === "Dashboard") {
-							PageActive = "DASHBOARD"
-							Icon = <FaHome />
-						} else if (item.Menu === "Gudang") {
-							PageActive = "GUDANG"
-							Icon = <FaWarehouse />
-						} else if (item.Menu === "Kasir") {
-							PageActive = "KASIR"
-							Icon = <FaCashRegister />
-						} else if (item.Menu === "Keuangan") {
-							PageActive = "KEUANGAN"
-							Icon = <FaMoneyBill />
-						} else if (item.Menu === "Lainnya") {
-							PageActive = "LAINNYA"
-							Icon = <FaServer />
-						}
-						// return item.SubMenu.length > 0 ? 
-						// <SubMenu icon={Icon} label={item.Menu} 
-						// // open={item.Menu === "Gudang" ? true : false}
-						// >
-						// 	{item.SubMenu.map((item2,index2) => {
-						// 		var Icon2 = ""
-						// 		if (item2.Menu === "Master Product") {
-						// 			Icon2 = <FaLayerGroup />
-						// 		} else if (item2.Menu === "Stok Product") {
-						// 			Icon2 = <FaBoxOpen />
-						// 		} else if (item2.Menu === "Scan Product") {
-						// 			Icon2 = <FaQrcode />
-						// 		} else if (item2.Menu === "Transaksi") {
-						// 			Icon2 = <FaFileInvoice />
-						// 		} else if (item2.Menu === "Rekening Koran") {
-						// 			Icon2 = <FaNewspaper />
-						// 		} else if (item2.Menu === "Report Transaksi") {
-						// 			Icon2 = <FaFileExport />
-						// 		} else if (item2.Menu === "Profit & Loss") {
-						// 			Icon2 = <FaDollarSign />
-						// 		} else if (item2.Menu === "Neraca") {
-						// 			Icon2 = <FaBalanceScale />
-						// 		} else if (item2.Menu === "Category") {
-						// 			Icon2 = <FaList />
-						// 		}
-						// 		return item.Id === item2.ParentId && <a href={item2.Href} style={{ textDecoration:'none', color:'#000000' }}><MenuItem icon={Icon2}>{item2.Menu}</MenuItem></a>
-						// 	})}
-						// </SubMenu>
-						// :icon={Icon}
-						return <a href={item.Href} style={{ textDecoration:'none', color:'#000000' }}>
-							{form.PageActive === PageActive ? 
-							<MenuItem icon={Icon}>
-								<div style={{ display:'flex', justifyContent:'flex-start' }}>
-									{/* <div style={{ backgroundColor:'#3A379F', width:5, borderTopRightRadius:10, borderBottomRightRadius:10 }}></div> */}
-									<div style={{ display:'flex', alignItems:'center', backgroundColor:'#004372', borderTopLeftRadius:10, borderTopRightRadius:10, borderBottomLeftRadius:10, borderBottomRightRadius:10, width:'100%' }}>
-										<div style={{ color:'#FFFFFF', fontSize:13, fontWeight:'bold', marginLeft:20, paddingTop:10, paddingBottom:10 }}>{item.Menu}</div>
-									</div>
-								</div>
-							</MenuItem>
-							// <div style={{ backgroundColor: form.PageActive === PageActive ? 'red' : '#FFFFFF', marginHorizontal: 10 }}></div>
-							:
-							// <MenuItem icon={Icon}>{item.Menu}</MenuItem>
-							<MenuItem icon={Icon}>
-								<div style={{ display:'flex', justifyContent:'flex-start' }}>
-									{/* <div style={{ backgroundColor:'#3A379F', width:5, borderTopRightRadius:10, borderBottomRightRadius:10 }}></div> */}
-									<div style={{ display:'flex', alignItems:'center', backgroundColor:'#E3E3E3', borderTopLeftRadius:10, borderTopRightRadius:10, borderBottomLeftRadius:10, borderBottomRightRadius:10, width:'100%' }}>
-										<div style={{ color:'#004372', fontSize:13, fontWeight:'bold', marginLeft:20, paddingTop:10, paddingBottom:10 }}>{item.Menu}</div>
-									</div>
-								</div>
-							</MenuItem>
-							}
-						</a>
-					})}
+		// 			{LoadingMenuSidebar ?
+		// 			<Skeleton count={ListMenuSidebar.length} />
+		// 			:
+		// 			ListMenuSidebar.length > 0 && ListMenuSidebar.map((item,index) => {
+		// 				var Icon = ""
+		// 				var PageActive = ""
+		// 				if (item.Menu === "Dashboard") {
+		// 					PageActive = "DASHBOARD"
+		// 					Icon = <FaHome />
+		// 				} else if (item.Menu === "Gudang") {
+		// 					PageActive = "GUDANG"
+		// 					Icon = <FaWarehouse />
+		// 				} else if (item.Menu === "Kasir") {
+		// 					PageActive = "KASIR"
+		// 					Icon = <FaCashRegister />
+		// 				} else if (item.Menu === "Keuangan") {
+		// 					PageActive = "KEUANGAN"
+		// 					Icon = <FaMoneyBill />
+		// 				} else if (item.Menu === "Lainnya") {
+		// 					PageActive = "LAINNYA"
+		// 					Icon = <FaServer />
+		// 				}
+		// 				return <a href={item.Href} style={{ textDecoration:'none', color:'#000000' }}>
+		// 					{form.PageActive === PageActive ? 
+		// 					<MenuItem icon={Icon}>
+		// 						<div style={{ display:'flex', justifyContent:'flex-start' }}>
+		// 							{/* <div style={{ backgroundColor:'#3A379F', width:5, borderTopRightRadius:10, borderBottomRightRadius:10 }}></div> */}
+		// 							<div style={{ display:'flex', alignItems:'center', backgroundColor:'#004372', borderTopLeftRadius:10, borderTopRightRadius:10, borderBottomLeftRadius:10, borderBottomRightRadius:10, width:'100%' }}>
+		// 								<div style={{ color:'#FFFFFF', fontSize:13, fontWeight:'bold', marginLeft:20, paddingTop:10, paddingBottom:10 }}>{item.Menu}</div>
+		// 							</div>
+		// 						</div>
+		// 					</MenuItem>
+		// 					// <div style={{ backgroundColor: form.PageActive === PageActive ? 'red' : '#FFFFFF', marginHorizontal: 10 }}></div>
+		// 					:
+		// 					// <MenuItem icon={Icon}>{item.Menu}</MenuItem>
+		// 					<MenuItem icon={Icon}>
+		// 						<div style={{ display:'flex', justifyContent:'flex-start' }}>
+		// 							{/* <div style={{ backgroundColor:'#3A379F', width:5, borderTopRightRadius:10, borderBottomRightRadius:10 }}></div> */}
+		// 							<div style={{ display:'flex', alignItems:'center', backgroundColor:'#E3E3E3', borderTopLeftRadius:10, borderTopRightRadius:10, borderBottomLeftRadius:10, borderBottomRightRadius:10, width:'100%' }}>
+		// 								<div style={{ color:'#004372', fontSize:13, fontWeight:'bold', marginLeft:20, paddingTop:10, paddingBottom:10 }}>{item.Menu}</div>
+		// 							</div>
+		// 						</div>
+		// 					</MenuItem>
+		// 					}
+		// 				</a>
+		// 			})}
+		// 		</Menu>
+		// 	</Sidebar>
 
-					{/* <SubMenu icon={<HomeOutlinedIcon />} label="Dashboard">
-						<MenuItem icon={<PeopleOutlinedIcon />}>Item 1</MenuItem>
-						<MenuItem icon={<PeopleOutlinedIcon />}>Item 2</MenuItem>
-						<MenuItem icon={<PeopleOutlinedIcon />}>Item 3</MenuItem>
-					</SubMenu>
-					<MenuItem icon={<PeopleOutlinedIcon />}>Team</MenuItem>
-					<MenuItem icon={<ContactsOutlinedIcon />}>Contacts</MenuItem>
-					<MenuItem icon={<ReceiptOutlinedIcon />}>Profile</MenuItem>
-					<MenuItem icon={<HelpOutlineOutlinedIcon />}>FAQ</MenuItem>
-					<MenuItem icon={<CalendarTodayOutlinedIcon />}>Calendar</MenuItem> */}
-				</Menu>
-			</Sidebar>
+		// </div>
 
+		<div className={`sidebar ${collapsed ? "collapsed" : ""}`}>
+      
+			{/* HEADER */}
+			<div className="sidebar-header">
+				<div className="logo">🏠</div>
+				{!collapsed && <h2>ResidentHub</h2>}
+			</div>
+
+			{/* MENU */}
+			<div className="menu">
+
+				<div className="menu-item active">
+				<span>📊</span>
+				{!collapsed && <span>Dashboard</span>}
+				</div>
+
+				{/* TAGIHAN DROPDOWN */}
+				<div className="menu-item" onClick={() => setOpenMenu(!openMenu)}>
+				<span>💵</span>
+				{!collapsed && (
+					<>
+					<span>Tagihan</span>
+					<span className="arrow">{openMenu ? "▲" : "▼"}</span>
+					</>
+				)}
+				</div>
+
+				{openMenu && !collapsed && (
+				<div className="submenu">
+					<div>IPL</div>
+					<div>Iuran Keamanan</div>
+					<div>Iuran Kebersihan</div>
+					<div>Donasi</div>
+					<div>Keuangan Cluster</div>
+				</div>
+				)}
+
+				<div className="menu-item">
+				<span>📄</span>
+				{!collapsed && <span>Master Cluster</span>}
+				</div>
+
+				<div className="menu-item">
+				<span>👥</span>
+				{!collapsed && <span>Manajemen User</span>}
+				</div>
+			</div>
+
+			{/* FOOTER */}
+			<div className="sidebar-footer">
+				<div onClick={() => setCollapsed(!collapsed)}>
+				⬅ {!collapsed && "Perkecil"}
+				</div>
+				<div className="logout">
+				🚪 {!collapsed && "Keluar"}
+				</div>
+			</div>
 		</div>
     )
 }

@@ -13,6 +13,14 @@ import IconUnactive from './icon/ic_unactive.svg';
 import IconAddNewProduct from './icon/ic_add_new_product.svg';
 import IconEye from './icon/ic_eye.svg';
 import IconMidtrans from './icon/ic_midtrans.png';
+import IconLogoIPLQ from './icon/ic_logo_iplq.png';
+
+import IconDashboardLeftMenu from './icon/ic_dashboard_left_menu.png';
+import IconBillsLeftMenu from './icon/ic_bills_left_menu.png';
+import IconMasterClusterLeftMenu from './icon/ic_master_cluster_left_menu.png';
+import IconUserLeftMenu from './icon/ic_user_left_menu.png';
+
+import IconDownload from './icon/ic_download.png';
 
 export {
     IconRefresh,
@@ -24,5 +32,11 @@ export {
     IconUnactive,
     IconAddNewProduct,
     IconEye,
-    IconMidtrans
+    IconMidtrans,
+    IconLogoIPLQ,
+    IconDashboardLeftMenu,
+    IconBillsLeftMenu,
+    IconMasterClusterLeftMenu,
+    IconUserLeftMenu,
+    IconDownload
 };
