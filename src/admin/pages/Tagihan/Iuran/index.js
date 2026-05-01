@@ -22,6 +22,7 @@ import {
 	Tooltip,
 	ResponsiveContainer,
 } from "recharts";
+import { safeStringify } from 'ajv/dist/compile/codegen/code';
 
 const Iuran = () => {
     const history = useHistory(historyConfig);
@@ -87,6 +88,7 @@ const Iuran = () => {
 
 	useEffect(() => {
 		getListIuran("");
+		console.log("current page update")
 	}, [CurrentPage]);
 
 	// useEffect(() => {
