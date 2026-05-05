@@ -210,6 +210,16 @@ const TransaksiIPL = () => {
                 setListIPL(data.result)
                 setTotalPage(data.total_page)
                 setTotalRecords(data.total_record)
+
+				// setTotal(data.result_summary.total)
+				// setTerkumpul(data.result_summary.terkumpul)
+				// setBelumTerkumpul(data.result_summary.belum)
+				// const collectionRate =
+				// 	data.result_summary.total > 0
+				// 		? (data.result_summary.terkumpul / data.result_summary.total) * 100
+				// 		: 0;
+				// setCollectionRate(collectionRate)
+
 				return
 			} else {
 				if (data.error_code === "2") {
@@ -472,7 +482,7 @@ const TransaksiIPL = () => {
 					</div>
 				</div>
 
-				<div className="row mb-3">
+				{/* <div className="row mb-3">
 					<div className="col-md-3">
 						<div className="card p-3 rounded-4 shadow-sm">
 						<small>Total Tagihan</small>
@@ -504,7 +514,7 @@ const TransaksiIPL = () => {
 						<h5>{CollectionRate.toFixed(1)}%</h5>
 						</div>
 					</div>
-				</div>
+				</div> */}
 
 				<div style={{ height:30 }} />
 

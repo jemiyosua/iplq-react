@@ -214,15 +214,20 @@ const TransaksiIuran = () => {
 			setLoadingIuran(false)
 
 			if (data.error_code === "0") {
-                // const collectionRate = 
-                //     0 > 0
-                //         ? (data.result_summary.terkumpul / data.result_summary.total) * 100
-                //         : 0;
                         
                 setListIuran(data.result)
                 setTotalPage(data.total_page)
                 setTotalRecords(data.total_record)
-                // setCollectionRate(collectionRate)
+				// setTotal(data.result_summary.total)
+				// setTerkumpul(data.result_summary.terkumpul)
+				// setBelumTerkumpul(data.result_summary.belum)
+				// const collectionRate =
+				// 	data.result_summary.total > 0
+				// 		? (data.result_summary.terkumpul / data.result_summary.total) * 100
+				// 		: 0;
+				// setCollectionRate(collectionRate)
+
+				
 				return
 			} else {
 				if (data.error_code === "2") {
@@ -483,7 +488,7 @@ const TransaksiIuran = () => {
 					</div>
 				</div>
 
-				<div className="row mb-3">
+				{/* <div className="row mb-3">
 					<div className="col-md-3">
 						<div className="card p-3 rounded-4 shadow-sm">
 						<small>Total Tagihan</small>
@@ -515,7 +520,7 @@ const TransaksiIuran = () => {
 						<h5>{CollectionRate.toFixed(1)}%</h5>
 						</div>
 					</div>
-				</div>
+				</div> */}
 
 				{/* <ResponsiveContainer width="100%" height={300}>
 					<BarChart data={chartData}>
