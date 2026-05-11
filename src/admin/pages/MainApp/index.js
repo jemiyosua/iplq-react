@@ -11,6 +11,7 @@ import IPL from '../Tagihan/IPL'
 import Iuran from '../Tagihan/Iuran'
 import { FaUserCircle } from 'react-icons/fa'
 import TransaksiIuran from '../Transaksi/TransaksiIuran'
+import TransaksiIPL from '../Transaksi/TransaksiIPL'
 
 const MainApp = () => {
     const history = useHistory(historyConfig);
@@ -77,6 +78,9 @@ const MainApp = () => {
                                 </Route>
                                 <Route path="/iuran">
                                     <Iuran />
+                                </Route>
+								<Route path="/transaksi-ipl">
+                                    <TransaksiIPL />
                                 </Route>
                                 <Route path="/transaksi-iuran">
                                     <TransaksiIuran />

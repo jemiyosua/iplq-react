@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
 import { Header, Footer, Input, Button, Gap, Pagination } from '../../../components';
-import './transaksi-iuran.css'
+import './transaksi-ipl.css'
 import { useDispatch } from 'react-redux';
 import { AlertMessage, paths } from '../../../../utils'
 import { historyConfig, generateSignature, fetchStatus } from '../../../../utils/functions';
@@ -11,7 +11,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import DataTable from 'react-data-table-component';
 import SweetAlert from 'react-bootstrap-sweetalert';
 import { FaMoneyBillWheat } from 'react-icons/fa6';
-import { FaFileDownload } from 'react-icons/fa';
+import { FaFileDownload, FaMoneyCheck } from 'react-icons/fa';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import {
@@ -23,9 +23,10 @@ import {
 	ResponsiveContainer,
 } from "recharts";
 
-import {ModalDetailTransaksiIuran} from '../../../components';
+import {ModalDetailTransaksiIPL}  from '../../../components';
 
-const TransaksiIuran = () => {
+
+const TransaksiIPL = () => {
     const history = useHistory(historyConfig);
     const dispatch = useDispatch();
     const containerRef = useRef(null);
@@ -33,7 +34,7 @@ const TransaksiIuran = () => {
 	const [cookies, setCookie,removeCookie] = useCookies(['user']);
 	const [Name, setName] = useState("")
 
-	const [ListIuran, setListIuran] = useState([])
+	const [ListIPL, setListIPL] = useState([])
 	const [ListTunggakan, setListTunggakan] = useState([])
 	const [CurrentPage, setCurrentPage] = useState(1);
 	const [RowPage, setRowPage] = useState(10);
@@ -52,7 +53,7 @@ const TransaksiIuran = () => {
     const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
     const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
 
-	const [LoadingIuran, setLoadingIuran] = useState(false)
+	const [LoadingIPL, setLoadingIPL] = useState(false)
 
 	const [open,setOpen] = useState(true)
 
@@ -64,22 +65,22 @@ const TransaksiIuran = () => {
 
 	const [GlobalSearch, setGlobalSearch] = useState('');
 	const [FilterStatus, setFilterStatus] = useState('');
-	const [FilterBulan, setFilterBulan] = useState('');
+    const [FilterBulan, setFilterBulan] = useState('');
     const [FilterBeginDate, setFilterBeginDate] = useState('');
     const [FilterEndDate, setFilterEndDate] = useState('');
-    const [idTransaksi, setIdTransaksi] = useState('');
 
-    // ----- Modal Detail Transaksi Iuran -----
-    const [showModalDetailIuran, setShowModalDetailIuran] = useState(false);
-    const [detailTransaksiIuran, setDetailTransaksiIuran] = useState([]);
-	const [detailTransaksiID, setDetailTransaksiID] = useState("");
+    // ----- Modal Detail Transaksi IPL -----
+    const [showModalDetailIPL, setShowModalDetailIPL] = useState(false);
+    const [detailTransaksiIPL, setDetailTransaksiIPL] = useState([]);
+    const [detailTransaksiID, setDetailTransaksiID] = useState("");
     const [detailOrderID, setDetailOrderID] = useState("");
     const [detailStatusTransaksi, setDetailStatusTransaksi] = useState("");
+    
 
 	useEffect(() => {
         window.scrollTo(0, 0)
 
-		console.log("MASUK IURAN")
+		console.log("MASUK IPL")
 
         var CookieNama = getCookie("nama");
         setName(CookieNama)
@@ -92,23 +93,15 @@ const TransaksiIuran = () => {
         }else{
             dispatch(setForm("ParamKey",CookieParamKey))
             dispatch(setForm("Username",CookieUsername))
-            dispatch(setForm("PageActive","TRANSAKSI_IURAN"))
+            dispatch(setForm("PageActive","TRANSAKSI_IPL"))
         }
 
     },[])
 
 	useEffect(() => {
-		getListIuran("");
+		getListIPL("");
 	}, [CurrentPage]);
 
-	// useEffect(() => {
-	// 	console.log("masuk sini")
-	// 	const delay = setTimeout(() => {
-	// 		setCurrentPage(1);
-	// 	}, 500);
-
-	// 	return () => clearTimeout(delay);
-	// }, [GlobalSearch]);
 
 	const getCookie = (tipe) => {
 		var SecretCookie = cookies.varCookie;
@@ -158,18 +151,17 @@ const TransaksiIuran = () => {
 		setOpen(!open)
 	}
 
-	const getListIuran = (posisi) => {
+	const getListIPL = (posisi) => {
+
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
 		var cookieAccessLogin = getCookie("access");
-		var cookieCluster = getCookie("cluster");
 		var cookieClusterId = getCookie("cluster_id");
 
 		let globalSearch = GlobalSearch
 		let filterStatus = FilterStatus
         let beginDate = FilterBeginDate
         let endDate = FilterEndDate
-        // let id = idTransaksi
 
 		if (posisi == "reset") {
 			globalSearch = ""
@@ -182,7 +174,7 @@ const TransaksiIuran = () => {
 			"username": cookieUsername,
 			"paramkey": cookieParamKey,
 			"method": "SELECT",
-			"jenis_transaksi": "iuran",
+			"jenis_transaksi": "ipl",
 			"global_search": globalSearch,
 			"transaction_status": filterStatus,
             "start_date_bayar": beginDate,
@@ -195,7 +187,7 @@ const TransaksiIuran = () => {
 			"order": ""
 		});
 
-		setLoadingIuran(true)
+		setLoadingIPL(true)
 
 		var url = paths.URL_API_ADMIN + 'TransaksiTagihan';
 		var Signature  = generateSignature(requestBody)
@@ -211,13 +203,14 @@ const TransaksiIuran = () => {
 		.then(fetchStatus)
 		.then(response => response.json())
 		.then((data) => {
-			setLoadingIuran(false)
+			setLoadingIPL(false)
 
 			if (data.error_code === "0") {
                         
-                setListIuran(data.result)
+                setListIPL(data.result)
                 setTotalPage(data.total_page)
                 setTotalRecords(data.total_record)
+
 				// setTotal(data.result_summary.total)
 				// setTerkumpul(data.result_summary.terkumpul)
 				// setBelumTerkumpul(data.result_summary.belum)
@@ -227,7 +220,6 @@ const TransaksiIuran = () => {
 				// 		: 0;
 				// setCollectionRate(collectionRate)
 
-				
 				return
 			} else {
 				if (data.error_code === "2") {
@@ -242,7 +234,7 @@ const TransaksiIuran = () => {
 			}
 		})
 		.catch((error) => {
-			setLoadingIuran(false)
+			setLoadingIPL(false)
 
 			if (error.message === 401) {
 				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
@@ -253,26 +245,28 @@ const TransaksiIuran = () => {
 				setShowAlert(true);
 				return false;
 			}
-		});	
-	}
+		});
 
-	const handleOpenModal = (item) => {
-		setLoadingIuran(true);
+
+	}
+    const handleOpenModal = (item) => {
+		setLoadingIPL(true);
         setDetailOrderID(item.order_id);
         setDetailTransaksiID(item.transaksi_id);
         setDetailStatusTransaksi(item.transaction_status);
 
-		const sortedData = [...item.payment_detail].sort((a, b) => a.id - b.id);
-        setDetailTransaksiIuran(sortedData);
+
+        const sortedData = [...item.payment_detail].sort((a, b) => a.id - b.id);
+        setDetailTransaksiIPL(sortedData);
 		
-        setShowModalDetailIuran(true);
+        setShowModalDetailIPL(true);
 	}
 
-	const handleCloseModal = () => {
-        setShowModalDetailIuran(false);
+    const handleCloseModal = () => {
+        setShowModalDetailIPL(false);
     }
 
-	const handleFilterBulan = (bulan) => {
+    const handleFilterBulan = (bulan) => {
         setFilterBulan(bulan);
 
         const [year, month] = bulan.split("-");
@@ -312,7 +306,7 @@ const TransaksiIuran = () => {
 	};
 
 	const handleExport = () => {
-		const formatted = ListIuran.map((item) => ({
+		const formatted = ListIPL.map((item) => ({
 			"Order ID": item.order_id || "-",
 			"Transaksi ID": item.transaction_id || "-",
 			"Nama": item.nama_user,
@@ -332,7 +326,7 @@ const TransaksiIuran = () => {
 		const year = now.getFullYear();
 		const dateFinal = `${day}-${month}-${year}`;
 
-		exportToExcel(formatted, "export-data-iuran-"+dateFinal);
+		exportToExcel(formatted, "export-data-ipl-"+dateFinal);
 	};
 
 	const exportToExcel = (data, fileName = "data") => {
@@ -369,11 +363,11 @@ const TransaksiIuran = () => {
 		});
 	};
 
-	// ---------- SUMMARY IURAN ----------
+	// ---------- SUMMARY IPL ----------
 	// 2. DATA PER BULAN
 	const perBulanMap = {};
 
-	ListIuran.forEach((item) => {
+	ListIPL.forEach((item) => {
 		const bulan = item.bulan_invoice;
 
 		if (!perBulanMap[bulan]) {
@@ -398,7 +392,7 @@ const TransaksiIuran = () => {
 	// 4. PER CLUSTER
 	const clusterMap = {};
 
-	ListIuran.forEach((item) => {
+	ListIPL.forEach((item) => {
 		const cluster = item.cluster;
 
 		if (!clusterMap[cluster]) {
@@ -419,7 +413,7 @@ const TransaksiIuran = () => {
 	});
 
 	const clusterData = Object.values(clusterMap);
-	// ---------- END OF SUMMARY IURAN ----------
+	// ---------- END OF SUMMARY IPL ----------
     
     return (
 		<div className="container-fluid p-4 min-vh-100">
@@ -484,7 +478,7 @@ const TransaksiIuran = () => {
 				<div className="d-flex justify-content-between align-items-center mb-3">
 					<div className="d-flex justify-content-between align-items-center gap-2">
 						<FaMoneyBillWheat />
-						<h5 className="mb-0 fw-bold">Iuran Warga</h5>
+						<h5 className="mb-0 fw-bold">IPL Warga</h5>
 					</div>
 				</div>
 
@@ -522,29 +516,6 @@ const TransaksiIuran = () => {
 					</div>
 				</div> */}
 
-				{/* <ResponsiveContainer width="100%" height={300}>
-					<BarChart data={chartData}>
-						<XAxis dataKey="bulan" />
-						<YAxis />
-						<Tooltip />
-						<Bar dataKey="total" fill="#e5e7eb" />
-						<Bar dataKey="bayar" fill="#22c55e" />
-					</BarChart>
-				</ResponsiveContainer> */}
-
-				{/* <div className="card p-3 rounded-4 shadow-sm mt-3">
-					<h6 className="fw-bold">Top Tunggakan</h6>
-
-					{ListTunggakan.map((item, i) => (
-						<div key={i} className="d-flex justify-content-between">
-							<span style={{ fontWeight:'bold' }}>{item.nama} ({item.cluster})</span>
-							<span className="text-danger">
-								{formatRupiah(item.total)}
-							</span>
-						</div>
-					))}
-				</div> */}
-
 				<div style={{ height:30 }} />
 
 				<div className="filter-container">
@@ -557,7 +528,7 @@ const TransaksiIuran = () => {
 						onKeyDown={(e) => {
 							if (e.key === "Enter") {
 								setCurrentPage(1);
-								getListIuran("");
+								getListIPL("");
 							}
 						}}
 					/>
@@ -585,7 +556,7 @@ const TransaksiIuran = () => {
 						className="btn-filter"
 						onClick={() => {
 							setCurrentPage(1)
-							getListIuran("")
+							getListIPL("")
 						}}
 					>
 						Filter
@@ -600,7 +571,7 @@ const TransaksiIuran = () => {
                             setFilterBulan("")
                             setFilterBeginDate("")
                             setFilterEndDate("")
-							getListIuran("reset")
+							getListIPL("reset")
 						}}
 					>
 						Reset
@@ -621,40 +592,43 @@ const TransaksiIuran = () => {
 				<div className="table-responsive">
 					<table className="table align-middle">
 						<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
-						<tr>
+						<tr >
 							<th>Order ID</th>
 							<th>Transaksi ID</th>
 							<th>Tagihan</th>
 							<th>Nama</th>
 							<th>Cluster</th>
-							<th>Bulan Tagihan</th>
+							<th>Jumlah Bulan Tagihan</th>
 							<th>Tanggal Bayar</th>
 							<th>Status Transaksi</th>
-							
 						</tr>
 						</thead>
 						<tbody>
-							{ListIuran?.map((item, index) => (
+							{ListIPL?.map((item, index) => (
 								<tr key={index} 
-									onClick={()=>handleOpenModal(item)}
-									style={{ cursor: "pointer" }}>
+                                    onClick={() => handleOpenModal(item)} 
+                                    style={{ cursor: "pointer" }} >
 									<td>{item.order_id ? item.order_id : '-'}</td>
 									<td>{item.transaksi_id ? item.transaksi_id : '-'}</td>
 									<td>{formatRupiah(item.total_tagihan_nominal)}</td>
 									<td style={{ fontWeight:'bold' }}>{item.nama_user}</td>
 									<td>{item.cluster}</td>
 									<td>{item.jumlah_bulan_tagihan_bayar}</td>
-									<td>{item.tanggal_bayar ? item.tanggal_bayar : '-'}</td>
+									<td>{item.tanggal_bayar? item.tanggal_bayar : '-'}</td>
 									<td>{statusBadge(item.transaction_status)}</td>
 								</tr>
+
+                                
 							))}
+
+                            
 						</tbody>
 					</table>
 				</div>
 
-				<ModalDetailTransaksiIuran
-                    showModal={showModalDetailIuran}
-                    listDetailTransaksiIuran={detailTransaksiIuran}
+                <ModalDetailTransaksiIPL
+                    showModal={showModalDetailIPL}
+                    listDetailTransaksiIPL={detailTransaksiIPL}
                     orderID={detailOrderID}
                     transaksiID={detailTransaksiID}
                     statusTransaksi={detailStatusTransaksi}
@@ -672,7 +646,7 @@ const TransaksiIuran = () => {
 							currentPage={CurrentPage}
 							totalPage={TotalPage}
 							onPageChange={(page) => {
-								if (!LoadingIuran) {
+								if (!LoadingIPL) {
 									setCurrentPage(page);
 								}
 							}}
@@ -685,4 +659,4 @@ const TransaksiIuran = () => {
 	);
 }
 
-export default TransaksiIuran;
+export default TransaksiIPL;
