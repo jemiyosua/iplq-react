@@ -1,0 +1,4 @@
+.modal-body-scrollable {
+    max-height: 80vh;  /* Atur tinggi maksimum, misalnya 400px */
+    overflow-y: auto;   /* Tambahkan scroll jika konten melebihi batas */
+  }
