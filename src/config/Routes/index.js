@@ -26,7 +26,27 @@ const Routes = () => {
 				<Route exact path="/admin/transaksi-iuran">
 					<MainApp />
 				</Route>
-				
+				<Route exact path="/admin/transaksi-ipl">
+					<MainApp />
+				</Route>
+				<Route exact path="/admin/donasi">
+					<MainApp />
+				</Route>
+				<Route exact path="/admin/donasi-detail">
+					<MainApp />
+				</Route>
+				<Route exact path="/admin/data-warga">
+					<MainApp />
+				</Route>
+				<Route exact path="/admin/data-warga-import">
+					<MainApp />
+				</Route>
+				<Route exact path="/admin/fasilitas">
+					<MainApp />
+				</Route>
+				<Route exact path="/admin/fasilitas-booking">
+					<MainApp />
+				</Route>
 				<Route path='/'>
 					<Home/>
 				</Route>

@@ -12,6 +12,12 @@ import Iuran from '../Tagihan/Iuran'
 import { FaUserCircle } from 'react-icons/fa'
 import TransaksiIuran from '../Transaksi/TransaksiIuran'
 import TransaksiIPL from '../Transaksi/TransaksiIPL'
+import Donasi from '../Donasi/DonasiList'
+import DonasiDetail from '../Donasi/DonasiDetail'
+import DataWarga from '../DataWarga/DataWargaList'
+import DataWargaImport from '../DataWarga/DataWargaImport'
+import FasilitasList from '../Fasilitas/FasilitasList'
+import FasilitasBooking from '../Fasilitas/FasilitasBooking'
 
 const MainApp = () => {
     const history = useHistory(historyConfig);
@@ -84,6 +90,24 @@ const MainApp = () => {
                                 </Route>
                                 <Route path="/transaksi-iuran">
                                     <TransaksiIuran />
+                                </Route>
+								<Route path="/donasi">
+                                    <Donasi />
+                                </Route>
+								<Route path="/donasi-detail">
+                                    <DonasiDetail />
+                                </Route>
+								<Route path="/data-warga">
+                                    <DataWarga />
+                                </Route>
+								<Route path="/data-warga-import">
+                                    <DataWargaImport />
+                                </Route>
+								<Route path="/fasilitas">
+                                    <FasilitasList />
+                                </Route>
+                                <Route path="/fasilitas-booking">
+                                    <FasilitasBooking />
                                 </Route>
                             </Switch>
                         </BrowserRouter>

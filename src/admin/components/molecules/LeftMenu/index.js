@@ -12,6 +12,7 @@ const LeftMenu = ({ children }) => {
 	const {form}=useSelector(state=>state.PaketReducer);
 	const [cookies, setCookie,removeCookie] = useCookies(['user']);
 
+	const [OpenMenuLaporanKeuangan, setOpenMenuLaporanKeuangan] = useState(true);
 	const [OpenMenuTagihan, setOpenMenuTagihan] = useState(true);
 	const [OpenMenuTransaksi, setOpenMenuTransaksi] = useState(true);
 	const [Collapsed, setCollapsed] = useState(false);
@@ -68,10 +69,31 @@ const LeftMenu = ({ children }) => {
 
 					<Gap height={15} />
 
+					<div className="menu-item" onClick={() => setOpenMenuLaporanKeuangan(!OpenMenuLaporanKeuangan)}>
+						<FaMoneyCheck /> {!Collapsed && "Laporan Keuangan"}
+					</div>
+					{OpenMenuLaporanKeuangan && !Collapsed && (
+						<div className="submenu">
+							<div className={`submenu-item ${form.PageActive == "SUMMARY_IURAN" && "active"}`} onClick={() => {
+								setOpen(false)
+								window.location.href = "/admin/summary-iuran"
+							}} style={{ cursor:'pointer' }}><FaMoneyBillTransfer /> Summary Iuran</div>
+							<div className={`submenu-item ${form.PageActive == "REKENING_KORAN" && "active"}`} onClick={() => {
+								setOpen(false)
+								window.location.href = "/admin/rekening-koran"
+							}} style={{ cursor:'pointer' }}><FaMoneyBillWheat /> Rekening Koran</div>
+							<div className={`submenu-item ${form.PageActive == "PENGGUNAAN_DANA" && "active"}`} onClick={() => {
+								setOpen(false)
+								window.location.href = "/admin/penggunaan-dana"
+							}} style={{ cursor:'pointer' }}><FaHandHoldingDollar /> Penggunaan Dana</div>
+						</div>
+					)}
+
+					<Gap height={15} />
+
 					<div className="menu-item" onClick={() => setOpenMenuTagihan(!OpenMenuTagihan)}>
 						<FaMoneyBill1Wave /> {!Collapsed && "Tagihan"}
 					</div>
-
 					{OpenMenuTagihan && !Collapsed && (
 						<div className="submenu">
 							<div className={`submenu-item ${form.PageActive == "IPL" && "active"}`} onClick={() => {
@@ -82,8 +104,6 @@ const LeftMenu = ({ children }) => {
 								setOpen(false)
 								window.location.href = "/admin/iuran"
 							}} style={{ cursor:'pointer' }}><FaMoneyBillWheat /> Iuran Warga</div>
-							<div className="submenu-item" onClick={() => setOpen(false)}><FaHandHoldingDollar /> Donasi</div>
-							<div className="submenu-item" onClick={() => setOpen(false)}><FaMoneyCheck /> Keuangan</div>
 						</div>
 					)}
 
@@ -92,7 +112,6 @@ const LeftMenu = ({ children }) => {
 					<div className="menu-item" onClick={() => setOpenMenuTransaksi(!OpenMenuTransaksi)}>
 						<FaMoneyBill1Wave /> {!Collapsed && "Transaksi"}
 					</div>
-
 					{OpenMenuTransaksi && !Collapsed && (
 						<div className="submenu">
 							<div className={`submenu-item ${form.PageActive == "TRANSAKSI_IPL" && "active"}`} onClick={() => {
@@ -103,13 +122,43 @@ const LeftMenu = ({ children }) => {
 								setOpen(false)
 								window.location.href = "/admin/transaksi-iuran"
 							}} style={{ cursor:'pointer' }}><FaMoneyBillWheat /> Transaksi Iuran</div>
+							<div className={`submenu-item ${form.PageActive == "DONASI" && "active"}`} onClick={() => {
+								setOpen(false)
+								window.location.href = "/admin/donasi"
+							}} style={{ cursor:'pointer' }} ><FaHandHoldingDollar /> Donasi</div>
 						</div>
 					)}
 
 					<Gap height={15} />
 
-					<div className={`menu-item ${form.PageActive == "DATA-WARGA" && "active"}`} onClick={() => setOpen(false)}>
-						<FaPeopleGroup /> {!Collapsed && "Data Warga"}
+					<div className={`menu-item ${form.PageActive == "RSVP" && "active"}`} onClick={() => {
+						setOpen(false)
+						window.location.href = "/admin/rsvp"
+					}}><FaPeopleGroup /> {!Collapsed && "RSVP Tamu"}
+					</div>
+
+					<Gap height={15} />
+
+					<div className={`menu-item ${form.PageActive == "FASILITAS" && "active"}`} onClick={() => {
+						setOpen(false)
+						window.location.href = "/admin/fasilitas"
+					}}><FaPeopleGroup /> {!Collapsed && "Fasilitas"}
+					</div>
+
+					<Gap height={15} />
+
+					<div className={`menu-item ${form.PageActive == "DATA_WARGA" && "active"}`} onClick={() => {
+						setOpen(false)
+						window.location.href = "/admin/data-warga"
+					}}><FaPeopleGroup /> {!Collapsed && "Data Warga"}
+					</div>
+
+					<Gap height={15} />
+
+					<div className={`menu-item ${form.PageActive == "LAPORAN_PENGADUAN" && "active"}`} onClick={() => {
+						setOpen(false)
+						window.location.href = "/admin/laporan-pengaduan"
+					}}><FaPeopleGroup /> {!Collapsed && "Laporan Pengaduan"}
 					</div>
 
 					<Gap height={15} />

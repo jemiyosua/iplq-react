@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
-import { Header, Footer, Input, Button, Gap } from '../../../components';
+import { Header, Footer, Input, Button, Gap, Pagination } from '../../../components';
 import './ipl.css'
 import { useDispatch } from 'react-redux';
 import { AlertMessage, paths } from '../../../utils'
@@ -19,11 +19,13 @@ const IPL = () => {
 	const [cookies, setCookie,removeCookie] = useCookies(['user']);
 	const [Name, setName] = useState("")
 
+	const [CurrentPage, setCurrentPage] = useState(1);
+
 	const [ListIPL, setListIPL] = useState([])
 	const [TotalPage, setTotalPage] = useState(0)
 	const [TotalRecords, setTotalRecords] = useState(0)
 
-	const [Loading, setLoading] = useState(false)
+	const [LoadingIPL, setLoadingIPL] = useState(false)
 	
 	const [ShowAlert, setShowAlert] = useState(true)
     const [SessionMessage, setSessionMessage] = useState("")
@@ -45,8 +47,6 @@ const IPL = () => {
 	useEffect(() => {
         window.scrollTo(0, 0)
 
-		console.log("MASUK IPL")
-
         var CookieNama = getCookie("nama");
         setName(CookieNama)
 
@@ -64,6 +64,10 @@ const IPL = () => {
 		getListIPLAnnualAll()
 
     },[])
+
+	useEffect(() => {
+		getListIPLAnnualAll("");
+	}, [CurrentPage]);
 
 	const getCookie = (tipe) => {
 		var SecretCookie = cookies.varCookie;
@@ -127,13 +131,13 @@ const IPL = () => {
 			"jenis_tagihan": 1,
 			"access": cookieAccessLogin,
 			"cluster_id": parseInt(cookieClusterId),
-			"page": 1,
+			"page": CurrentPage,
 			"row_page": 10,
 			"order_by": "",
 			"order": ""
 		});
 
-		setLoadingDashboard(true)
+		setLoadingIPL(true)
 
 		var url = paths.URL_API_ADMIN + 'BillsAnnual';
 		var Signature  = generateSignature(requestBody)
@@ -149,7 +153,7 @@ const IPL = () => {
 		.then(fetchStatus)
 		.then(response => response.json())
 		.then((data) => {
-			setLoadingDashboard(false)
+			setLoadingIPL(false)
 
 			if (data.error_code === "0") {
 				setListIPL(data.result)
@@ -169,7 +173,7 @@ const IPL = () => {
 			}
 		})
 		.catch((error) => {
-			setLoadingDashboard(false)
+			setLoadingIPL(false)
 
 			if (error.message === 401) {
 				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
@@ -201,15 +205,6 @@ const IPL = () => {
 				return null;
 		}
 	};
-
-	const data = [
-		{ nama: "Gunawan Hidayat", cluster: "Cluster Harmony", rumah: "01-001", bulan: "Januari", nominal: "Rp 277.500", status: "Lunas", tgl: "2025-01-02" },
-		{ nama: "Gunawan Hidayat", cluster: "Cluster Harmony", rumah: "01-001", bulan: "Februari", nominal: "Rp 277.500", status: "Lunas", tgl: "2025-02-08" },
-		{ nama: "Gunawan Hidayat", cluster: "Cluster Harmony", rumah: "01-001", bulan: "Maret", nominal: "Rp 277.500", status: "Lunas", tgl: "2025-03-01" },
-		{ nama: "Gunawan Hidayat", cluster: "Cluster Harmony", rumah: "01-001", bulan: "April", nominal: "Rp 277.500", status: "Tertunda", tgl: "-" },
-		{ nama: "Gunawan Hidayat", cluster: "Cluster Harmony", rumah: "01-001", bulan: "Mei", nominal: "Rp 277.500", status: "Lunas", tgl: "2025-05-19" },
-		{ nama: "Gunawan Hidayat", cluster: "Cluster Harmony", rumah: "01-001", bulan: "Juni", nominal: "Rp 277.500", status: "Belum Bayar", tgl: "-" }
-	];
     
     return (
 		<div className="container-fluid p-4 min-vh-100">
@@ -218,9 +213,9 @@ const IPL = () => {
 				{/* Header */}
 				<div className="d-flex justify-content-between align-items-center mb-3">
 					<div className="d-flex align-items-center gap-2">
-						<div className="bg-success-subtle text-success p-2 rounded-3">💵</div>
+						{/* <div className="bg-success-subtle text-success p-2 rounded-3">💵</div> */}
 						<h5 className="mb-0 fw-bold">Tagihan IPL</h5>
-						<span className="badge bg-secondary">288</span>
+						{/* <span className="badge bg-secondary">288</span> */}
 					</div>
 				</div>
 
@@ -273,13 +268,20 @@ const IPL = () => {
 
 				{/* Footer */}
 				<div className="d-flex justify-content-between align-items-center mt-3">
-					<small className="text-muted">Menampilkan 8 dari 288 data</small>
+					{/* <small className="text-muted">Total Data : {TotalRecords}</small> */}
+
+					<div style={{ fontWeight:'bold' }}>Total Data : {TotalRecords}</div>
 
 					<div className="d-flex gap-2">
-						<button className="btn btn-success btn-sm">1</button>
-						<button className="btn btn-light btn-sm">2</button>
-						<button className="btn btn-light btn-sm">3</button>
-						<button className="btn btn-light btn-sm">4</button>
+						<Pagination
+							currentPage={CurrentPage}
+							totalPage={TotalPage}
+							onPageChange={(page) => {
+								if (!LoadingIPL) {
+									setCurrentPage(page);
+								}
+							}}
+						/>
 					</div>
 				</div>
 
