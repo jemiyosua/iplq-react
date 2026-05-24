@@ -14,6 +14,8 @@ import IconAddNewProduct from './icon/ic_add_new_product.svg';
 import IconEye from './icon/ic_eye.svg';
 import IconMidtrans from './icon/ic_midtrans.png';
 import IconLogoIPLQ from './icon/ic_logo_iplq.png';
+import IconLogo1 from './icon/ic_logo1.png';
+import IconLogo2 from './icon/ic_logo2.png';
 
 import IconDashboardLeftMenu from './icon/ic_dashboard_left_menu.png';
 import IconBillsLeftMenu from './icon/ic_bills_left_menu.png';
@@ -34,6 +36,8 @@ export {
     IconEye,
     IconMidtrans,
     IconLogoIPLQ,
+    IconLogo1,
+    IconLogo2,
     IconDashboardLeftMenu,
     IconBillsLeftMenu,
     IconMasterClusterLeftMenu,

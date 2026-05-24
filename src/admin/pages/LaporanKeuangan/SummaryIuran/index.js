@@ -2,16 +2,16 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
 import { Header, Footer, Input, Button, Gap, Pagination } from '../../../components';
-import './iuran.css'
+import './laporan-keuangan.css'
 import { useDispatch } from 'react-redux';
-import { AlertMessage, paths } from '../../../utils'
-import { historyConfig, generateSignature, fetchStatus } from '../../../utils/functions';
-import { setForm } from '../../../redux';
+import { AlertMessage, paths } from '../../../../utils'
+import { historyConfig, generateSignature, fetchStatus } from '../../../../utils/functions';
+import { setForm } from '../../../../redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DataTable from 'react-data-table-component';
 import SweetAlert from 'react-bootstrap-sweetalert';
 import { FaMoneyBillWheat } from 'react-icons/fa6';
-import { FaFileDownload } from 'react-icons/fa';
+import { FaFileDownload, FaMoneyCheck } from 'react-icons/fa';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import {
@@ -23,7 +23,7 @@ import {
 	ResponsiveContainer,
 } from "recharts";
 
-const Iuran = () => {
+const SummaryIuran = () => {
     const history = useHistory(historyConfig);
     const dispatch = useDispatch();
     const containerRef = useRef(null);
@@ -80,7 +80,7 @@ const Iuran = () => {
         }else{
             dispatch(setForm("ParamKey",CookieParamKey))
             dispatch(setForm("Username",CookieUsername))
-            dispatch(setForm("PageActive","IURAN"))
+            dispatch(setForm("PageActive","LAPORAN-KEUANGAN"))
         }
 
     },[])
@@ -429,22 +429,22 @@ const Iuran = () => {
 				{/* Header */}
 				<div className="d-flex justify-content-between align-items-center mb-3">
 					<div className="d-flex justify-content-between align-items-center gap-2">
-						<FaMoneyBillWheat />
-						<h5 className="mb-0 fw-bold">Iuran Warga</h5>
+						<FaMoneyCheck />
+						<h5 className="mb-0 fw-bold">Summary Keuangan</h5>
 					</div>
 				</div>
 
 				<div className="row mb-3">
 					<div className="col-md-3">
 						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Total Tagihan</small>
+						<small>Saldo Awal</small>
 						<h5>{formatRupiah(Total)}</h5>
 						</div>
 					</div>
 
 					<div className="col-md-3">
 						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Terkumpul</small>
+						<small>Uang Masuk (Kredit)</small>
 						<h5 className="text-success">
 							{formatRupiah(Terkumpul)}
 						</h5>
@@ -453,7 +453,7 @@ const Iuran = () => {
 
 					<div className="col-md-3">
 						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Belum</small>
+						<small>Uang Keluar (Debit)</small>
 						<h5 className="text-danger">
 							{formatRupiah(BelumTerkumpul)}
 						</h5>
@@ -462,7 +462,7 @@ const Iuran = () => {
 
 					<div className="col-md-3">
 						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Collection Rate</small>
+						<small>Saldo Akhir</small>
 						<h5>{CollectionRate.toFixed(1)}%</h5>
 						</div>
 					</div>
@@ -477,149 +477,9 @@ const Iuran = () => {
 						<Bar dataKey="bayar" fill="#22c55e" />
 					</BarChart>
 				</ResponsiveContainer> */}
-
-				<div className="card p-3 rounded-4 shadow-sm mt-3">
-					<h6 className="fw-bold">Top Tunggakan</h6>
-
-					{ListTunggakan.map((item, i) => (
-						<div key={i} className="d-flex justify-content-between">
-							<span style={{ fontWeight:'bold' }}>{item.nama} ({item.cluster})</span>
-							<span className="text-danger">
-								{formatRupiah(item.total)}
-							</span>
-						</div>
-					))}
-				</div>
-
-				<div style={{ height:30 }} />
-
-				<div className="filter-container">
-					<input
-						type="text"
-						className="filter-input"
-						placeholder="🔍 Cari Order ID / Transaksi ID / Nama Warga / Cluster"
-						value={GlobalSearch}
-						onChange={(e) => setGlobalSearch(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								setCurrentPage(1);
-								getListIuran("");
-							}
-						}}
-					/>
-
-					<select
-						className="filter-select"
-						value={FilterStatus}
-						onChange={(e) => {
-							setFilterStatus(e.target.value)
-						}}
-					>
-						<option value="">Status Transaksi</option>
-						<option value="settlement">Settlement</option>
-						<option value="pending">Pending</option>
-					</select>
-
-					<input
-						type="month"
-						className="filter-input"
-						value={FilterBulan}
-						onChange={(e) => setFilterBulan(e.target.value)}
-					/>
-
-					<button
-						className="btn-filter"
-						onClick={() => {
-							setCurrentPage(1)
-							getListIuran("")
-						}}
-					>
-						Filter
-					</button>
-
-					<button
-						className="btn-reset"
-						onClick={() => {
-							setCurrentPage(1)
-							setGlobalSearch("")
-							setFilterStatus("")
-							setFilterBulan("")
-							getListIuran("reset")
-						}}
-					>
-						Reset
-					</button>
-
-					<button
-						className="btn-export"
-						onClick={() => {
-							handleExport()
-						}}
-					>
-						<FaFileDownload /> Export Data
-					</button>
-					
-				</div>
-
-				{/* Table */}
-				<div className="table-responsive">
-					<table className="table align-middle">
-						<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
-						<tr>
-							<th>Order ID</th>
-							<th>Transaksi ID</th>
-							<th>Tagihan</th>
-							<th>Biaya Aplikasi</th>
-							<th>Nama</th>
-							<th>No Rumah</th>
-							<th>Cluster</th>
-							<th>Bulan Tagihan</th>
-							<th>Tanggal Bayar</th>
-							<th>Status Transaksi</th>
-							
-						</tr>
-						</thead>
-						<tbody>
-							{ListIuran?.map((item, index) => (
-								<tr key={index}>
-									<td>{item.order_id ? item.order_id : '-'}</td>
-									<td>{item.transaction_id ? item.transaction_id : '-'}</td>
-									<td>{formatRupiah(item.tagihan)}</td>
-									<td>{formatRupiah(item.margin)}</td>
-									<td style={{ fontWeight:'bold' }}>{item.nama_user}</td>
-									<td>{item.nomor_rumah}</td>
-									<td>{item.cluster}</td>
-									<td>{formatBulan(item.bulan_invoice)}</td>
-									<td>{item.tanggal_bayar ? item.tanggal_bayar : '-'}</td>
-									<td>{statusBadge(item.transaction_status)}</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-
-				{/* Footer */}
-				<div className="d-flex justify-content-between align-items-center mt-3">
-					{/* <small className="text-muted">Total Data : {TotalRecords}</small> */}
-
-					<div style={{ fontWeight:'bold' }}>Total Data : {TotalRecords}</div>
-
-					<div className="d-flex gap-2">
-						<Pagination
-							currentPage={CurrentPage}
-							totalPage={TotalPage}
-							onPageChange={(page) => {
-								if (!LoadingIuran) {
-									setCurrentPage(page);
-								}
-							}}
-						/>
-					</div>
-				</div>
-
 			</div>
 		</div>
 	);
 }
 
-export default Iuran;
+export default SummaryIuran;

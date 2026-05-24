@@ -25,5 +25,4 @@ import CardDashboard from './CardDashboard';
 import ModalDetailTransaksiIPL from './ModalDetailTransaksiIPL';
 import ModalDetailTransaksiIuran from './ModalDetailTransaksiIuran';
 
-
 export { Header, SlideShow, Alert, ModalAddNewHero, ModalUpdateHero, ModalAddNewCategoryDev, ModalUpdateCategoryDev, ModalAddNewImageDev, ModalUpdateImageDev, ModalAddNewOurProduct, ModalUpdateOurProduct, ModalUpdateUpcomingProject, ModalUpdateCompanyOverview, ModalUpdateStatistic, ModalUpdateVisionMision, ModalUpdateLeadershipInitiative, PopupImagePreview, ModalAddNewAwards, ModalUpdateAwards, ModalUpdateCoreValues, ModalUpdateHeaderLogo, ModalUpdateHeaderMenu, Pagination, CardDashboard, ModalDetailTransaksiIPL, ModalDetailTransaksiIuran };

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
 import { Header, Footer, Input, Button, Gap, Pagination } from '../../../components';
-import './iuran.css'
+import './donasi.css'
 import { useDispatch } from 'react-redux';
 import { AlertMessage, paths } from '../../../utils'
 import { historyConfig, generateSignature, fetchStatus } from '../../../utils/functions';
@@ -23,7 +23,7 @@ import {
 	ResponsiveContainer,
 } from "recharts";
 
-const Iuran = () => {
+const Donasi = () => {
     const history = useHistory(historyConfig);
     const dispatch = useDispatch();
     const containerRef = useRef(null);
@@ -31,15 +31,15 @@ const Iuran = () => {
 	const [cookies, setCookie,removeCookie] = useCookies(['user']);
 	const [Name, setName] = useState("")
 
-	const [ListIuran, setListIuran] = useState([])
+	const [ListDonasi, setListDonasi] = useState([])
 	const [ListTunggakan, setListTunggakan] = useState([])
 	const [CurrentPage, setCurrentPage] = useState(1);
 	const [RowPage, setRowPage] = useState(10);
 	const [TotalPage, setTotalPage] = useState(0)
 	const [TotalRecords, setTotalRecords] = useState(0)
 	const [Total, setTotal] = useState(0)
-	const [Terkumpul, setTerkumpul] = useState(0)
-	const [BelumTerkumpul, setBelumTerkumpul] = useState(0)
+	const [TotalSettlement, setTotalSettlement] = useState(0)
+	const [TotalPending, setTotalPending] = useState(0)
 	const [CollectionRate, setCollectionRate] = useState(0)
 
 	const [Loading, setLoading] = useState(false)
@@ -50,7 +50,7 @@ const Iuran = () => {
     const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
     const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
 
-	const [LoadingIuran, setLoadingIuran] = useState(false)
+	const [LoadingDonasi, setLoadingDonasi] = useState(false)
 
 	const [open,setOpen] = useState(true)
 
@@ -80,13 +80,13 @@ const Iuran = () => {
         }else{
             dispatch(setForm("ParamKey",CookieParamKey))
             dispatch(setForm("Username",CookieUsername))
-            dispatch(setForm("PageActive","IURAN"))
+            dispatch(setForm("PageActive","DONASI"))
         }
 
     },[])
 
 	useEffect(() => {
-		getListIuran("");
+		getListDonasi("");
 	}, [CurrentPage]);
 
 	// useEffect(() => {
@@ -146,7 +146,7 @@ const Iuran = () => {
 		setOpen(!open)
 	}
 
-	const getListIuran = (posisi) => {
+	const getListDonasi = (posisi) => {
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
 		var cookieAccessLogin = getCookie("access");
@@ -166,11 +166,8 @@ const Iuran = () => {
 			"username": cookieUsername,
 			"paramkey": cookieParamKey,
 			"method": "SELECT",
-			"jenis_tagihan": 2,
-			"access": cookieAccessLogin,
-			"cluster_id": parseInt(cookieClusterId),
 			"global_search": globalSearch,
-			"transaction_status": filterStatus,
+			"status": filterStatus,
 			"bulan_invoice": filterBulan,
 			"page": CurrentPage,
 			"row_page": RowPage,
@@ -178,9 +175,9 @@ const Iuran = () => {
 			"order": ""
 		});
 
-		setLoadingIuran(true)
+		setLoadingDonasi(true)
 
-		var url = paths.URL_API_ADMIN + 'BillsAnnual';
+		var url = paths.URL_API_ADMIN + 'Donasi';
 		var Signature  = generateSignature(requestBody)
 
 		fetch(url, {
@@ -194,22 +191,16 @@ const Iuran = () => {
 		.then(fetchStatus)
 		.then(response => response.json())
 		.then((data) => {
-			setLoadingIuran(false)
+			setLoadingDonasi(false)
 
-			if (data.error_code === "0") {
-				const collectionRate =
-					data.result_summary.total > 0
-						? (data.result_summary.terkumpul / data.result_summary.total) * 100
-						: 0;
-
-				setListIuran(data.result)
-				setListTunggakan(data.result_top_tunggakan)
+			if (data.error_code == "0") {
+				setListDonasi(data.result)
+				setTotalSettlement(data.total_settlement)
+				setTotalPending(data.total_pending)
+				setCollectionRate(data.collection_rate)
 				setTotalPage(data.total_page)
 				setTotalRecords(data.total_record)
-				setTotal(data.result_summary.total)
-				setTerkumpul(data.result_summary.terkumpul)
-				setBelumTerkumpul(data.result_summary.belum)
-				setCollectionRate(collectionRate)
+				// setTotal(data.result_summary.total)
 				return
 			} else {
 				if (data.error_code === "2") {
@@ -224,7 +215,7 @@ const Iuran = () => {
 			}
 		})
 		.catch((error) => {
-			setLoadingIuran(false)
+			setLoadingDonasi(false)
 
 			if (error.message === 401) {
 				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
@@ -248,17 +239,17 @@ const Iuran = () => {
 
 	const statusBadge = (status) => {
 		switch (status) {
-			case "settlement":
-				return <div style={{ color:'#84cc16', fontWeight:'bold', fontSize:15 }}>{status}</div>
-			case "pending":
-				return <div style={{ color:'orange', fontWeight:'bold', fontSize:15 }}>{status}</div>
+			case 1:
+				return <div style={{ color:'#84cc16', fontWeight:'bold', fontSize:15 }}>Aktif</div>
+			case 0:
+				return <div style={{ color:'red', fontWeight:'bold', fontSize:15 }}>Tidak Aktif</div>
 			default:
 				return null;
 		}
 	};
 
 	const handleExport = () => {
-		const formatted = ListIuran.map((item) => ({
+		const formatted = ListDonasi.map((item) => ({
 			"Order ID": item.order_id || "-",
 			"Transaksi ID": item.transaction_id || "-",
 			"Nama": item.nama_user,
@@ -278,7 +269,7 @@ const Iuran = () => {
 		const year = now.getFullYear();
 		const dateFinal = `${day}-${month}-${year}`;
 
-		exportToExcel(formatted, "export-data-iuran-"+dateFinal);
+		exportToExcel(formatted, "export-data-donasi-"+dateFinal);
 	};
 
 	const exportToExcel = (data, fileName = "data") => {
@@ -315,11 +306,11 @@ const Iuran = () => {
 		});
 	};
 
-	// ---------- SUMMARY IURAN ----------
+	// ---------- SUMMARY DONASI ----------
 	// 2. DATA PER BULAN
 	const perBulanMap = {};
 
-	ListIuran.forEach((item) => {
+	ListDonasi.forEach((item) => {
 		const bulan = item.bulan_invoice;
 
 		if (!perBulanMap[bulan]) {
@@ -344,7 +335,7 @@ const Iuran = () => {
 	// 4. PER CLUSTER
 	const clusterMap = {};
 
-	ListIuran.forEach((item) => {
+	ListDonasi.forEach((item) => {
 		const cluster = item.cluster;
 
 		if (!clusterMap[cluster]) {
@@ -365,7 +356,13 @@ const Iuran = () => {
 	});
 
 	const clusterData = Object.values(clusterMap);
-	// ---------- END OF SUMMARY IURAN ----------
+	// ---------- END OF SUMMARY DONASI ----------
+
+	const handleDetailDonasi = (id) => {
+		console.log(id)
+		setCookie('varCookieDonasiId', id, {path: '/'})
+		window.location.href = "/admin/donasi-detail"
+	}
     
     return (
 		<div className="container-fluid p-4 min-vh-100">
@@ -430,65 +427,35 @@ const Iuran = () => {
 				<div className="d-flex justify-content-between align-items-center mb-3">
 					<div className="d-flex justify-content-between align-items-center gap-2">
 						<FaMoneyBillWheat />
-						<h5 className="mb-0 fw-bold">Iuran Warga</h5>
+						<h5 className="mb-0 fw-bold">List Donasi</h5>
 					</div>
 				</div>
 
 				<div className="row mb-3">
 					<div className="col-md-3">
 						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Total Tagihan</small>
-						<h5>{formatRupiah(Total)}</h5>
-						</div>
-					</div>
-
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Terkumpul</small>
+						<small>Total Donasi Terkumpul</small>
 						<h5 className="text-success">
-							{formatRupiah(Terkumpul)}
+							{formatRupiah(TotalSettlement)}
 						</h5>
 						</div>
 					</div>
 
 					<div className="col-md-3">
 						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Belum</small>
-						<h5 className="text-danger">
-							{formatRupiah(BelumTerkumpul)}
+						<small>Total Donasi Pending</small>
+						<h5 className="text-warning">
+							{formatRupiah(TotalPending)}
 						</h5>
 						</div>
 					</div>
 
 					<div className="col-md-3">
 						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Collection Rate</small>
+						<small>Collection Rate Donasi</small>
 						<h5>{CollectionRate.toFixed(1)}%</h5>
 						</div>
 					</div>
-				</div>
-
-				{/* <ResponsiveContainer width="100%" height={300}>
-					<BarChart data={chartData}>
-						<XAxis dataKey="bulan" />
-						<YAxis />
-						<Tooltip />
-						<Bar dataKey="total" fill="#e5e7eb" />
-						<Bar dataKey="bayar" fill="#22c55e" />
-					</BarChart>
-				</ResponsiveContainer> */}
-
-				<div className="card p-3 rounded-4 shadow-sm mt-3">
-					<h6 className="fw-bold">Top Tunggakan</h6>
-
-					{ListTunggakan.map((item, i) => (
-						<div key={i} className="d-flex justify-content-between">
-							<span style={{ fontWeight:'bold' }}>{item.nama} ({item.cluster})</span>
-							<span className="text-danger">
-								{formatRupiah(item.total)}
-							</span>
-						</div>
-					))}
 				</div>
 
 				<div style={{ height:30 }} />
@@ -497,13 +464,13 @@ const Iuran = () => {
 					<input
 						type="text"
 						className="filter-input"
-						placeholder="🔍 Cari Order ID / Transaksi ID / Nama Warga / Cluster"
+						placeholder="🔍 Cari Donasi / Cluster"
 						value={GlobalSearch}
 						onChange={(e) => setGlobalSearch(e.target.value)}
 						onKeyDown={(e) => {
 							if (e.key === "Enter") {
 								setCurrentPage(1);
-								getListIuran("");
+								getListDonasi("");
 							}
 						}}
 					/>
@@ -515,9 +482,9 @@ const Iuran = () => {
 							setFilterStatus(e.target.value)
 						}}
 					>
-						<option value="">Status Transaksi</option>
-						<option value="settlement">Settlement</option>
-						<option value="pending">Pending</option>
+						<option value="">Status Donasi</option>
+						<option value="1">Aktif</option>
+						<option value="0">Tidak Aktif</option>
 					</select>
 
 					<input
@@ -530,8 +497,9 @@ const Iuran = () => {
 					<button
 						className="btn-filter"
 						onClick={() => {
+							setListDonasi([])
 							setCurrentPage(1)
-							getListIuran("")
+							getListDonasi("")
 						}}
 					>
 						Filter
@@ -544,7 +512,7 @@ const Iuran = () => {
 							setGlobalSearch("")
 							setFilterStatus("")
 							setFilterBulan("")
-							getListIuran("reset")
+							getListDonasi("reset")
 						}}
 					>
 						Reset
@@ -566,34 +534,32 @@ const Iuran = () => {
 					<table className="table align-middle">
 						<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
 						<tr>
-							<th>Order ID</th>
-							<th>Transaksi ID</th>
-							<th>Tagihan</th>
-							<th>Biaya Aplikasi</th>
-							<th>Nama</th>
-							<th>No Rumah</th>
+							<th style={{ width:150 }}>Nama Donasi</th>
 							<th>Cluster</th>
-							<th>Bulan Tagihan</th>
-							<th>Tanggal Bayar</th>
-							<th>Status Transaksi</th>
-							
+							<th>Tanggal Mulai</th>
+							<th>Tanggal Selesai</th>
+							<th style={{ width:300 }}>Keterangan Donasi</th>
+							<th>Donasi Minimal</th>
+							<th>Status Donasi</th>
 						</tr>
 						</thead>
 						<tbody>
-							{ListIuran?.map((item, index) => (
-								<tr key={index}>
-									<td>{item.order_id ? item.order_id : '-'}</td>
-									<td>{item.transaction_id ? item.transaction_id : '-'}</td>
-									<td>{formatRupiah(item.tagihan)}</td>
-									<td>{formatRupiah(item.margin)}</td>
-									<td style={{ fontWeight:'bold' }}>{item.nama_user}</td>
-									<td>{item.nomor_rumah}</td>
+							{ListDonasi.length > 0 ? ListDonasi?.map((item, index) => (
+								<tr key={index} onClick={() => handleDetailDonasi(item.id)} style={{ cursor:'pointer' }}>
+									<td>{item.nama_donasi}</td>
 									<td>{item.cluster}</td>
-									<td>{formatBulan(item.bulan_invoice)}</td>
-									<td>{item.tanggal_bayar ? item.tanggal_bayar : '-'}</td>
-									<td>{statusBadge(item.transaction_status)}</td>
+									<td>{item.tanggal_mulai_donasi}</td>
+									<td>{item.tanggal_selesai_donasi}</td>
+									<td>{item.keterangan_donasi}</td>
+									<td>{formatRupiah(item.donasi_minimal)}</td>
+									<td>{statusBadge(item.status)}</td>
 								</tr>
-							))}
+							))
+							:
+							<tr>
+								<td colspan={7} style={{ color:'red', fontWeight:'bold', textAlign:'center' }}>Donasi tidak ditemukan</td>
+							</tr>
+							}
 						</tbody>
 					</table>
 				</div>
@@ -609,7 +575,7 @@ const Iuran = () => {
 							currentPage={CurrentPage}
 							totalPage={TotalPage}
 							onPageChange={(page) => {
-								if (!LoadingIuran) {
+								if (!LoadingDonasi) {
 									setCurrentPage(page);
 								}
 							}}
@@ -622,4 +588,4 @@ const Iuran = () => {
 	);
 }
 
-export default Iuran;
+export default Donasi;

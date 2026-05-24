@@ -4,14 +4,14 @@ import { useHistory } from 'react-router-dom';
 import { Header, Footer, Input, Button, Gap, Pagination } from '../../../components';
 import './data-warga.css'
 import { useDispatch } from 'react-redux';
-import { AlertMessage, paths } from '../../../utils'
-import { historyConfig, generateSignature, fetchStatus } from '../../../utils/functions';
-import { setForm } from '../../../redux';
+import { AlertMessage, paths } from '../../../../utils'
+import { historyConfig, generateSignature, fetchStatus } from '../../../../utils/functions';
+import { setForm } from '../../../../redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DataTable from 'react-data-table-component';
 import SweetAlert from 'react-bootstrap-sweetalert';
-import { FaMoneyBillWheat } from 'react-icons/fa6';
-import { FaFileDownload } from 'react-icons/fa';
+import { FaHouse, FaMoneyBillWheat, FaPeopleGroup } from 'react-icons/fa6';
+import { FaFileDownload, FaSave } from 'react-icons/fa';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import {
@@ -22,6 +22,7 @@ import {
 	Tooltip,
 	ResponsiveContainer,
 } from "recharts";
+import LoadingLogo from '../../../components/molecules/LoadingLogo';
 
 const DataWarga = () => {
     const history = useHistory(historyConfig);
@@ -32,17 +33,15 @@ const DataWarga = () => {
 	const [Name, setName] = useState("")
 
 	const [ListIuran, setListIuran] = useState([])
-	const [ListTunggakan, setListTunggakan] = useState([])
+	const [ListDataSheet, setListDataSheet] = useState([])
+	const [ListDataWarga, setListDataWarga] = useState([])
+	
 	const [CurrentPage, setCurrentPage] = useState(1);
 	const [RowPage, setRowPage] = useState(10);
 	const [TotalPage, setTotalPage] = useState(0)
 	const [TotalRecords, setTotalRecords] = useState(0)
-	const [Total, setTotal] = useState(0)
-	const [Terkumpul, setTerkumpul] = useState(0)
-	const [BelumTerkumpul, setBelumTerkumpul] = useState(0)
-	const [CollectionRate, setCollectionRate] = useState(0)
-
-	const [Loading, setLoading] = useState(false)
+	const [TotalCluster, setTotalCluster] = useState(0)
+	const [TotalWarga, setTotalWarga] = useState(0)
 	
 	const [ShowAlert, setShowAlert] = useState(true)
     const [SessionMessage, setSessionMessage] = useState("")
@@ -50,15 +49,13 @@ const DataWarga = () => {
     const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
     const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
 
-	const [LoadingIuran, setLoadingIuran] = useState(false)
+	const [LoadingDataWarga, setLoadingDataWarga] = useState(false)
+	const [LoadingPreview, setLoadingPreview] = useState(false)
+	const [LoadingInsertDataWarga, setLoadingInsertDataWarga] = useState(false)
 
 	const [open,setOpen] = useState(true)
 
-	const [TotalCluster, setTotalCluster] = useState(0)
-	const [TotalRumah, setTotalRumah] = useState(0)
-	const [TotalWarga, setTotalWarga] = useState(0)
-	const [TotalTransaksi, setTotalTransaksi] = useState(0)
-	const [TotalPembayaran, setTotalPembayaran] = useState(0)
+	
 
 	const [GlobalSearch, setGlobalSearch] = useState('');
 	const [FilterStatus, setFilterStatus] = useState('');
@@ -66,8 +63,6 @@ const DataWarga = () => {
 
 	useEffect(() => {
         window.scrollTo(0, 0)
-
-		console.log("MASUK IURAN")
 
         var CookieNama = getCookie("nama");
         setName(CookieNama)
@@ -80,13 +75,15 @@ const DataWarga = () => {
         }else{
             dispatch(setForm("ParamKey",CookieParamKey))
             dispatch(setForm("Username",CookieUsername))
-            dispatch(setForm("PageActive","IURAN"))
+            dispatch(setForm("PageActive","DATA_WARGA"))
         }
+
+		getListDataWarga()
 
     },[])
 
 	useEffect(() => {
-		getListIuran("");
+		// getListIuran("");
 	}, [CurrentPage]);
 
 	// useEffect(() => {
@@ -108,6 +105,8 @@ const DataWarga = () => {
 			var accessName = LongSecretCookie[3];
 			var cluster = LongSecretCookie[4];
 			var clusterId = LongSecretCookie[5];
+			var sheetId = LongSecretCookie[6];
+			var sheetName = LongSecretCookie[7];
 		
 			if (tipe === "username") {
 				return username;
@@ -121,6 +120,10 @@ const DataWarga = () => {
 				return cluster;
 			} else if (tipe === "cluster_id") {
 				return clusterId;
+			} else if (tipe === "sheet_id") {
+				return sheetId;
+			} else if (tipe === "sheet_name") {
+				return sheetName;
 			} else {
 				return null;
 			}
@@ -146,7 +149,7 @@ const DataWarga = () => {
 		setOpen(!open)
 	}
 
-	const getListIuran = (posisi) => {
+	const getListDataWarga = async (posisi) => {
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
 		var cookieAccessLogin = getCookie("access");
@@ -155,32 +158,26 @@ const DataWarga = () => {
 
 		let globalSearch = GlobalSearch
 		let filterStatus = FilterStatus
-		let filterBulan = FilterBulan
 		if (posisi == "reset") {
 			globalSearch = ""
 			filterStatus = ""
-			filterBulan = ""
 		}
 
 		var requestBody = JSON.stringify({
 			"username": cookieUsername,
 			"paramkey": cookieParamKey,
 			"method": "SELECT",
-			"jenis_tagihan": 2,
-			"access": cookieAccessLogin,
-			"cluster_id": parseInt(cookieClusterId),
 			"global_search": globalSearch,
-			"transaction_status": filterStatus,
-			"bulan_invoice": filterBulan,
+			"status_aktif": filterStatus,
 			"page": CurrentPage,
 			"row_page": RowPage,
 			"order_by": "",
 			"order": ""
 		});
 
-		setLoadingIuran(true)
+		setLoadingDataWarga(true)
 
-		var url = paths.URL_API_ADMIN + 'BillsAnnual';
+		var url = paths.URL_API_ADMIN + 'DataWarga';
 		var Signature  = generateSignature(requestBody)
 
 		fetch(url, {
@@ -194,22 +191,14 @@ const DataWarga = () => {
 		.then(fetchStatus)
 		.then(response => response.json())
 		.then((data) => {
-			setLoadingIuran(false)
+			setLoadingDataWarga(false)
 
-			if (data.error_code === "0") {
-				const collectionRate =
-					data.result_summary.total > 0
-						? (data.result_summary.terkumpul / data.result_summary.total) * 100
-						: 0;
-
-				setListIuran(data.result)
-				setListTunggakan(data.result_top_tunggakan)
-				setTotalPage(data.total_page)
+			if (data.error_code == "0") {
+				setListDataWarga(data.result)
 				setTotalRecords(data.total_record)
-				setTotal(data.result_summary.total)
-				setTerkumpul(data.result_summary.terkumpul)
-				setBelumTerkumpul(data.result_summary.belum)
-				setCollectionRate(collectionRate)
+				setTotalPage(data.total_page)
+				setTotalCluster(data.total_cluster)
+				setTotalWarga(data.total_record)
 				return
 			} else {
 				if (data.error_code === "2") {
@@ -224,7 +213,7 @@ const DataWarga = () => {
 			}
 		})
 		.catch((error) => {
-			setLoadingIuran(false)
+			setLoadingDataWarga(false)
 
 			if (error.message === 401) {
 				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
@@ -236,7 +225,7 @@ const DataWarga = () => {
 				return false;
 			}
 		});
-	}
+	};
 
 	const formatRupiah = (value) => {
 		return new Intl.NumberFormat("id-ID", {
@@ -368,257 +357,234 @@ const DataWarga = () => {
 	// ---------- END OF SUMMARY IURAN ----------
     
     return (
-		<div className="container-fluid p-4 min-vh-100">
-			<div className="card border-0 shadow rounded-4 p-3">
+		<>
+			{LoadingDataWarga && <LoadingLogo />}
 
-				{SessionMessage !== "" ?
-				<SweetAlert 
-					warning 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						logout()
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{SessionMessage}
-				</SweetAlert>
-				:""}
-	
-				{SuccessMessage !== "" ?
-				<SweetAlert 
-					success 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setSuccessMessage("")
-						history.replace("/dashboard")
-					}}
-					btnSize="sm">
-					{SuccessMessage}
-				</SweetAlert>
-				:""}          
-	
-				{ErrorMessageAlert !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlert("")
-					}}
-					btnSize="sm">
-					{ErrorMessageAlert}
-				</SweetAlert>
-				:""}
-	
-				{ErrorMessageAlertLogout !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlertLogout("")
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{ErrorMessageAlertLogout}
-				</SweetAlert>
-				:""}
+			<div className="container-fluid p-4 min-vh-100">
+				<div className="card border-0 shadow rounded-4 p-3">
 
-				{/* Header */}
-				<div className="d-flex justify-content-between align-items-center mb-3">
-					<div className="d-flex justify-content-between align-items-center gap-2">
-						<FaMoneyBillWheat />
-						<h5 className="mb-0 fw-bold">Iuran Warga</h5>
-					</div>
-				</div>
+					{SessionMessage !== "" ?
+					<SweetAlert 
+						warning 
+						show={ShowAlert}
+						onConfirm={() => {
+							setShowAlert(false)
+							logout()
+							window.location.href="/admin/login";
+						}}
+						btnSize="sm">
+						{SessionMessage}
+					</SweetAlert>
+					:""}
+		
+					{SuccessMessage !== "" ?
+					<SweetAlert 
+						success 
+						show={ShowAlert}
+						onConfirm={() => {
+							setShowAlert(false)
+							setSuccessMessage("")
+							history.replace("/admin/data-warga")
+						}}
+						btnSize="sm">
+						{SuccessMessage}
+					</SweetAlert>
+					:""}          
+		
+					{ErrorMessageAlert !== "" ?
+					<SweetAlert 
+						danger 
+						show={ShowAlert}
+						onConfirm={() => {
+							setShowAlert(false)
+							setErrorMessageAlert("")
+						}}
+						btnSize="sm">
+						{ErrorMessageAlert}
+					</SweetAlert>
+					:""}
+		
+					{ErrorMessageAlertLogout !== "" ?
+					<SweetAlert 
+						danger 
+						show={ShowAlert}
+						onConfirm={() => {
+							setShowAlert(false)
+							setErrorMessageAlertLogout("")
+							window.location.href="/admin/login";
+						}}
+						btnSize="sm">
+						{ErrorMessageAlertLogout}
+					</SweetAlert>
+					:""}
 
-				<div className="row mb-3">
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Total Tagihan</small>
-						<h5>{formatRupiah(Total)}</h5>
+					{/* Header */}
+					<div className="d-flex justify-content-between align-items-center mb-3">
+						<div className="d-flex justify-content-between align-items-center gap-2">
+							<FaPeopleGroup />
+							<h5 className="mb-0 fw-bold">Data Warga</h5>
 						</div>
 					</div>
 
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Terkumpul</small>
-						<h5 className="text-success">
-							{formatRupiah(Terkumpul)}
-						</h5>
+					<div className="row mb-3">
+						<div className="col-md-3">
+							<div className="card p-3 rounded-4 shadow-sm">
+								<small>Total Cluster</small>
+								<div className="d-flex justify-content-start align-items-center gap-2">
+									<FaHouse />
+									<h5>{TotalCluster}</h5>
+								</div>
+							</div>
+						</div>
+
+						<div className="col-md-3">
+							<div className="card p-3 rounded-4 shadow-sm">
+							<small>Total Warga</small>
+								<div className="d-flex justify-content-start align-items-center gap-2">
+									<FaPeopleGroup />
+									<h5>{TotalWarga}</h5>
+								</div>
+							</div>
 						</div>
 					</div>
 
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Belum</small>
-						<h5 className="text-danger">
-							{formatRupiah(BelumTerkumpul)}
-						</h5>
-						</div>
-					</div>
+					<div style={{ height:30 }} />
 
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Collection Rate</small>
-						<h5>{CollectionRate.toFixed(1)}%</h5>
-						</div>
-					</div>
-				</div>
-
-				{/* <ResponsiveContainer width="100%" height={300}>
-					<BarChart data={chartData}>
-						<XAxis dataKey="bulan" />
-						<YAxis />
-						<Tooltip />
-						<Bar dataKey="total" fill="#e5e7eb" />
-						<Bar dataKey="bayar" fill="#22c55e" />
-					</BarChart>
-				</ResponsiveContainer> */}
-
-				<div className="card p-3 rounded-4 shadow-sm mt-3">
-					<h6 className="fw-bold">Top Tunggakan</h6>
-
-					{ListTunggakan.map((item, i) => (
-						<div key={i} className="d-flex justify-content-between">
-							<span style={{ fontWeight:'bold' }}>{item.nama} ({item.cluster})</span>
-							<span className="text-danger">
-								{formatRupiah(item.total)}
-							</span>
-						</div>
-					))}
-				</div>
-
-				<div style={{ height:30 }} />
-
-				<div className="filter-container">
-					<input
-						type="text"
-						className="filter-input"
-						placeholder="🔍 Cari Order ID / Transaksi ID / Nama Warga / Cluster"
-						value={GlobalSearch}
-						onChange={(e) => setGlobalSearch(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								setCurrentPage(1);
-								getListIuran("");
-							}
-						}}
-					/>
-
-					<select
-						className="filter-select"
-						value={FilterStatus}
-						onChange={(e) => {
-							setFilterStatus(e.target.value)
-						}}
-					>
-						<option value="">Status Transaksi</option>
-						<option value="settlement">Settlement</option>
-						<option value="pending">Pending</option>
-					</select>
-
-					<input
-						type="month"
-						className="filter-input"
-						value={FilterBulan}
-						onChange={(e) => setFilterBulan(e.target.value)}
-					/>
-
-					<button
-						className="btn-filter"
-						onClick={() => {
-							setCurrentPage(1)
-							getListIuran("")
-						}}
-					>
-						Filter
-					</button>
-
-					<button
-						className="btn-reset"
-						onClick={() => {
-							setCurrentPage(1)
-							setGlobalSearch("")
-							setFilterStatus("")
-							setFilterBulan("")
-							getListIuran("reset")
-						}}
-					>
-						Reset
-					</button>
-
-					<button
-						className="btn-export"
-						onClick={() => {
-							handleExport()
-						}}
-					>
-						<FaFileDownload /> Export Data
-					</button>
-					
-				</div>
-
-				{/* Table */}
-				<div className="table-responsive">
-					<table className="table align-middle">
-						<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
-						<tr>
-							<th>Order ID</th>
-							<th>Transaksi ID</th>
-							<th>Tagihan</th>
-							<th>Biaya Aplikasi</th>
-							<th>Nama</th>
-							<th>No Rumah</th>
-							<th>Cluster</th>
-							<th>Bulan Tagihan</th>
-							<th>Tanggal Bayar</th>
-							<th>Status Transaksi</th>
-							
-						</tr>
-						</thead>
-						<tbody>
-							{ListIuran?.map((item, index) => (
-								<tr key={index}>
-									<td>{item.order_id ? item.order_id : '-'}</td>
-									<td>{item.transaction_id ? item.transaction_id : '-'}</td>
-									<td>{formatRupiah(item.tagihan)}</td>
-									<td>{formatRupiah(item.margin)}</td>
-									<td style={{ fontWeight:'bold' }}>{item.nama_user}</td>
-									<td>{item.nomor_rumah}</td>
-									<td>{item.cluster}</td>
-									<td>{formatBulan(item.bulan_invoice)}</td>
-									<td>{item.tanggal_bayar ? item.tanggal_bayar : '-'}</td>
-									<td>{statusBadge(item.transaction_status)}</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-
-				{/* Footer */}
-				<div className="d-flex justify-content-between align-items-center mt-3">
-					{/* <small className="text-muted">Total Data : {TotalRecords}</small> */}
-
-					<div style={{ fontWeight:'bold' }}>Total Data : {TotalRecords}</div>
-
-					<div className="d-flex gap-2">
-						<Pagination
-							currentPage={CurrentPage}
-							totalPage={TotalPage}
-							onPageChange={(page) => {
-								if (!LoadingIuran) {
-									setCurrentPage(page);
+					<div className="filter-container">
+						<input
+							type="text"
+							className="filter-input"
+							placeholder="🔍 Cari Cluster / Nama"
+							value={GlobalSearch}
+							onChange={(e) => setGlobalSearch(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									setCurrentPage(1);
+									getListDataWarga("");
 								}
 							}}
 						/>
-					</div>
-				</div>
 
+						<select
+							className="filter-select"
+							value={FilterStatus}
+							onChange={(e) => {
+								setFilterStatus(e.target.value)
+							}}
+						>
+							<option value="">Status Warga</option>
+							<option value="1">Aktif</option>
+							<option value="0">Tidak Aktif</option>
+						</select>
+
+						<button
+							className="btn-filter"
+							onClick={() => {
+								setListDataWarga([])
+								setCurrentPage(1)
+								getListDataWarga("")
+							}}
+						>
+							Filter
+						</button>
+
+						<button
+							className="btn-reset"
+							onClick={() => {
+								setCurrentPage(1)
+								setGlobalSearch("")
+								setFilterStatus("")
+								setFilterBulan("")
+								getListDataWarga("reset")
+							}}
+						>
+							Reset
+						</button>
+
+						<button
+							className="btn-export"
+							onClick={() => {
+								window.location.href = '/admin/data-warga-import'
+							}}
+						>
+							<FaFileDownload /> Import Data From Sheets
+						</button>
+						
+					</div>
+
+					{/* Table */}
+					<div className="table-responsive">
+						<table className="table align-middle">
+							<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
+							<tr>
+								<th>Cluster</th>
+								<th>Nama</th>
+								<th>Nomor HP</th>
+								<th>Email</th>
+								<th>Tanggal Lahir</th>
+								<th>Role</th>
+								<th>Alamat</th>
+								<th>Nomor Rumah</th>
+								<th>Luas Tanah</th>
+								<th>Luas Bangunan</th>
+								<th>Agama</th>
+								<th>Pekerjaan</th>
+								<th>Jenis Kelamin</th>
+								<th>Status Serah Terima</th>
+								<th>Status Ditempati</th>
+							</tr>
+							</thead>
+							<tbody>
+								{ListDataWarga?.length > 0 ? ListDataWarga?.map((item, index) => (
+									<tr key={index}>
+										<td>{item.cluster}</td>
+										<td>{item.nama}</td>
+										<td>{item.no_hp}</td>
+										<td>{item.email}</td>
+										<td>{item.tanggal_lahir}</td>
+										<td>{item.role}</td>
+										<td>{item.alamat}</td>
+										<td>{item.nomor_rumah}</td>
+										<td>{item.luas_tanah}</td>
+										<td>{item.luas_bangunan}</td>
+										<td>{item.agama}</td>
+										<td>{item.pekerjaan}</td>
+										<td>{item.jenis_kelamin}</td>
+										<td>{item.status_serah_terima_teks}</td>
+										<td>{item.status_ditempati_teks}</td>
+									</tr>
+								))
+								:
+								<tr>
+									<td colspan={15} style={{ color:'red', fontWeight:'bold', textAlign:'center' }}>Data tidak ditemukan</td>
+								</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+
+					{/* Footer */}
+					<div className="d-flex justify-content-between align-items-center mt-3">
+						{/* <small className="text-muted">Total Data : {TotalRecords}</small> */}
+
+						<div style={{ fontWeight:'bold' }}>Total Data : {TotalRecords}</div>
+
+						<div className="d-flex gap-2">
+							<Pagination
+								currentPage={CurrentPage}
+								totalPage={TotalPage}
+								onPageChange={(page) => {
+									if (!LoadingDataWarga) {
+										setCurrentPage(page);
+									}
+								}}
+							/>
+						</div>
+					</div>
+
+				</div>
 			</div>
-		</div>
+		</>
 	);
 }
 
