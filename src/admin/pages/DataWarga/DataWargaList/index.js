@@ -23,6 +23,7 @@ import {
 	ResponsiveContainer,
 } from "recharts";
 import LoadingLogo from '../../../components/molecules/LoadingLogo';
+import { IconCheck } from '../../../assets';
 
 const DataWarga = () => {
     const history = useHistory(historyConfig);
@@ -71,7 +72,7 @@ const DataWarga = () => {
         var CookieUsername = getCookie("username");
         
         if (CookieParamKey === null || CookieParamKey === "" || CookieUsername === null || CookieUsername === ""){
-            window.location.href="admin/login";
+            window.location.href="/admin/login";
         }else{
             dispatch(setForm("ParamKey",CookieParamKey))
             dispatch(setForm("Username",CookieUsername))
@@ -152,9 +153,6 @@ const DataWarga = () => {
 	const getListDataWarga = async (posisi) => {
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
-		var cookieAccessLogin = getCookie("access");
-		var cookieCluster = getCookie("cluster");
-		var cookieClusterId = getCookie("cluster_id");
 
 		let globalSearch = GlobalSearch
 		let filterStatus = FilterStatus
@@ -304,57 +302,9 @@ const DataWarga = () => {
 		});
 	};
 
-	// ---------- SUMMARY IURAN ----------
-	// 2. DATA PER BULAN
-	const perBulanMap = {};
+	const handleImportFromSheet = () => {
 
-	ListIuran.forEach((item) => {
-		const bulan = item.bulan_invoice;
-
-		if (!perBulanMap[bulan]) {
-			perBulanMap[bulan] = {
-				bulan,
-				total: 0,
-				bayar: 0,
-			};
-		}
-
-		const nominal = Number(item.tagihan || 0);
-
-		perBulanMap[bulan].total += nominal;
-
-		if (item.transaction_status === "settlement") {
-			perBulanMap[bulan].bayar += nominal;
-		}
-	});
-
-	const chartData = Object.values(perBulanMap);
-
-	// 4. PER CLUSTER
-	const clusterMap = {};
-
-	ListIuran.forEach((item) => {
-		const cluster = item.cluster;
-
-		if (!clusterMap[cluster]) {
-			clusterMap[cluster] = {
-				cluster,
-				total: 0,
-				bayar: 0,
-			};
-		}
-
-		const nominal = Number(item.tagihan || 0);
-
-		clusterMap[cluster].total += nominal;
-
-		if (item.transaction_status === "settlement") {
-			clusterMap[cluster].bayar += nominal;
-		}
-	});
-
-	const clusterData = Object.values(clusterMap);
-	// ---------- END OF SUMMARY IURAN ----------
+	}
     
     return (
 		<>
@@ -427,6 +377,7 @@ const DataWarga = () => {
 					</div>
 
 					<div className="row mb-3">
+						{getCookie("username") == "superadmin" &&
 						<div className="col-md-3">
 							<div className="card p-3 rounded-4 shadow-sm">
 								<small>Total Cluster</small>
@@ -435,7 +386,7 @@ const DataWarga = () => {
 									<h5>{TotalCluster}</h5>
 								</div>
 							</div>
-						</div>
+						</div>}
 
 						<div className="col-md-3">
 							<div className="card p-3 rounded-4 shadow-sm">
@@ -454,7 +405,7 @@ const DataWarga = () => {
 						<input
 							type="text"
 							className="filter-input"
-							placeholder="🔍 Cari Cluster / Nama"
+							placeholder="🔍 Cari Cluster / Nama Warga"
 							value={GlobalSearch}
 							onChange={(e) => setGlobalSearch(e.target.value)}
 							onKeyDown={(e) => {
@@ -476,6 +427,13 @@ const DataWarga = () => {
 							<option value="1">Aktif</option>
 							<option value="0">Tidak Aktif</option>
 						</select>
+
+						{/* <input
+							type="month"
+							className="filter-input"
+							value={FilterBulan}
+							onChange={(e) => setFilterBulan(e.target.value)}
+						/> */}
 
 						<button
 							className="btn-filter"
@@ -504,54 +462,77 @@ const DataWarga = () => {
 						<button
 							className="btn-export"
 							onClick={() => {
-								window.location.href = '/admin/data-warga-import'
+								handleExport()
 							}}
 						>
-							<FaFileDownload /> Import Data From Sheets
+							<FaFileDownload /> Export Data
 						</button>
-						
-					</div>
 
-					{/* Table */}
+						<button
+							className="btn-export"
+							onClick={() => {
+								handleExport()
+							}}
+						>
+							<FaFileDownload /> Export Data
+						</button>
+					</div>
+				
 					<div className="table-responsive">
-						<table className="table align-middle">
+						<table className="table align-top">
 							<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
 							<tr>
 								<th>Cluster</th>
-								<th>Nama</th>
-								<th>Nomor HP</th>
-								<th>Email</th>
-								<th>Tanggal Lahir</th>
-								<th>Role</th>
-								<th>Alamat</th>
-								<th>Nomor Rumah</th>
-								<th>Luas Tanah</th>
-								<th>Luas Bangunan</th>
-								<th>Agama</th>
-								<th>Pekerjaan</th>
-								<th>Jenis Kelamin</th>
-								<th>Status Serah Terima</th>
-								<th>Status Ditempati</th>
+								<th>Detail Warga</th>
+								<th>Detail Rumah</th>
+								<th style={{ textAlign:'center' }}>Serah Terima</th>
+								<th style={{ textAlign:'center' }}>Ditempati</th>
 							</tr>
 							</thead>
 							<tbody>
 								{ListDataWarga?.length > 0 ? ListDataWarga?.map((item, index) => (
 									<tr key={index}>
 										<td>{item.cluster}</td>
-										<td>{item.nama}</td>
-										<td>{item.no_hp}</td>
-										<td>{item.email}</td>
-										<td>{item.tanggal_lahir}</td>
-										<td>{item.role}</td>
-										<td>{item.alamat}</td>
-										<td>{item.nomor_rumah}</td>
-										<td>{item.luas_tanah}</td>
-										<td>{item.luas_bangunan}</td>
-										<td>{item.agama}</td>
-										<td>{item.pekerjaan}</td>
-										<td>{item.jenis_kelamin}</td>
-										<td>{item.status_serah_terima_teks}</td>
-										<td>{item.status_ditempati_teks}</td>
+										<td>
+											<span style={{ fontWeight:'bold', fontSize:15 }}>{item.nama}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Nomor HP: {item.no_hp ? item.no_hp : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Email: {item.email ? item.email : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Tanggal Lahir: {item.tanggal_lahir ? item.tanggal_lahir : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Jenis Kelamin: {item.jenis_kelamin ? item.jenis_kelamin : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Agama: {item.agama ? item.agama : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Role: {item.role ? item.role : "-"}</span>
+										</td>
+										<td>
+											<span style={{ fontSize:12 }}>Alamat: {item.alamat ? item.alamat : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Nomor Rumah: {item.nomor_rumah ? item.nomor_rumah : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Luas Tanah (m2): {item.luas_tanah ? item.luas_tanah : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Luas Bangunan (m2): {item.luas_bangunan ? item.luas_bangunan : "-"}</span>
+										</td>
+										<td>
+											{item.status_serah_terima == 1 ?
+											<div style={{ display:'flex', justifyContent:'center' }}>
+												<img src={IconCheck} alt="logo" style={{ height:30, width:30 }}  /> 
+											</div>
+											:
+											<div style={{ display:'flex', justifyContent:'center' }}>-</div>}
+										</td>
+										<td>
+											{item.status_ditempati == 1 ?
+											<div style={{ display:'flex', justifyContent:'center' }}>
+												<img src={IconCheck} alt="logo" style={{ height:30, width:30 }}  /> 
+											</div>
+											:
+											<div style={{ display:'flex', justifyContent:'center' }}>-</div>}
+										</td>
 									</tr>
 								))
 								:

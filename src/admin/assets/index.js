@@ -24,6 +24,8 @@ import IconUserLeftMenu from './icon/ic_user_left_menu.png';
 
 import IconDownload from './icon/ic_download.png';
 
+import IconCheck from './icon/ic_check.png';
+
 export {
     IconRefresh,
     IconScanProduct,
@@ -42,5 +44,6 @@ export {
     IconBillsLeftMenu,
     IconMasterClusterLeftMenu,
     IconUserLeftMenu,
-    IconDownload
+    IconDownload,
+    IconCheck
 };

@@ -18,6 +18,7 @@ import DataWarga from '../DataWarga/DataWargaList'
 import DataWargaImport from '../DataWarga/DataWargaImport'
 import FasilitasList from '../Fasilitas/FasilitasList'
 import FasilitasBooking from '../Fasilitas/FasilitasBooking'
+import LaporanPengaduanList from '../LaporanPengaduan/LaporanPengaduanList'
 
 const MainApp = () => {
     const history = useHistory(historyConfig);
@@ -108,6 +109,9 @@ const MainApp = () => {
                                 </Route>
                                 <Route path="/fasilitas-booking">
                                     <FasilitasBooking />
+                                </Route>
+                                <Route path="/laporan-pengaduan">
+                                    <LaporanPengaduanList />
                                 </Route>
                             </Switch>
                         </BrowserRouter>

@@ -68,8 +68,6 @@ const FasilitasList = () => {
 	useEffect(() => {
         window.scrollTo(0, 0)
 
-		console.log("MASUK IURAN")
-
         var CookieNama = getCookie("nama");
         setName(CookieNama)
 
@@ -77,7 +75,7 @@ const FasilitasList = () => {
         var CookieUsername = getCookie("username");
         
         if (CookieParamKey === null || CookieParamKey === "" || CookieUsername === null || CookieUsername === ""){
-            window.location.href="admin/login";
+            window.location.href="/admin/login";
         }else{
             dispatch(setForm("ParamKey",CookieParamKey))
             dispatch(setForm("Username",CookieUsername))
@@ -134,6 +132,9 @@ const FasilitasList = () => {
         removeCookie('varCookie', { path: '/'})
         removeCookie('varMerchantId', { path: '/'})
         removeCookie('varIdVoucher', { path: '/'})
+        removeCookie('varCookieFasilitasId', { path: '/'})
+        removeCookie('varCookieDonasiId', { path: '/'})
+
         dispatch(setForm("ParamKey",''))
         dispatch(setForm("Username",''))
         dispatch(setForm("Name",''))

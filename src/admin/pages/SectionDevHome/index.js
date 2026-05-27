@@ -57,7 +57,7 @@ const SectionDevHome = () => {
         var CookieUsername = getCookie("username");
         
         if (CookieParamKey === null || CookieParamKey === "" || CookieUsername === null || CookieUsername === ""){
-            window.location.href="admin/login";
+            window.location.href="/admin/login";
         }else{
             dispatch(setForm("ParamKey",CookieParamKey))
             dispatch(setForm("Username",CookieUsername))
@@ -76,7 +76,7 @@ const SectionDevHome = () => {
         if(window){
             sessionStorage.clear();
         }
-        window.location.href="admin/login";
+        window.location.href="/admin/login";
     }
 
     const getCookie = (tipe) => {
@@ -103,7 +103,7 @@ const SectionDevHome = () => {
         if (alertState == "session") {
             setShowAlert(false)
             logout()
-            window.location.href="admin/login";
+            window.location.href="/admin/login";
         } else if (alertState == "success") {
             setShowAlert(false)
             setSuccessMessage("")
@@ -114,7 +114,7 @@ const SectionDevHome = () => {
         } else if (alertState == "logout") {
             setShowAlert(false)
             setErrorMessageAlertLogout("")
-            window.location.href="admin/login";
+            window.location.href="/admin/login";
         }
     }
 

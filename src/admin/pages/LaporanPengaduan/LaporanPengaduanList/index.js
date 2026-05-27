@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
 import { Header, Footer, Input, Button, Gap, Pagination } from '../../../components';
-import './donasi.css'
+import './laporan-pengaduan.css'
 import { useDispatch } from 'react-redux';
 import { AlertMessage, paths } from '../../../utils'
 import { historyConfig, generateSignature, fetchStatus } from '../../../utils/functions';
@@ -14,16 +14,9 @@ import { FaMoneyBillWheat } from 'react-icons/fa6';
 import { FaFileDownload } from 'react-icons/fa';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import {
-	BarChart,
-	Bar,
-	XAxis,
-	YAxis,
-	Tooltip,
-	ResponsiveContainer,
-} from "recharts";
+import LoadingLogo from '../../../components/molecules/LoadingLogo';
 
-const Donasi = () => {
+const LaporanPengaduanList = () => {
     const history = useHistory(historyConfig);
     const dispatch = useDispatch();
     const containerRef = useRef(null);
@@ -31,16 +24,16 @@ const Donasi = () => {
 	const [cookies, setCookie,removeCookie] = useCookies(['user']);
 	const [Name, setName] = useState("")
 
-	const [ListDonasi, setListDonasi] = useState([])
-	const [ListTunggakan, setListTunggakan] = useState([])
+	const [ListFasilitas, setListFasilitas] = useState([])
+
 	const [CurrentPage, setCurrentPage] = useState(1);
 	const [RowPage, setRowPage] = useState(10);
 	const [TotalPage, setTotalPage] = useState(0)
 	const [TotalRecords, setTotalRecords] = useState(0)
-	const [Total, setTotal] = useState(0)
-	const [TotalSettlement, setTotalSettlement] = useState(0)
-	const [TotalPending, setTotalPending] = useState(0)
-	const [CollectionRate, setCollectionRate] = useState(0)
+	const [TotalAktif, setTotalAktif] = useState(0)
+	const [TotalTidakAktif, setTotalTidakAktif] = useState(0)
+	const [TotalTersedia, setTotalTersedia] = useState(0)
+	const [TotalTidakTersedia, setTotalTidakTersedia] = useState(0)
 
 	const [Loading, setLoading] = useState(false)
 	
@@ -50,7 +43,7 @@ const Donasi = () => {
     const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
     const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
 
-	const [LoadingDonasi, setLoadingDonasi] = useState(false)
+	const [LoadingFasilitas, setLoadingFasilitas] = useState(false)
 
 	const [open,setOpen] = useState(true)
 
@@ -67,8 +60,6 @@ const Donasi = () => {
 	useEffect(() => {
         window.scrollTo(0, 0)
 
-		console.log("MASUK IURAN")
-
         var CookieNama = getCookie("nama");
         setName(CookieNama)
 
@@ -80,13 +71,12 @@ const Donasi = () => {
         }else{
             dispatch(setForm("ParamKey",CookieParamKey))
             dispatch(setForm("Username",CookieUsername))
-            dispatch(setForm("PageActive","DONASI"))
+            dispatch(setForm("PageActive","LAPORAN_PENGADUAN"))
         }
-
     },[])
 
 	useEffect(() => {
-		getListDonasi("");
+		getListLaporanPengaduan("");
 	}, [CurrentPage]);
 
 	// useEffect(() => {
@@ -133,7 +123,7 @@ const Donasi = () => {
         removeCookie('varCookie', { path: '/'})
         removeCookie('varMerchantId', { path: '/'})
         removeCookie('varIdVoucher', { path: '/'})
-		removeCookie('varCookieFasilitasId', { path: '/'})
+        removeCookie('varCookieFasilitasId', { path: '/'})
         removeCookie('varCookieDonasiId', { path: '/'})
 
         dispatch(setForm("ParamKey",''))
@@ -149,7 +139,7 @@ const Donasi = () => {
 		setOpen(!open)
 	}
 
-	const getListDonasi = (posisi) => {
+	const getListLaporanPengaduan = (posisi) => {
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
 		var cookieAccessLogin = getCookie("access");
@@ -158,11 +148,9 @@ const Donasi = () => {
 
 		let globalSearch = GlobalSearch
 		let filterStatus = FilterStatus
-		let filterBulan = FilterBulan
 		if (posisi == "reset") {
 			globalSearch = ""
 			filterStatus = ""
-			filterBulan = ""
 		}
 
 		var requestBody = JSON.stringify({
@@ -171,16 +159,15 @@ const Donasi = () => {
 			"method": "SELECT",
 			"global_search": globalSearch,
 			"status": filterStatus,
-			"bulan_invoice": filterBulan,
 			"page": CurrentPage,
 			"row_page": RowPage,
 			"order_by": "",
 			"order": ""
 		});
 
-		setLoadingDonasi(true)
+		setLoadingFasilitas(true)
 
-		var url = paths.URL_API_ADMIN + 'Donasi';
+		var url = paths.URL_API_ADMIN + 'LaporanPengaduan';
 		var Signature  = generateSignature(requestBody)
 
 		fetch(url, {
@@ -194,13 +181,14 @@ const Donasi = () => {
 		.then(fetchStatus)
 		.then(response => response.json())
 		.then((data) => {
-			setLoadingDonasi(false)
+			setLoadingFasilitas(false)
 
 			if (data.error_code == "0") {
-				setListDonasi(data.result)
-				setTotalSettlement(data.total_settlement)
-				setTotalPending(data.total_pending)
-				setCollectionRate(data.collection_rate)
+				setListFasilitas(data.result)
+				setTotalAktif(data.total_aktif)
+				setTotalTidakAktif(data.total_tidak_aktif)
+				setTotalTersedia(data.total_tersedia)
+				setTotalTidakTersedia(data.total_tidak_tersedia)
 				setTotalPage(data.total_page)
 				setTotalRecords(data.total_record)
 				// setTotal(data.result_summary.total)
@@ -218,7 +206,7 @@ const Donasi = () => {
 			}
 		})
 		.catch((error) => {
-			setLoadingDonasi(false)
+			setLoadingFasilitas(false)
 
 			if (error.message === 401) {
 				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
@@ -252,7 +240,7 @@ const Donasi = () => {
 	};
 
 	const handleExport = () => {
-		const formatted = ListDonasi.map((item) => ({
+		const formatted = ListFasilitas.map((item) => ({
 			"Order ID": item.order_id || "-",
 			"Transaksi ID": item.transaction_id || "-",
 			"Nama": item.nama_user,
@@ -272,7 +260,7 @@ const Donasi = () => {
 		const year = now.getFullYear();
 		const dateFinal = `${day}-${month}-${year}`;
 
-		exportToExcel(formatted, "export-data-donasi-"+dateFinal);
+		exportToExcel(formatted, "export-data-fasilitas-"+dateFinal);
 	};
 
 	const exportToExcel = (data, fileName = "data") => {
@@ -309,286 +297,248 @@ const Donasi = () => {
 		});
 	};
 
-	// ---------- SUMMARY DONASI ----------
-	// 2. DATA PER BULAN
-	const perBulanMap = {};
-
-	ListDonasi.forEach((item) => {
-		const bulan = item.bulan_invoice;
-
-		if (!perBulanMap[bulan]) {
-			perBulanMap[bulan] = {
-				bulan,
-				total: 0,
-				bayar: 0,
-			};
-		}
-
-		const nominal = Number(item.tagihan || 0);
-
-		perBulanMap[bulan].total += nominal;
-
-		if (item.transaction_status === "settlement") {
-			perBulanMap[bulan].bayar += nominal;
-		}
-	});
-
-	const chartData = Object.values(perBulanMap);
-
-	// 4. PER CLUSTER
-	const clusterMap = {};
-
-	ListDonasi.forEach((item) => {
-		const cluster = item.cluster;
-
-		if (!clusterMap[cluster]) {
-			clusterMap[cluster] = {
-				cluster,
-				total: 0,
-				bayar: 0,
-			};
-		}
-
-		const nominal = Number(item.tagihan || 0);
-
-		clusterMap[cluster].total += nominal;
-
-		if (item.transaction_status === "settlement") {
-			clusterMap[cluster].bayar += nominal;
-		}
-	});
-
-	const clusterData = Object.values(clusterMap);
-	// ---------- END OF SUMMARY DONASI ----------
-
-	const handleDetailDonasi = (id) => {
-		console.log(id)
-		setCookie('varCookieDonasiId', id, {path: '/'})
-		window.location.href = "/admin/donasi-detail"
+	const handleFasilitasBooking = (id) => {
+		setCookie('varCookieFasilitasId', id, {path: '/'})
+		window.location.href = "/admin/fasilitas-booking"
 	}
     
     return (
-		<div className="container-fluid p-4 min-vh-100">
-			<div className="card border-0 shadow rounded-4 p-3">
+		<>
+			{LoadingFasilitas && <LoadingLogo />}
+			
+			<div className="container-fluid p-4 min-vh-100">
+				<div className="card border-0 shadow rounded-4 p-3">
 
-				{SessionMessage !== "" ?
-				<SweetAlert 
-					warning 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						logout()
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{SessionMessage}
-				</SweetAlert>
-				:""}
-	
-				{SuccessMessage !== "" ?
-				<SweetAlert 
-					success 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setSuccessMessage("")
-						history.replace("/dashboard")
-					}}
-					btnSize="sm">
-					{SuccessMessage}
-				</SweetAlert>
-				:""}          
-	
-				{ErrorMessageAlert !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlert("")
-					}}
-					btnSize="sm">
-					{ErrorMessageAlert}
-				</SweetAlert>
-				:""}
-	
-				{ErrorMessageAlertLogout !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlertLogout("")
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{ErrorMessageAlertLogout}
-				</SweetAlert>
-				:""}
+					{SessionMessage !== "" ?
+					<SweetAlert 
+						warning 
+						show={ShowAlert}
+						onConfirm={() => {
+							setShowAlert(false)
+							logout()
+							window.location.href="/admin/login";
+						}}
+						btnSize="sm">
+						{SessionMessage}
+					</SweetAlert>
+					:""}
+		
+					{SuccessMessage !== "" ?
+					<SweetAlert 
+						success 
+						show={ShowAlert}
+						onConfirm={() => {
+							setShowAlert(false)
+							setSuccessMessage("")
+							history.replace("/dashboard")
+						}}
+						btnSize="sm">
+						{SuccessMessage}
+					</SweetAlert>
+					:""}          
+		
+					{ErrorMessageAlert !== "" ?
+					<SweetAlert 
+						danger 
+						show={ShowAlert}
+						onConfirm={() => {
+							setShowAlert(false)
+							setErrorMessageAlert("")
+						}}
+						btnSize="sm">
+						{ErrorMessageAlert}
+					</SweetAlert>
+					:""}
+		
+					{ErrorMessageAlertLogout !== "" ?
+					<SweetAlert 
+						danger 
+						show={ShowAlert}
+						onConfirm={() => {
+							setShowAlert(false)
+							setErrorMessageAlertLogout("")
+							window.location.href="/admin/login";
+						}}
+						btnSize="sm">
+						{ErrorMessageAlertLogout}
+					</SweetAlert>
+					:""}
 
-				{/* Header */}
-				<div className="d-flex justify-content-between align-items-center mb-3">
-					<div className="d-flex justify-content-between align-items-center gap-2">
-						<FaMoneyBillWheat />
-						<h5 className="mb-0 fw-bold">List Donasi</h5>
-					</div>
-				</div>
-
-				<div className="row mb-3">
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Total Donasi Terkumpul</small>
-						<h5 className="text-success">
-							{formatRupiah(TotalSettlement)}
-						</h5>
+					{/* Header */}
+					<div className="d-flex justify-content-between align-items-center mb-3">
+						<div className="d-flex justify-content-between align-items-center gap-2">
+							<FaMoneyBillWheat />
+							<h5 className="mb-0 fw-bold">List Fasilitas</h5>
 						</div>
 					</div>
 
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Total Donasi Pending</small>
-						<h5 className="text-warning">
-							{formatRupiah(TotalPending)}
-						</h5>
+					<div className="row mb-3">
+						<div className="col-md-3">
+							<div className="card p-3 rounded-4 shadow-sm">
+							<small>Fasilitas Aktif</small>
+							<h5 className="text-success">
+								{TotalAktif}
+							</h5>
+							</div>
+						</div>
+
+						<div className="col-md-3">
+							<div className="card p-3 rounded-4 shadow-sm">
+							<small>Fasilitas Tidak Aktif</small>
+							<h5 className="text-success">
+								{TotalTidakAktif}
+							</h5>
+							</div>
+						</div>
+
+						<div className="col-md-3">
+							<div className="card p-3 rounded-4 shadow-sm">
+							<small>Fasilitas Tersedia</small>
+							<h5 className="text-warning">
+								{TotalTersedia}
+							</h5>
+							</div>
+						</div>
+
+						<div className="col-md-3">
+							<div className="card p-3 rounded-4 shadow-sm">
+							<small>Fasilitas Tidak Tersedia</small>
+							<h5 className="text-warning">
+								{TotalTidakTersedia}
+							</h5>
+							</div>
 						</div>
 					</div>
 
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Collection Rate Donasi</small>
-						<h5>{CollectionRate.toFixed(1)}%</h5>
-						</div>
-					</div>
-				</div>
+					<div style={{ height:30 }} />
 
-				<div style={{ height:30 }} />
-
-				<div className="filter-container">
-					<input
-						type="text"
-						className="filter-input"
-						placeholder="🔍 Cari Donasi / Cluster"
-						value={GlobalSearch}
-						onChange={(e) => setGlobalSearch(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								setCurrentPage(1);
-								getListDonasi("");
-							}
-						}}
-					/>
-
-					<select
-						className="filter-select"
-						value={FilterStatus}
-						onChange={(e) => {
-							setFilterStatus(e.target.value)
-						}}
-					>
-						<option value="">Status Donasi</option>
-						<option value="1">Aktif</option>
-						<option value="0">Tidak Aktif</option>
-					</select>
-
-					<input
-						type="month"
-						className="filter-input"
-						value={FilterBulan}
-						onChange={(e) => setFilterBulan(e.target.value)}
-					/>
-
-					<button
-						className="btn-filter"
-						onClick={() => {
-							setListDonasi([])
-							setCurrentPage(1)
-							getListDonasi("")
-						}}
-					>
-						Filter
-					</button>
-
-					<button
-						className="btn-reset"
-						onClick={() => {
-							setCurrentPage(1)
-							setGlobalSearch("")
-							setFilterStatus("")
-							setFilterBulan("")
-							getListDonasi("reset")
-						}}
-					>
-						Reset
-					</button>
-
-					<button
-						className="btn-export"
-						onClick={() => {
-							handleExport()
-						}}
-					>
-						<FaFileDownload /> Export Data
-					</button>
-					
-				</div>
-
-				{/* Table */}
-				<div className="table-responsive">
-					<table className="table align-middle">
-						<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
-						<tr>
-							<th style={{ width:150 }}>Nama Donasi</th>
-							<th>Cluster</th>
-							<th>Tanggal Mulai</th>
-							<th>Tanggal Selesai</th>
-							<th style={{ width:300 }}>Keterangan Donasi</th>
-							<th>Donasi Minimal</th>
-							<th>Status Donasi</th>
-						</tr>
-						</thead>
-						<tbody>
-							{ListDonasi.length > 0 ? ListDonasi?.map((item, index) => (
-								<tr key={index} onClick={() => handleDetailDonasi(item.id)} style={{ cursor:'pointer' }}>
-									<td>{item.nama_donasi}</td>
-									<td>{item.cluster}</td>
-									<td>{item.tanggal_mulai_donasi}</td>
-									<td>{item.tanggal_selesai_donasi}</td>
-									<td>{item.keterangan_donasi}</td>
-									<td>{formatRupiah(item.donasi_minimal)}</td>
-									<td>{statusBadge(item.status)}</td>
-								</tr>
-							))
-							:
-							<tr>
-								<td colspan={7} style={{ color:'red', fontWeight:'bold', textAlign:'center' }}>Donasi tidak ditemukan</td>
-							</tr>
-							}
-						</tbody>
-					</table>
-				</div>
-
-				{/* Footer */}
-				<div className="d-flex justify-content-between align-items-center mt-3">
-					{/* <small className="text-muted">Total Data : {TotalRecords}</small> */}
-
-					<div style={{ fontWeight:'bold' }}>Total Data : {TotalRecords}</div>
-
-					<div className="d-flex gap-2">
-						<Pagination
-							currentPage={CurrentPage}
-							totalPage={TotalPage}
-							onPageChange={(page) => {
-								if (!LoadingDonasi) {
-									setCurrentPage(page);
+					<div className="filter-container">
+						<input
+							type="text"
+							className="filter-input"
+							placeholder="🔍 Cari Fasilitas"
+							value={GlobalSearch}
+							onChange={(e) => setGlobalSearch(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									setCurrentPage(1);
+									getListLaporanPengaduan("");
 								}
 							}}
 						/>
-					</div>
-				</div>
 
+						<select
+							className="filter-select"
+							value={FilterStatus}
+							onChange={(e) => {
+								setFilterStatus(e.target.value)
+							}}
+						>
+							<option value="">Status Fasilitas</option>
+							<option value="1">Aktif</option>
+							<option value="0">Tidak Aktif</option>
+						</select>
+
+						{/* <input
+							type="month"
+							className="filter-input"
+							value={FilterBulan}
+							onChange={(e) => setFilterBulan(e.target.value)}
+						/> */}
+
+						<button
+							className="btn-filter"
+							onClick={() => {
+								setListFasilitas([])
+								setCurrentPage(1)
+								getListLaporanPengaduan("")
+							}}
+						>
+							Filter
+						</button>
+
+						<button
+							className="btn-reset"
+							onClick={() => {
+								setCurrentPage(1)
+								setGlobalSearch("")
+								setFilterStatus("")
+								setFilterBulan("")
+								getListLaporanPengaduan("reset")
+							}}
+						>
+							Reset
+						</button>
+
+						<button
+							className="btn-export"
+							onClick={() => {
+								handleExport()
+							}}
+						>
+							<FaFileDownload /> Export Data
+						</button>
+						
+					</div>
+
+					{/* Table */}
+					<div className="table-responsive">
+						<table className="table align-middle">
+							<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
+							<tr>
+								<th>Cluster</th>
+								<th>Nama Fasilitas</th>
+								<th>Jam Mulai</th>
+								<th>Jam Tutup</th>
+								<th>Harga</th>
+								<th>Status Tersedia</th>
+								<th>Status</th>
+							</tr>
+							</thead>
+							<tbody>
+								{ListFasilitas.length > 0 ? ListFasilitas?.map((item, index) => (
+									<tr key={index} onClick={() => handleFasilitasBooking(item.id)} style={{ cursor:'pointer' }}>
+										<td>{item.cluster}</td>
+										<td>{item.nama_Fasilitas}</td>
+										<td>{item.jam_buka}</td>
+										<td>{item.jam_tutup}</td>
+										<td>{formatRupiah(item.harga)}</td>
+										<td>{item.flag_tersedia == 1 ? "Tersedia" : "Tidak Tersedia"}</td>
+										<td>{statusBadge(item.status)}</td>
+									</tr>
+								))
+								:
+								<tr>
+									<td colspan={6} style={{ color:'red', fontWeight:'bold', textAlign:'center' }}>Fasilitas tidak ditemukan</td>
+								</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+
+					{/* Footer */}
+					<div className="d-flex justify-content-between align-items-center mt-3">
+						{/* <small className="text-muted">Total Data : {TotalRecords}</small> */}
+
+						<div style={{ fontWeight:'bold' }}>Total Data : {TotalRecords}</div>
+
+						<div className="d-flex gap-2">
+							<Pagination
+								currentPage={CurrentPage}
+								totalPage={TotalPage}
+								onPageChange={(page) => {
+									if (!LoadingFasilitas) {
+										setCurrentPage(page);
+									}
+								}}
+							/>
+						</div>
+					</div>
+
+				</div>
 			</div>
-		</div>
+		</>
 	);
 }
 
-export default Donasi;
+export default LaporanPengaduanList;

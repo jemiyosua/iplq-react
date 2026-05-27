@@ -85,7 +85,7 @@
 
 .submenu-item:hover {
     /* background: #84cc16; */
-    color: #84cc16;
+    color: #9AE800;
     border-radius: 10px;
     font-weight: bold;
     cursor: pointer;
@@ -93,7 +93,7 @@
 
 .submenu-item.active {
     /* background: #84cc16; */
-    color: #84cc16;
+    color: #9AE800;
     /* border-radius: 10px; */
 }
 
@@ -107,7 +107,7 @@
 .sidebar-footer div {
     margin-bottom: 10px;
     cursor: pointer;
-    color: #84cc16;
+    color: #9AE800;
     font-weight: bold;
 }
 
