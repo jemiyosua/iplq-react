@@ -47,6 +47,9 @@ const Routes = () => {
 				<Route exact path="/admin/fasilitas-booking">
 					<MainApp />
 				</Route>
+				<Route exact path="/admin/laporan-pengaduan">
+					<MainApp />
+				</Route>
 				<Route path='/'>
 					<Home/>
 				</Route>

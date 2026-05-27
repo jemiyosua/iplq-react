@@ -68,8 +68,6 @@ const DonasiDetail = () => {
 	useEffect(() => {
         window.scrollTo(0, 0)
 
-		console.log("MASUK IURAN")
-
         var CookieNama = getCookie("nama");
         setName(CookieNama)
 
@@ -77,10 +75,10 @@ const DonasiDetail = () => {
         var CookieUsername = getCookie("username");
         
         if (CookieParamKey === null || CookieParamKey === "" || CookieUsername === null || CookieUsername === ""){
-            window.location.href="admin/login";
+            window.location.href="/admin/login";
         }else{
-			if (cookies.varCookieDonasiId == "") {
-				window.location.href="admin/donasi";
+			if (cookies.varCookieDonasiId == "" || cookies.varCookieDonasiId == undefined) {
+				window.location.href="/admin/donasi";
 			} else {
 				dispatch(setForm("ParamKey",CookieParamKey))
 				dispatch(setForm("Username",CookieUsername))
@@ -201,6 +199,8 @@ const DonasiDetail = () => {
 			setLoadingDonasiDetail(false)
 
 			if (data.error_code == "0") {
+				removeCookie('varCookieDonasiId', { path: '/'})
+
 				setListDonasiDetail(data.result)
 				setTotalSettlement(data.total_settlement)
 				setTotalPending(data.total_pending)

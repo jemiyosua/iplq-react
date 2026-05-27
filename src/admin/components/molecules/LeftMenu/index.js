@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './LeftMenu.css';
 import { useHistory } from "react-router-dom";
 import { IconDashboardLeftMenu, IconLogoIPLQ } from '../../../assets';
-import { FaArrowAltCircleLeft, FaBuilding, FaDashcube, FaDoorClosed, FaHandHolding, FaMoneyBill, FaMoneyCheck, FaUser } from 'react-icons/fa';
-import { FaBilibili, FaHandHoldingDollar, FaMoneyBill1Wave, FaMoneyBillTransfer, FaMoneyBillWheat, FaPeopleGroup } from 'react-icons/fa6';
+import { FaArrowAltCircleLeft, FaBuilding, FaDashcube, FaDoorClosed, FaHandHolding, FaMandalorian, FaMoneyBill, FaMoneyCheck, FaParking, FaPen, FaPenAlt, FaUser, FaWalking } from 'react-icons/fa';
+import { FaBilibili, FaHandHoldingDollar, FaHelmetSafety, FaMoneyBill1Wave, FaMoneyBillTransfer, FaMoneyBillWheat, FaPeopleGroup } from 'react-icons/fa6';
 import { useSelector } from 'react-redux';
 import { useCookies } from 'react-cookie';
 import { Gap } from '../../atoms';
@@ -134,7 +134,7 @@ const LeftMenu = ({ children }) => {
 					<div className={`menu-item ${form.PageActive == "RSVP" && "active"}`} onClick={() => {
 						setOpen(false)
 						window.location.href = "/admin/rsvp"
-					}}><FaPeopleGroup /> {!Collapsed && "RSVP Tamu"}
+					}}><FaPenAlt /> {!Collapsed && "RSVP Tamu"}
 					</div>
 
 					<Gap height={15} />
@@ -142,7 +142,7 @@ const LeftMenu = ({ children }) => {
 					<div className={`menu-item ${form.PageActive == "FASILITAS" && "active"}`} onClick={() => {
 						setOpen(false)
 						window.location.href = "/admin/fasilitas"
-					}}><FaPeopleGroup /> {!Collapsed && "Fasilitas"}
+					}}><FaParking /> {!Collapsed && "Fasilitas"}
 					</div>
 
 					<Gap height={15} />
@@ -158,7 +158,7 @@ const LeftMenu = ({ children }) => {
 					<div className={`menu-item ${form.PageActive == "LAPORAN_PENGADUAN" && "active"}`} onClick={() => {
 						setOpen(false)
 						window.location.href = "/admin/laporan-pengaduan"
-					}}><FaPeopleGroup /> {!Collapsed && "Laporan Pengaduan"}
+					}}><FaHelmetSafety /> {!Collapsed && "Laporan Pengaduan"}
 					</div>
 
 					<Gap height={15} />

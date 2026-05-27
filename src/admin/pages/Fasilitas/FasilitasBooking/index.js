@@ -66,11 +66,15 @@ const FasilitasBooking = () => {
         var CookieUsername = getCookie("username");
         
         if (CookieParamKey === null || CookieParamKey === "" || CookieUsername === null || CookieUsername === ""){
-            window.location.href="admin/login";
+            window.location.href="/admin/login";
         }else{
-            dispatch(setForm("ParamKey",CookieParamKey))
-            dispatch(setForm("Username",CookieUsername))
-            dispatch(setForm("PageActive","FASILITAS"))
+			if (cookies.varCookieFasilitasId == "" || cookies.varCookieFasilitasId == undefined) {
+				window.location.href="/admin/fasilitas";
+			} else {
+				dispatch(setForm("ParamKey",CookieParamKey))
+				dispatch(setForm("Username",CookieUsername))
+				dispatch(setForm("PageActive","FASILITAS"))
+			}
         }
 
     },[])
@@ -139,7 +143,7 @@ const FasilitasBooking = () => {
 	const getListFasilitasBooking = (posisi) => {
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
-		let fasilitasId = cookies.varCookieDonasiId
+		let fasilitasId = cookies.varCookieFasilitasId
 
 		let globalSearch = GlobalSearch
 		let filterStatus = FilterStatus
@@ -152,6 +156,7 @@ const FasilitasBooking = () => {
 			"username": cookieUsername,
 			"paramkey": cookieParamKey,
 			"method": "SELECT",
+			"fasilitas_id": fasilitasId,
 			"global_search": globalSearch,
 			"status": filterStatus,
 			"page": CurrentPage,
@@ -179,6 +184,8 @@ const FasilitasBooking = () => {
 			setLoadingFasilitasBooking(false)
 
 			if (data.error_code == "0") {
+				removeCookie('varCookieFasilitasId', { path: '/'})
+
 				setListFasilitasBooking(data.result)
 				setTotalAktif(data.total_aktif)
 				setTotalTidakAktif(data.total_tidak_aktif)
@@ -371,7 +378,7 @@ const FasilitasBooking = () => {
 					<div className="row mb-3">
 						<div className="col-md-3">
 							<div className="card p-3 rounded-4 shadow-sm">
-							<small>Fasilitas Aktif</small>
+							<small>Booking Aktif</small>
 							<h5 className="text-success">
 								{TotalAktif}
 							</h5>
@@ -380,7 +387,7 @@ const FasilitasBooking = () => {
 
 						<div className="col-md-3">
 							<div className="card p-3 rounded-4 shadow-sm">
-							<small>Fasilitas Tidak Aktif</small>
+							<small>Booking Tidak Aktif</small>
 							<h5 className="text-success">
 								{TotalTidakAktif}
 							</h5>
