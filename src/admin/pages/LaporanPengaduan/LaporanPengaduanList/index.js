@@ -299,7 +299,7 @@ const LaporanPengaduanList = () => {
 
 	const handleFasilitasBooking = (id) => {
 		setCookie('varCookieFasilitasId', id, {path: '/'})
-		window.location.href = "/admin/fasilitas-booking"
+		window.location.href = "/admin/laporan-booking"
 	}
     
     return (
@@ -483,15 +483,13 @@ const LaporanPengaduanList = () => {
 
 					{/* Table */}
 					<div className="table-responsive">
-						<table className="table align-middle">
+						<table className="table align-top">
 							<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
 							<tr>
 								<th>Cluster</th>
-								<th>Nama Fasilitas</th>
-								<th>Jam Mulai</th>
-								<th>Jam Tutup</th>
-								<th>Harga</th>
-								<th>Status Tersedia</th>
+								<th>Detail Laporan</th>
+								<th>Foto Laporan</th>
+								<th>Detail Pengerjaan</th>
 								<th>Status</th>
 							</tr>
 							</thead>
@@ -499,11 +497,33 @@ const LaporanPengaduanList = () => {
 								{ListFasilitas.length > 0 ? ListFasilitas?.map((item, index) => (
 									<tr key={index} onClick={() => handleFasilitasBooking(item.id)} style={{ cursor:'pointer' }}>
 										<td>{item.cluster}</td>
-										<td>{item.nama_Fasilitas}</td>
-										<td>{item.jam_buka}</td>
-										<td>{item.jam_tutup}</td>
-										<td>{formatRupiah(item.harga)}</td>
-										<td>{item.flag_tersedia == 1 ? "Tersedia" : "Tidak Tersedia"}</td>
+										<td>
+											<span style={{ fontSize:15, fontWeight:'bold' }}>{item.judul_laporan}</span>
+											<br />
+											<span style={{ fontSize:12 }}>{item.id_laporan_pengaduan}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Detail Lokasi: {item.detail_lokasi}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Deskripsi Laporan: {item.deskripsi_laporan}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Jumlah Foto Laporan: {item.foto_laporan.length}</span>
+										</td>
+										<td>
+											{item.foto_laporan.map((item,index) => {
+												return <img src={ 'https://api.ipl-q.com/api/v1/image/laporan/' + item.image_name } alt="logo" style={{ height:80, width:200 }}  />
+											})}
+										</td>
+										<td>
+											<span style={{ fontSize:12 }}>Nama Tukang: {item.nama_tukang ? item.nama_tukang : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Tanggal Mulai Pengerjaan: {item.tanggal_mulai_pengerjaan ? item.tanggal_mulai_pengerjaan : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Tanggal Selesai Pengerjaan: {item.tanggal_selesai_pengerjaan ? item.tanggal_selesai_pengerjaan : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Lama Pengerjaan: {item.lama_pengerjaan ? item.lama_pengerjaan : "-"}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Perbaikan Tukang: {item.perbaikan_tukang ? item.perbaikan_tukang : "-"}</span>
+										</td>
 										<td>{statusBadge(item.status)}</td>
 									</tr>
 								))

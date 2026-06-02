@@ -94,7 +94,7 @@
     outline: none;
 }
 
-.btn-filter-data-warga {
+.btn-filter-data-warga2 {
     height: 44px;
     padding: 0 18px;
     border-radius: 12px;
@@ -106,7 +106,7 @@
     transition: all 0.2s ease;
 }
 
-.btn-filter:hover {
+.btn-filter-data-warga2:hover {
     transform: translateY(-1px);
     box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
 }
@@ -127,7 +127,7 @@
     background: #4b5563;
 }
 
-.btn-export-data-warga {
+.btn-export-data-warga2 {
 	height: 44px;
 	padding: 0 18px;
 	border-radius: 12px;
@@ -155,7 +155,7 @@
 	white-space: nowrap;
 }
 
-.btn-export-data-warga:hover {
+.btn-export-data-warga2:hover {
 	transform: translateY(-1px);
 	/* box-shadow: 0 6px 14px rgba(34, 197, 94, 0.25); */
 	box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);

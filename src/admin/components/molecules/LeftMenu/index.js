@@ -69,7 +69,7 @@ const LeftMenu = ({ children }) => {
 
 					<Gap height={15} />
 
-					<div className="menu-item" onClick={() => setOpenMenuLaporanKeuangan(!OpenMenuLaporanKeuangan)}>
+					{/* <div className="menu-item" onClick={() => setOpenMenuLaporanKeuangan(!OpenMenuLaporanKeuangan)}>
 						<FaMoneyCheck /> {!Collapsed && "Laporan Keuangan"}
 					</div>
 					{OpenMenuLaporanKeuangan && !Collapsed && (
@@ -87,7 +87,13 @@ const LeftMenu = ({ children }) => {
 								window.location.href = "/admin/penggunaan-dana"
 							}} style={{ cursor:'pointer' }}><FaHandHoldingDollar /> Penggunaan Dana</div>
 						</div>
-					)}
+					)} */}
+
+					<div className={`menu-item ${form.PageActive == "LAPORAN_KEUANGAN" && "active"}`} onClick={() => {
+						setOpen(false)
+						window.location.href = "/admin/laporan-keuangan"
+					}}><FaMoneyCheck /> {!Collapsed && "Laporan Keuangan"}
+					</div>
 
 					<Gap height={15} />
 

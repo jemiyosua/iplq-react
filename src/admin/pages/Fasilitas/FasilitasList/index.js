@@ -496,10 +496,7 @@ const FasilitasList = () => {
 							<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
 							<tr>
 								<th>Cluster</th>
-								<th>Nama Fasilitas</th>
-								<th>Jam Mulai</th>
-								<th>Jam Tutup</th>
-								<th>Harga</th>
+								<th>Detail Fasilitas</th>
 								<th>Status Tersedia</th>
 								<th>Status</th>
 							</tr>
@@ -508,10 +505,15 @@ const FasilitasList = () => {
 								{ListFasilitas.length > 0 ? ListFasilitas?.map((item, index) => (
 									<tr key={index} onClick={() => handleFasilitasBooking(item.id)} style={{ cursor:'pointer' }}>
 										<td>{item.cluster}</td>
-										<td>{item.nama_Fasilitas}</td>
-										<td>{item.jam_buka}</td>
-										<td>{item.jam_tutup}</td>
-										<td>{formatRupiah(item.harga)}</td>
+										<td>
+											<span style={{ fontSize:15, fontWeight:'bold' }}>{item.nama_Fasilitas}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Jam Buka: {item.jam_buka}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Jam Tutup: {item.jam_tutup}</span>
+											<br />
+											<span style={{ fontSize:12 }}>Harga: {formatRupiah(item.harga)}</span>
+										</td>
 										<td>{item.flag_tersedia == 1 ? "Tersedia" : "Tidak Tersedia"}</td>
 										<td>{statusBadge(item.status)}</td>
 									</tr>

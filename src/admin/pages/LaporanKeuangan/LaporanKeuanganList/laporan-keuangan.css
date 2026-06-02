@@ -94,37 +94,38 @@
     outline: none;
 }
 
-.btn-filter {
+.btn-filter-lk {
     height: 44px;
     padding: 0 18px;
     border-radius: 12px;
     border: none;
     font-weight: 500;
     cursor: pointer;
-    background: #84cc16;
-    color: #02140d;
+    background: green;
+    color: #FFFFFF;
     transition: all 0.2s ease;
 }
 
-.btn-filter:hover {
+.btn-filter-lk:hover {
     transform: translateY(-1px);
     box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
 }
 
-.btn-reset {
+.btn-reset-lk {
     height: 44px;
     padding: 0 18px;
     border-radius: 12px;
-    border: none;
-    font-weight: 500;
+    border: 1px solid #6b7280;
+    font-weight: bold;
     cursor: pointer;
-    background: #6b7280;
-    color: white;
+    color: #111111;
     transition: all 0.2s ease;
+	background-color: #FFFFFF;
 }
 
-.btn-reset:hover {
-    background: #4b5563;
+.btn-reset-lk:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
 }
 
 .btn-export {
@@ -145,4 +146,86 @@
 	transform: translateY(-1px);
 	/* box-shadow: 0 6px 14px rgba(34, 197, 94, 0.25); */
 	box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
+}
+
+.finance-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    border-radius: 20px;
+
+    padding: 24px;
+
+    box-shadow:
+        0 5px 15px rgba(0,0,0,.05);
+}
+
+.finance-icon {
+    width: 60px;
+    height: 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 15px;
+
+    font-size: 26px;
+}
+
+.finance-title {
+    color: #64748b;
+    font-size: 14px;
+	font-weight: bold;
+}
+
+.finance-sub-title {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.finance-value {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.saldo {
+    background: #eff6ff;
+}
+
+.saldo .finance-icon {
+    background: #bfdbfe;
+}
+
+.kredit {
+    background: #f0fdf4;
+}
+
+.kredit .finance-icon {
+    background: #bbf7d0;
+}
+
+.debit {
+    background: #fef2f2;
+}
+
+.debit .finance-icon {
+    background: #fecaca;
+}
+
+.saldo-awal {
+	background: #EFF6FF;
+}
+
+.saldo-awal .finance-icon {
+    background: #BFDBFE;
+}
+
+.saldo-akhir {
+	background: #F5F3FF;
+}
+
+.saldo-akhir .finance-icon {
+    background: #DDD6FE;
 }

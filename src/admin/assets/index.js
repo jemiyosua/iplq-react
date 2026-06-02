@@ -26,6 +26,15 @@ import IconDownload from './icon/ic_download.png';
 
 import IconCheck from './icon/ic_check.png';
 
+import IconArrowRightUp from './icon/ic_arrow_right_up.png';
+import IconExport from './icon/ic_export.png';
+import IconAdd from './icon/ic_add.png';
+import IconDownloadGreen from './icon/ic_download_green.png';
+import IconUploadRed from './icon/ic_upload_red.png';
+import IconFilter from './icon/ic_filter.png';
+import IconReset from './icon/ic_reset.png';
+import IconWallet from './icon/ic_wallet.png';
+
 export {
     IconRefresh,
     IconScanProduct,
@@ -45,5 +54,13 @@ export {
     IconMasterClusterLeftMenu,
     IconUserLeftMenu,
     IconDownload,
-    IconCheck
+    IconCheck,
+    IconArrowRightUp,
+    IconExport,
+    IconAdd,
+    IconDownloadGreen,
+    IconUploadRed,
+    IconFilter,
+    IconReset,
+    IconWallet
 };

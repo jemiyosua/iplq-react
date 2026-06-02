@@ -42,6 +42,8 @@ const DataWarga = () => {
 	const [TotalPage, setTotalPage] = useState(0)
 	const [TotalRecords, setTotalRecords] = useState(0)
 	const [TotalCluster, setTotalCluster] = useState(0)
+	const [TotalWargaAktif, setTotalWargaAktif] = useState(0)
+	const [TotalWargaTidakAktif, setTotalWargaTidakAktif] = useState(0)
 	const [TotalWarga, setTotalWarga] = useState(0)
 	
 	const [ShowAlert, setShowAlert] = useState(true)
@@ -196,7 +198,9 @@ const DataWarga = () => {
 				setTotalRecords(data.total_record)
 				setTotalPage(data.total_page)
 				setTotalCluster(data.total_cluster)
-				setTotalWarga(data.total_record)
+				setTotalWargaAktif(data.total_aktif)
+				setTotalWargaTidakAktif(data.total_tidak_aktif)
+				setTotalWarga(data.total_warga)
 				return
 			} else {
 				if (data.error_code === "2") {
@@ -303,7 +307,7 @@ const DataWarga = () => {
 	};
 
 	const handleImportFromSheet = () => {
-
+		window.location.href = "/admin/data-warga-import"
 	}
     
     return (
@@ -397,6 +401,26 @@ const DataWarga = () => {
 								</div>
 							</div>
 						</div>
+
+						<div className="col-md-3">
+							<div className="card p-3 rounded-4 shadow-sm">
+							<small>Total Warga Aktif</small>
+								<div className="d-flex justify-content-start align-items-center gap-2">
+									<FaPeopleGroup />
+									<h5>{TotalWargaAktif}</h5>
+								</div>
+							</div>
+						</div>
+
+						<div className="col-md-3">
+							<div className="card p-3 rounded-4 shadow-sm">
+							<small>Total Warga Tidak Aktif</small>
+								<div className="d-flex justify-content-start align-items-center gap-2">
+									<FaPeopleGroup />
+									<h5>{TotalWargaTidakAktif}</h5>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<div style={{ height:30 }} />
@@ -436,7 +460,7 @@ const DataWarga = () => {
 						/> */}
 
 						<button
-							className="btn-filter"
+							className="btn-filter-data-warga"
 							onClick={() => {
 								setListDataWarga([])
 								setCurrentPage(1)
@@ -460,7 +484,7 @@ const DataWarga = () => {
 						</button>
 
 						<button
-							className="btn-export"
+							className="btn-export-data-warga"
 							onClick={() => {
 								handleExport()
 							}}
@@ -469,12 +493,12 @@ const DataWarga = () => {
 						</button>
 
 						<button
-							className="btn-export"
+							className="btn-import-data-warga"
 							onClick={() => {
-								handleExport()
+								handleImportFromSheet()
 							}}
 						>
-							<FaFileDownload /> Export Data
+							<FaFileDownload /> Import From Sheets
 						</button>
 					</div>
 				
@@ -485,6 +509,7 @@ const DataWarga = () => {
 								<th>Cluster</th>
 								<th>Detail Warga</th>
 								<th>Detail Rumah</th>
+								<th style={{ textAlign:'center' }}>Status</th>
 								<th style={{ textAlign:'center' }}>Serah Terima</th>
 								<th style={{ textAlign:'center' }}>Ditempati</th>
 							</tr>
@@ -517,6 +542,7 @@ const DataWarga = () => {
 											<br />
 											<span style={{ fontSize:12 }}>Luas Bangunan (m2): {item.luas_bangunan ? item.luas_bangunan : "-"}</span>
 										</td>
+										<td style={{ textAlign:'center', color:item.status_aktif == 1 ? "green" : "red" }}>{item.status_aktif == 1 ? "Aktif" : "Tidak Aktif"}</td>
 										<td>
 											{item.status_serah_terima == 1 ?
 											<div style={{ display:'flex', justifyContent:'center' }}>

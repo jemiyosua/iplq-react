@@ -17,6 +17,9 @@ const Routes = () => {
 				<Route exact path="/admin/dashboard">
 					<MainApp />
 				</Route>
+				<Route exact path="/admin/laporan-keuangan">
+					<MainApp />
+				</Route>
 				<Route exact path="/admin/ipl">
 					<MainApp />
 				</Route>

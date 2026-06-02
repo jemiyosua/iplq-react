@@ -19,6 +19,7 @@ import DataWargaImport from '../DataWarga/DataWargaImport'
 import FasilitasList from '../Fasilitas/FasilitasList'
 import FasilitasBooking from '../Fasilitas/FasilitasBooking'
 import LaporanPengaduanList from '../LaporanPengaduan/LaporanPengaduanList'
+import LaporangKeuanganList from '../LaporanKeuangan/LaporanKeuanganList'
 
 const MainApp = () => {
     const history = useHistory(historyConfig);
@@ -79,6 +80,9 @@ const MainApp = () => {
                             <Switch>
                                 <Route exact path="/dashboard">
                                     <Dashboard />
+                                </Route>
+                                <Route path="/laporan-keuangan">
+                                    <LaporangKeuanganList />
                                 </Route>
                                 <Route path="/ipl">
                                     <IPL />

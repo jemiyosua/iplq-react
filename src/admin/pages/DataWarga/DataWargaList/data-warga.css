@@ -101,30 +101,14 @@
     border: none;
     font-weight: 500;
     cursor: pointer;
-    background: #84cc16;
-    color: #02140d;
+    background: #9AE800;
+    color: #002C00;
     transition: all 0.2s ease;
 }
 
 .btn-filter:hover {
     transform: translateY(-1px);
     box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
-}
-
-.btn-reset {
-    height: 44px;
-    padding: 0 18px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 500;
-    cursor: pointer;
-    background: #6b7280;
-    color: white;
-    transition: all 0.2s ease;
-}
-
-.btn-reset:hover {
-    background: #4b5563;
 }
 
 .btn-export-data-warga {
@@ -135,8 +119,22 @@
 	font-weight: 500;
 	cursor: pointer;
 	/* background: linear-gradient(135deg, #22c55e, #16a34a); */
-	background-color: green;
+	background-color: #111111;
 	color: #FFFFFF;
+	transition: all 0.2s ease;
+	white-space: nowrap;
+}
+
+.btn-import-data-warga {
+	height: 44px;
+	padding: 0 18px;
+	border-radius: 12px;
+	border: none;
+	font-weight: 500;
+	cursor: pointer;
+	/* background: linear-gradient(135deg, #22c55e, #16a34a); */
+	background-color: #002C00;
+	color: #9AE800;
 	transition: all 0.2s ease;
 	white-space: nowrap;
 }
@@ -156,6 +154,12 @@
 }
 
 .btn-export-data-warga:hover {
+	transform: translateY(-1px);
+	/* box-shadow: 0 6px 14px rgba(34, 197, 94, 0.25); */
+	box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
+}
+
+.btn-import-data-warga:hover {
 	transform: translateY(-1px);
 	/* box-shadow: 0 6px 14px rgba(34, 197, 94, 0.25); */
 	box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
