@@ -7,14 +7,14 @@ import { CookiesProvider } from "react-cookie";
 import { ProSidebarProvider } from "react-pro-sidebar";
 
 ReactDOM.render(
-  <React.StrictMode>
-    <CookiesProvider>
-      <ProSidebarProvider>
-        <App />
-      </ProSidebarProvider>
-    </CookiesProvider>
-  </React.StrictMode>,
-  document.getElementById('root')
+    <React.StrictMode>
+		<CookiesProvider>
+			<ProSidebarProvider>
+				<App />
+			</ProSidebarProvider>
+		</CookiesProvider>
+    </React.StrictMode>,
+    document.getElementById('root')
 );
 
 
