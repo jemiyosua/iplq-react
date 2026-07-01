@@ -492,6 +492,7 @@ const DataWarga = () => {
 							<FaFileDownload /> Export Data
 						</button>
 
+						{getCookie("access") != 1 &&
 						<button
 							className="btn-import-data-warga"
 							onClick={() => {
@@ -499,7 +500,7 @@ const DataWarga = () => {
 							}}
 						>
 							<FaFileDownload /> Import From Sheets
-						</button>
+						</button>}
 					</div>
 				
 					<div className="table-responsive">
@@ -542,7 +543,7 @@ const DataWarga = () => {
 											<br />
 											<span style={{ fontSize:12 }}>Luas Bangunan (m2): {item.luas_bangunan ? item.luas_bangunan : "-"}</span>
 										</td>
-										<td style={{ textAlign:'center', color:item.status_aktif == 1 ? "green" : "red" }}>{item.status_aktif == 1 ? "Aktif" : "Tidak Aktif"}</td>
+										<td style={{ textAlign:'center', color:item.status_aktif == 1 ? "green" : "red", fontWeight:'bold' }}>{item.status_aktif == 1 ? "Aktif" : "Tidak Aktif"}</td>
 										<td>
 											{item.status_serah_terima == 1 ?
 											<div style={{ display:'flex', justifyContent:'center' }}>

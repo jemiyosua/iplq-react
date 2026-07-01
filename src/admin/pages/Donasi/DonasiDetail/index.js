@@ -22,6 +22,7 @@ import {
 	Tooltip,
 	ResponsiveContainer,
 } from "recharts";
+import { IconCheck, IconExport } from '../../../assets';
 
 const DonasiDetail = () => {
     const history = useHistory(historyConfig);
@@ -370,103 +371,85 @@ const DonasiDetail = () => {
     
     return (
 		<div className="container-fluid p-4 min-vh-100">
+
+			<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+				<div style={{ display:'flex', justifyContent:'flex-start', alignItems:'center' }}>
+					<div>
+						<div style={{ fontSize:30, fontWeight:'bold' }}>Donasi Detail</div>
+						<div style={{ fontSize:15 }}>Kelola dan pantau semua transaksi donasi</div>
+					</div>
+				</div>
+				<div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center' }}>
+					<div style={{ backgroundColor:'#FFFFFF', border:'1px solid #002C00', padding:10, borderRadius:10, cursor:'pointer' }} onClick={() => handleExport()}>
+						<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+							<img src={IconExport} alt="logo" style={{ height:20, width:20 }}  />
+							<div style={{ width:5 }} />
+							<div style={{ color:'#002C00', fontWeight:'bold' }}>Export Data</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div style={{ height:30 }} />
+
+			<div className="row mb-4">
+				<div className="col-lg-4 mb-3">
+					<div className="finance-card saldo">
+						<div className="finance-icon">
+							💰
+						</div>
+						<div>
+							<div className="finance-title">
+								Total Donasi Terkumpul
+							</div>
+							<div className="finance-value">
+								{formatRupiah(TotalSettlement)}
+							</div>
+							<div className="finance-sub-title">
+								Saldo Dana Masuk
+							</div>
+						</div>
+					</div>
+				</div>
+				<div className="col-lg-4 mb-3">
+					<div className="finance-card kredit">
+						<div className="finance-icon">
+							📥
+						</div>
+						<div>
+							<div className="finance-title">
+								Total Donasi Pending
+							</div>
+							<div className="finance-value">
+								{formatRupiah(TotalPending)}
+							</div>
+							<div className="finance-sub-title">
+								Total Dana Belum Masuk
+							</div>
+						</div>
+					</div>
+				</div>
+				<div className="col-lg-4 mb-3">
+					<div className="finance-card debit">
+						<div className="finance-icon">
+							📤
+						</div>
+						<div>
+							<div className="finance-title">
+								Collection Rate
+							</div>
+							<div className="finance-value">
+								{CollectionRate.toFixed(1)}%
+							</div>
+							<div className="finance-sub-title">
+								Kolektibilitas Dana Terkumpul
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<div className="card border-0 shadow rounded-4 p-3">
-
-				{SessionMessage !== "" ?
-				<SweetAlert 
-					warning 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						logout()
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{SessionMessage}
-				</SweetAlert>
-				:""}
-	
-				{SuccessMessage !== "" ?
-				<SweetAlert 
-					success 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setSuccessMessage("")
-						history.replace("/dashboard")
-					}}
-					btnSize="sm">
-					{SuccessMessage}
-				</SweetAlert>
-				:""}          
-	
-				{ErrorMessageAlert !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlert("")
-					}}
-					btnSize="sm">
-					{ErrorMessageAlert}
-				</SweetAlert>
-				:""}
-	
-				{ErrorMessageAlertLogout !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlertLogout("")
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{ErrorMessageAlertLogout}
-				</SweetAlert>
-				:""}
-
-				{/* Header */}
-				<div className="d-flex justify-content-between align-items-center mb-3">
-					<div className="d-flex justify-content-between align-items-center gap-2">
-						<FaMoneyBillWheat />
-						<h5 className="mb-0 fw-bold">Donasi Detail</h5>
-					</div>
-				</div>
-				<div>Nama Donasi: </div>
-
-				<div style={{ height:30 }} />
-
-				<div className="row mb-3">
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Total Donasi Terkumpul</small>
-						<h5 className="text-success">
-							{formatRupiah(TotalSettlement)}
-						</h5>
-						</div>
-					</div>
-
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Total Donasi Pending</small>
-						<h5 className="text-warning">
-							{formatRupiah(TotalPending)}
-						</h5>
-						</div>
-					</div>
-
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Collection Rate Donasi</small>
-						<h5>{CollectionRate.toFixed(1)}%</h5>
-						</div>
-					</div>
-				</div>
-
-				<div style={{ height:30 }} />
-
 				<div className="filter-container">
 					<input
 						type="text"
@@ -547,7 +530,6 @@ const DonasiDetail = () => {
 					
 				</div>
 
-				{/* Table */}
 				<div className="table-responsive">
 					<table className="table align-middle">
 						<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
@@ -564,37 +546,63 @@ const DonasiDetail = () => {
 						</tr>
 						</thead>
 						<tbody>
-							{ListDonasiDetail?.map((item, index) => {
-								let metode_pembayaran = item.metode_pembayaran
-								let pembayaran = ""
-								if (metode_pembayaran == "va") {
-									pembayaran = item.nomor_va + " : " + item.metode_pembayaran_va_bank
-								} else if (metode_pembayaran == "qris") {
-									pembayaran = item.qris
-								}
-								return (
-									<tr key={index}>
-										<td>{item.order_id}</td>
-										<td>{formatRupiah(item.nominal_donasi)}</td>
-										<td>{item.metode_pembayaran}</td>
-										<td>{pembayaran}</td>
-										<td>{item.cluster}</td>
-										<td>{item.nama}</td>
-										<td>{item.tgl_transaksi}</td>
-										<td>{item.tgl_bayar}</td>
-										<td>{statusBadge(item.status_transaksi)}</td>
-									</tr>
-								)})}
+							{ListDonasiDetail?.length > 0 ? ListDonasiDetail?.map((item, index) => (
+								<tr key={index}>
+									<td>{item.cluster}</td>
+									<td>
+										<span style={{ fontWeight:'bold', fontSize:15 }}>{item.nama}</span>
+										<br />
+										<span style={{ fontSize:12 }}>Nomor HP: {item.no_hp ? item.no_hp : "-"}</span>
+										<br />
+										<span style={{ fontSize:12 }}>Email: {item.email ? item.email : "-"}</span>
+										<br />
+										<span style={{ fontSize:12 }}>Tanggal Lahir: {item.tanggal_lahir ? item.tanggal_lahir : "-"}</span>
+										<br />
+										<span style={{ fontSize:12 }}>Jenis Kelamin: {item.jenis_kelamin ? item.jenis_kelamin : "-"}</span>
+										<br />
+										<span style={{ fontSize:12 }}>Agama: {item.agama ? item.agama : "-"}</span>
+										<br />
+										<span style={{ fontSize:12 }}>Role: {item.role ? item.role : "-"}</span>
+									</td>
+									<td>
+										<span style={{ fontSize:12 }}>Alamat: {item.alamat ? item.alamat : "-"}</span>
+										<br />
+										<span style={{ fontSize:12 }}>Nomor Rumah: {item.nomor_rumah ? item.nomor_rumah : "-"}</span>
+										<br />
+										<span style={{ fontSize:12 }}>Luas Tanah (m2): {item.luas_tanah ? item.luas_tanah : "-"}</span>
+										<br />
+										<span style={{ fontSize:12 }}>Luas Bangunan (m2): {item.luas_bangunan ? item.luas_bangunan : "-"}</span>
+									</td>
+									<td style={{ textAlign:'center', color:item.status_aktif == 1 ? "green" : "red" }}>{item.status_aktif == 1 ? "Aktif" : "Tidak Aktif"}</td>
+									<td>
+										{item.status_serah_terima == 1 ?
+										<div style={{ display:'flex', justifyContent:'center' }}>
+											<img src={IconCheck} alt="logo" style={{ height:30, width:30 }}  /> 
+										</div>
+										:
+										<div style={{ display:'flex', justifyContent:'center' }}>-</div>}
+									</td>
+									<td>
+										{item.status_ditempati == 1 ?
+										<div style={{ display:'flex', justifyContent:'center' }}>
+											<img src={IconCheck} alt="logo" style={{ height:30, width:30 }}  /> 
+										</div>
+										:
+										<div style={{ display:'flex', justifyContent:'center' }}>-</div>}
+									</td>
+								</tr>
+							))
+							:
+							<tr>
+								<td colspan={15} style={{ color:'red', fontWeight:'bold', textAlign:'center' }}>Data tidak ditemukan</td>
+							</tr>
+							}
 						</tbody>
 					</table>
 				</div>
 
-				{/* Footer */}
 				<div className="d-flex justify-content-between align-items-center mt-3">
-					{/* <small className="text-muted">Total Data : {TotalRecords}</small> */}
-
 					<div style={{ fontWeight:'bold' }}>Total Data : {TotalRecords}</div>
-
 					<div className="d-flex gap-2">
 						<Pagination
 							currentPage={CurrentPage}
@@ -607,6 +615,61 @@ const DonasiDetail = () => {
 						/>
 					</div>
 				</div>
+
+				{SessionMessage !== "" ?
+				<SweetAlert 
+					warning 
+					show={ShowAlert}
+					onConfirm={() => {
+						setShowAlert(false)
+						logout()
+						window.location.href="/admin/login";
+					}}
+					btnSize="sm">
+					{SessionMessage}
+				</SweetAlert>
+				:""}
+	
+				{SuccessMessage !== "" ?
+				<SweetAlert 
+					success 
+					show={ShowAlert}
+					onConfirm={() => {
+						setShowAlert(false)
+						setSuccessMessage("")
+						history.replace("/dashboard")
+					}}
+					btnSize="sm">
+					{SuccessMessage}
+				</SweetAlert>
+				:""}          
+	
+				{ErrorMessageAlert !== "" ?
+				<SweetAlert 
+					danger 
+					show={ShowAlert}
+					onConfirm={() => {
+						setShowAlert(false)
+						setErrorMessageAlert("")
+					}}
+					btnSize="sm">
+					{ErrorMessageAlert}
+				</SweetAlert>
+				:""}
+	
+				{ErrorMessageAlertLogout !== "" ?
+				<SweetAlert 
+					danger 
+					show={ShowAlert}
+					onConfirm={() => {
+						setShowAlert(false)
+						setErrorMessageAlertLogout("")
+						window.location.href="/admin/login";
+					}}
+					btnSize="sm">
+					{ErrorMessageAlertLogout}
+				</SweetAlert>
+				:""}
 
 			</div>
 		</div>

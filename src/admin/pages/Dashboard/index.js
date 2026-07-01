@@ -391,7 +391,7 @@ const Dashboard = () => {
 
 			{/* Header */}
 			<div className="mb-4">
-				<h3 className="fw-bold">Selamat Datang, Super Admin 👋</h3>
+				<h3 className="fw-bold">Selamat Datang, {cookies.varCookie?.split("|")[4]} 👋</h3>
 				<p className="text-muted">Ringkasan data seluruh cluster hari ini</p>
 			</div>
 

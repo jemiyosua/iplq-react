@@ -1,0 +1,76 @@
+.transaction-form{
+    background:#fff;
+    border-radius:24px;
+    padding:32px;
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+}
+
+.form-header h2{
+    margin:0;
+    font-size:28px;
+    font-weight:700;
+}
+
+.form-header p{
+    color:#6b7280;
+    margin-top:4px;
+}
+
+.form-grid{
+    margin-top:32px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-group label{
+    margin-bottom:8px;
+    font-weight:600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+    height:52px;
+    border:1px solid #E5E7EB;
+    border-radius:14px;
+    padding:0 16px;
+    font-size:14px;
+}
+
+.form-group textarea{
+    height:120px;
+    padding-top:16px;
+}
+
+.footer-action{
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+    margin-top:32px;
+}
+
+.btn-primary{
+    background:#02140d;
+    color:#9AE800;
+    border:none;
+    height:48px;
+    padding:0 24px;
+    border-radius:14px;
+    font-weight:bold;
+}
+
+.btn-outline{
+    background:white;
+    border:1px solid #D1D5DB;
+    height:48px;
+    padding:0 24px;
+    border-radius:14px;
+    color: #02140d;
+    font-weight: bold;
+}

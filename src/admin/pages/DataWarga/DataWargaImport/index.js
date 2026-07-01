@@ -159,8 +159,6 @@ const DataWargaImport = () => {
 		const sheetName = getCookie("sheet_name");
 		const urlSheet = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
 
-		console.log(urlSheet)
-
 		const responseSheet = await fetch(urlSheet);
 		const dataSheet = await responseSheet.json();
 
@@ -507,7 +505,6 @@ const DataWargaImport = () => {
 						>
 							<FaSave /> Simpan Data Warga
 						</button>}
-						
 					</div>
 
 					{ListDataSheet?.length > 0 &&

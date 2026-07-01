@@ -10,6 +10,9 @@ import { setForm } from '../../../redux';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import DataTable from 'react-data-table-component';
+import { IconArrowRightUp, IconExport, IconWallet } from '../../../assets';
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const IPL = () => {
     const history = useHistory(historyConfig);
@@ -22,6 +25,7 @@ const IPL = () => {
 	const [CurrentPage, setCurrentPage] = useState(1);
 
 	const [ListIPL, setListIPL] = useState([])
+	const [ListTunggakan, setListTunggakan] = useState([])
 	const [TotalPage, setTotalPage] = useState(0)
 	const [TotalRecords, setTotalRecords] = useState(0)
 
@@ -37,8 +41,8 @@ const IPL = () => {
 
 	const [open,setOpen] = useState(true)
 
-	const [TotalCluster, setTotalCluster] = useState(0)
-	const [TotalRumah, setTotalRumah] = useState(0)
+	const [TotalSettlement, setTotalSettlement] = useState(0)
+	const [TotalPending, setTotalPending] = useState(0)
 	const [TotalWarga, setTotalWarga] = useState(0)
 	const [TotalTransaksi, setTotalTransaksi] = useState(0)
 	const [TotalPembayaran, setTotalPembayaran] = useState(0)
@@ -58,7 +62,7 @@ const IPL = () => {
         }else{
             dispatch(setForm("ParamKey",CookieParamKey))
             dispatch(setForm("Username",CookieUsername))
-            dispatch(setForm("PageActive","IPL"))
+            dispatch(setForm("PageActive","TAGIHAN_IPL"))
         }
 
 		getListIPLAnnualAll()
@@ -159,6 +163,11 @@ const IPL = () => {
 				setListIPL(data.result)
 				setTotalPage(data.total_page)
 				setTotalRecords(data.total_record)
+
+				setTotalSettlement(data.result_summary.terkumpul)
+				setTotalPending(data.result_summary.belum)
+
+				setListTunggakan(data.result_top_tunggakan)
 				return
 			} else {
 				if (data.error_code === "2") {
@@ -205,19 +214,162 @@ const IPL = () => {
 				return null;
 		}
 	};
+
+	const handleExport = () => {
+		const formatted = ListIPL.map((item) => ({
+			"Order ID": item.order_id || "-",
+			"Transaksi ID": item.transaction_id || "-",
+			"Nama": item.nama_user,
+			"No Rumah": item.nomor_rumah,
+			"Cluster": item.cluster,
+			"Bulan Invoice": formatBulan(item.bulan_invoice),
+			"Tagihan": formatRupiah(item.tagihan),
+			"Biaya Aplikasi": formatRupiah(item.margin),
+			"Tanggal Bayar": item.tanggal_bayar,
+			"Status Transaksi": item.transaction_status,
+		}));
+
+		const now = new Date();
+
+		const day = String(now.getDate()).padStart(2, "0");
+		const month = String(now.getMonth() + 1).padStart(2, "0");
+		const year = now.getFullYear();
+		const dateFinal = `${day}-${month}-${year}`;
+
+		exportToExcel(formatted, "export-data-donasi-"+dateFinal);
+	};
+
+	const exportToExcel = (data, fileName = "data") => {
+		// ubah JSON → worksheet
+		const worksheet = XLSX.utils.json_to_sheet(data);
+
+		// buat workbook
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+		// convert ke buffer
+		const excelBuffer = XLSX.write(workbook, {
+			bookType: "xlsx",
+			type: "array",
+		});
+
+		// save file
+		const fileData = new Blob([excelBuffer], {
+			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		});
+
+		saveAs(fileData, `${fileName}.xlsx`);
+	};
+
+	const formatBulan = (val) => {
+		if (!val) return "-";
+
+		const [year, month] = val.split("-");
+		const date = new Date(year, month - 1);
+
+		return date.toLocaleString("id-ID", {
+			month: "long",
+			year: "numeric",
+		});
+	};
     
     return (
 		<div className="container-fluid p-4 min-vh-100">
-			<div className="card border-0 shadow rounded-4 p-3">
 
-				{/* Header */}
-				<div className="d-flex justify-content-between align-items-center mb-3">
-					<div className="d-flex align-items-center gap-2">
-						{/* <div className="bg-success-subtle text-success p-2 rounded-3">💵</div> */}
-						<h5 className="mb-0 fw-bold">Tagihan IPL</h5>
-						{/* <span className="badge bg-secondary">288</span> */}
+			<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+				<div style={{ display:'flex', justifyContent:'flex-start', alignItems:'center' }}>
+					<div>
+						<div style={{ fontSize:30, fontWeight:'bold' }}>Tagihan IPL</div>
+						<div style={{ fontSize:15 }}>Kelola dan pantau semua transaksi keuangan</div>
 					</div>
 				</div>
+				<div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center' }}>
+					{/* <div style={{ backgroundColor:'#FFFFFF', border:'1px solid #002C00', padding:10, borderRadius:10, cursor:'pointer' }} onClick={() => handleInputPemasukan()}>
+						<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+							<img src={IconAdd} alt="logo" style={{ height:20, width:20 }}  />
+							<div style={{ width:5 }} />
+							<div style={{ color:'#002C00', fontWeight:'bold' }}>Input Pemasukan</div>
+						</div>
+					</div>
+					<div style={{ width:10 }} /> */}
+					<div style={{ backgroundColor:'#FFFFFF', border:'1px solid #002C00', padding:10, borderRadius:10, cursor:'pointer' }} onClick={() => handleExport()}>
+						<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+							<img src={IconExport} alt="logo" style={{ height:20, width:20 }}  />
+							<div style={{ width:5 }} />
+							<div style={{ color:'#002C00', fontWeight:'bold' }}>Export Data</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div style={{ height:30 }} />
+
+			<div className="row mb-3">
+				<div className="col-lg-3 mb-3">
+					<div className="finance-card saldo-awal">
+						<div className="finance-icon">
+							<img src={IconWallet} alt="logo" style={{ height:30, width:30 }} />
+						</div>
+						<div>
+							<div className="finance-title">
+								Saldo Terkumpul
+							</div>
+							<div className="finance-value">
+								{/* {formatRupiah(TotalSettlement)} */}
+							</div>
+							<div className="finance-sub-title">
+								Saldo IPL
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div className="col-lg-3 mb-3">
+					<div className="finance-card kredit">
+						<div className="finance-icon">
+							<img src={IconArrowRightUp} alt="logo" style={{ height:30, width:30, transform: "rotate(180deg)" }} />
+						</div>
+						<div>
+							<div className="finance-title">
+								Total IPL Pending
+							</div>
+							<div className="finance-value">
+								{/* {formatRupiah(TotalPending)} */}
+							</div>
+							<div className="finance-sub-title">
+								IPL Pending
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div className="col-lg-3 mb-3">
+					<div className="finance-card saldo-akhir">
+						<div className="finance-icon">
+							<img src={IconWallet} alt="logo" style={{ height:30, width:30 }} />
+						</div>
+						<div>
+							<div className="finance-title">
+								Collection Rate Donasi
+							</div>
+							<div className="finance-value">
+								{/* {CollectionRate.toFixed(1)}% */}
+							</div>
+							<div className="finance-sub-title">
+								Collection Rate Donasi
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div className="card border-0 shadow rounded-4 p-3">
+				<div>Top Tunggakan</div>
+			</div>
+
+			<div style={{ height:30 }} />
+			
+			<div className="card border-0 shadow rounded-4 p-3">
 
 				{/* Search + Export */}
 				<div className="d-flex justify-content-between mb-3">
@@ -226,7 +378,6 @@ const IPL = () => {
 						className="form-control w-75"
 						placeholder="🔍 Cari data..."
 					/>
-					<button className="btn btn-success">⬇ Export</button>
 				</div>
 
 				{/* Table */}

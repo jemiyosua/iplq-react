@@ -17,7 +17,9 @@ const Alert = ({ alertState, onConfirm, onCancel, onEscapeKey, onOutsideClick, s
         <SweetAlert show={showAlert} onConfirm={onConfirm} onEscapeKey={onEscapeKey} onOutsideClick={onOutsideClick} btnSize="sm">
             {() => (
                 <div>
-                    <p style={{fontSize:'20px', textAlign:'left'}}><Markup content={validationMessage}/></p>
+                    <p style={{fontSize:'20px', textAlign:'left'}}>
+                        <Markup content={validationMessage}/>
+                    </p>
                 </div>
             )}
         </SweetAlert>

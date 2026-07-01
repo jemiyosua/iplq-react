@@ -20,6 +20,11 @@ import FasilitasList from '../Fasilitas/FasilitasList'
 import FasilitasBooking from '../Fasilitas/FasilitasBooking'
 import LaporanPengaduanList from '../LaporanPengaduan/LaporanPengaduanList'
 import LaporangKeuanganList from '../LaporanKeuangan/LaporanKeuanganList'
+import InputLaporanKeuangan from '../LaporanKeuangan/InputLaporanKeuangan'
+import MasterCluster from '../MasterCluster'
+import RSVPList from '../RSVP/RSVPList'
+import TarikDana from '../TarikDana/ListTarikDana'
+import ListNomorRekening from '../TarikDana/ListNomorRekening'
 
 const MainApp = () => {
     const history = useHistory(historyConfig);
@@ -84,10 +89,13 @@ const MainApp = () => {
                                 <Route path="/laporan-keuangan">
                                     <LaporangKeuanganList />
                                 </Route>
-                                <Route path="/ipl">
+                                <Route path="/input-laporan-keuangan">
+                                    <InputLaporanKeuangan />
+                                </Route>
+                                <Route path="/tagihan-ipl">
                                     <IPL />
                                 </Route>
-                                <Route path="/iuran">
+                                <Route path="/tagihan-iuran">
                                     <Iuran />
                                 </Route>
 								<Route path="/transaksi-ipl">
@@ -116,6 +124,18 @@ const MainApp = () => {
                                 </Route>
                                 <Route path="/laporan-pengaduan">
                                     <LaporanPengaduanList />
+                                </Route>
+                                <Route path="/master-cluster">
+                                    <MasterCluster />
+                                </Route>
+                                <Route path="/rsvp">
+                                    <RSVPList />
+                                </Route>
+                                <Route path="/tarik-dana">
+                                    <TarikDana />
+                                </Route>
+                                <Route path="/nomor-rekening">
+                                    <ListNomorRekening />
                                 </Route>
                             </Switch>
                         </BrowserRouter>
