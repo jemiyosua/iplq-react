@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
-import { Header, Footer, Input, Button, Gap, Pagination } from '../../../components';
+import { Header, Footer, Input, Button, Gap, Pagination, Alert, ModalUpdateLaporanKeuangan } from '../../../components';
 import './laporan-keuangan.css'
 import './table-laporan-keuangan.css'
 import { useDispatch } from 'react-redux';
@@ -35,10 +35,9 @@ const LaporangKeuanganList = () => {
 	const [Name, setName] = useState("")
 
 	const [ListLaporanKeuangan, setListLaporanKeuangan] = useState([])
-	const [ListTunggakan, setListTunggakan] = useState([])
 
 	const [CurrentPage, setCurrentPage] = useState(1);
-	const [RowPage, setRowPage] = useState(10);
+	const [RowPage, setRowPage] = useState(3);
 	const [TotalPage, setTotalPage] = useState(0)
 	const [TotalRecords, setTotalRecords] = useState(0)
 	
@@ -49,16 +48,10 @@ const LaporangKeuanganList = () => {
 	const [TotalDebit, setTotalDebit] = useState(0)
 
 	const [Loading, setLoading] = useState(false)
-	
-	const [ShowAlert, setShowAlert] = useState(true)
-    const [SessionMessage, setSessionMessage] = useState("")
-    const [SuccessMessage, setSuccessMessage] = useState("")
-    const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
-    const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
 
 	const [LoadingLaporanKeuangan, setLoadingLaporanKeuangan] = useState(false)
 
-	const [open,setOpen] = useState(true)
+	const [ShowModalUpdateLaporanKeuangan, setShowModalUpdateLaporanKeuangan] = useState(false)
 
 	const [TotalCluster, setTotalCluster] = useState(0)
 	const [TotalRumah, setTotalRumah] = useState(0)
@@ -88,6 +81,25 @@ const LaporangKeuanganList = () => {
 			pengeluaran: 500000
 		}
 	]);
+
+	// ---------- alert ----------
+	const [AlertState, setAlertState] = useState("")
+	const [ShowAlert, setShowAlert] = useState(true)
+	const [SessionMessage, setSessionMessage] = useState("")
+	const [SuccessMessage, setSuccessMessage] = useState("")
+	const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
+	const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
+	const [ValidationMessage, setValidationMessage] = useState("")
+	const [ConfirmMessage, setConfirmMessage] = useState("")
+
+	const [IdRekeningKoran, setIdRekeningKoran] = useState(0)
+
+	const [OrderId, setOrderId] = useState("")
+	const [JenisTransaksi, setJenisTransaksi] = useState("")
+	const [TipeTransaksi, setTipeTransaksi] = useState("")
+	const [Nominal, setNominal] = useState("")
+	const [TanggalBayar, setTanggalBayar] = useState("")
+	const [Deskripsi, setDeskripsi] = useState("")
 
 	useEffect(() => {
         window.scrollTo(0, 0)
@@ -165,10 +177,6 @@ const LaporangKeuanganList = () => {
 		}
     }
 
-	const toggleSidebar = () =>{
-		setOpen(!open)
-	}
-
 	const getListLaporanKeuangan = (posisi) => {
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
@@ -224,6 +232,76 @@ const LaporangKeuanganList = () => {
 
 				setTotalPage(data.total_page)
 				setTotalRecords(data.total_record)
+				return
+			} else {
+				if (data.error_code === "2") {
+					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
+					setShowAlert(true);
+					return;
+				} else {
+					setErrorMessageAlert(data.error_message);
+					setShowAlert(true);
+					return;
+				}
+			}
+		})
+		.catch((error) => {
+			setLoadingLaporanKeuangan(false)
+
+			if (error.message === 401) {
+				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
+				setShowAlert(true);
+				return false;
+			} else if (error.message !== 401) {
+				setErrorMessageAlert(AlertMessage.failedConnect);
+				setShowAlert(true);
+				return false;
+			}
+		});
+	}
+
+	const handleLaporanKeuangan = () => {
+		var cookieUsername = getCookie("username");
+		var cookieParamKey = getCookie("paramkey");
+
+		var requestBody = JSON.stringify({
+			"username": cookieUsername,
+			"paramkey": cookieParamKey,
+			"method": "SELECT",
+			"bulan_laporan": "",
+			"bulan_laporan_summary": 0,
+			"bulan_penggunaan_dana": 0,
+			"page": CurrentPage,
+			"row_page": RowPage,
+			"order_by": "",
+			"order": ""
+		});
+
+		setLoadingLaporanKeuangan(true)
+
+		var url = paths.URL_API_ADMIN + 'ExportLaporanKeuangan';
+		var Signature  = generateSignature(requestBody)
+
+		fetch(url, {
+			method: "POST",
+			body: requestBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'Signature': Signature
+			},
+		})
+		.then(fetchStatus)
+		.then(response => response.json())
+		.then((data) => {
+			setLoadingLaporanKeuangan(false)
+
+			if (data.error_code == "0") {
+				// setListLaporanKeuangan(data.result)
+
+				handleExportLaporanKeuangan()
+
+				// setTotalPage(data.total_page)
+				// setTotalRecords(data.total_record)
 				return
 			} else {
 				if (data.error_code === "2") {
@@ -349,19 +427,329 @@ const LaporangKeuanganList = () => {
     }
 
 	const handleInputPemasukan = () => {
-
-	}
-
-	const handleDetail = () => {
-
+		window.location.href = "/admin/input-laporan-keuangan"
 	}
 
 	const handleEdit = () => {
-		
+		var cookieUsername = getCookie("username");
+		var cookieParamKey = getCookie("paramkey");
+
+		var requestBody = JSON.stringify({
+			"username": cookieUsername,
+			"paramkey": cookieParamKey,
+			"method": "UPDATE",
+			"id_rekening_koran": parseInt(IdRekeningKoran),
+			"nominal": parseInt(Nominal),
+			"jenis_transaksi": JenisTransaksi,
+			"tipe_transaksi": TipeTransaksi,
+			"deskripsi": Deskripsi,
+			"tanggal_bayar": TanggalBayar
+		});
+
+		var url = paths.URL_API_ADMIN + 'LaporanKeuangan';
+		var Signature  = generateSignature(requestBody)
+
+		fetch(url, {
+			method: "POST",
+			body: requestBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'Signature': Signature
+			},
+		})
+		.then(fetchStatus)
+		.then(response => response.json())
+		.then((data) => {
+			if (data.error_code == "0") {
+				getListLaporanKeuangan()
+
+				setAlertState("success")
+				setSuccessMessage("Data berhasil diupdate");
+				setShowAlert(true);
+				return;
+			} else {
+				if (data.error_code === "2") {
+					setAlertState("session")
+					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
+					setShowAlert(true);
+					return;
+				} else {
+					setAlertState("error")
+					setErrorMessageAlert(data.error_message);
+					setShowAlert(true);
+					return;
+				}
+			}
+		})
+		.catch((error) => {
+			setAlertState("error")
+			
+			if (error.message === 401) {
+				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
+				setShowAlert(true);
+				return false;
+			} else if (error.message !== 401) {
+				setErrorMessageAlert(AlertMessage.failedConnect);
+				setShowAlert(true);
+				return false;
+			}
+		});
 	}
 
 	const handleDelete = () => {
-		
+		var cookieUsername = getCookie("username");
+		var cookieParamKey = getCookie("paramkey");
+
+		var requestBody = JSON.stringify({
+			"username": cookieUsername,
+			"paramkey": cookieParamKey,
+			"method": "DELETE",
+			"id_rekening_koran": parseInt(IdRekeningKoran)
+		});
+
+		var url = paths.URL_API_ADMIN + 'LaporanKeuangan';
+		var Signature  = generateSignature(requestBody)
+
+		fetch(url, {
+			method: "POST",
+			body: requestBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'Signature': Signature
+			},
+		})
+		.then(fetchStatus)
+		.then(response => response.json())
+		.then((data) => {
+			if (data.error_code == "0") {
+				getListLaporanKeuangan()
+
+				setAlertState("success")
+				setSuccessMessage("Data berhasil dihapus");
+				setShowAlert(true);
+				return;
+			} else {
+				if (data.error_code === "2") {
+					setAlertState("session")
+					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
+					setShowAlert(true);
+					return;
+				} else {
+					setAlertState("error")
+					setErrorMessageAlert(data.error_message);
+					setShowAlert(true);
+					return;
+				}
+			}
+		})
+		.catch((error) => {
+			setAlertState("error")
+			
+			if (error.message === 401) {
+				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
+				setShowAlert(true);
+				return false;
+			} else if (error.message !== 401) {
+				setErrorMessageAlert(AlertMessage.failedConnect);
+				setShowAlert(true);
+				return false;
+			}
+		});
+	}
+
+	const handleConfirmAlert = (alertState) => {
+        if (alertState == "session") {
+            setShowAlert(false)
+            logout()
+        } else if (alertState == "success") {
+            setShowAlert(false)
+            setSuccessMessage("")
+        } else if (alertState == "error") {
+            setShowAlert(false)
+            setErrorMessageAlert("")
+        } else if (alertState == "logout") {
+            setShowAlert(false)
+            setErrorMessageAlertLogout("")
+            window.location.href="/admin/login"
+        } else if (alertState == "validation") {
+            setShowAlert(false)
+            setValidationMessage("")
+        } else if (alertState == "confirm") {
+            handleDelete()
+        }
+    }
+
+	const convertToDateInput = (tanggal) => {
+		const bulan = {
+			Januari: "01",
+			Februari: "02",
+			Maret: "03",
+			April: "04",
+			Mei: "05",
+			Juni: "06",
+			Juli: "07",
+			Agustus: "08",
+			September: "09",
+			Oktober: "10",
+			November: "11",
+			Desember: "12",
+		};
+
+		const [hari, namaBulan, tahun] = tanggal.split(" ");
+
+		return `${tahun}-${bulan[namaBulan]}-${hari.padStart(2, "0")}`;
+	};
+
+	const handleExportLaporanKeuangan = (data) => {
+		const workbook = XLSX.utils.book_new();
+
+		/*
+		* ======================
+		* SHEET 1 - SUMMARY
+		* ======================
+		*/
+
+		const summaryData = [
+			["LAPORAN KEUANGAN"],
+			[],
+				["Saldo Awal", data.summary.saldo_awal],
+				["Total Pemasukan (Debit)", data.summary.total_debit],
+				["Total Pengeluaran (Kredit)", data.summary.total_kredit],
+				["Saldo Akhir", data.summary.total_saldo],
+			[],
+			["RINGKASAN PER BULAN"],
+			["Bulan", "Total Transaksi", "Total Nominal"],
+			...data.summary.detail_summary_bulan.map((item) => [
+				item.bulan,
+				item.total_transaksi,
+				item.total_nominal,
+			]),
+		];
+
+		const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+
+		XLSX.utils.book_append_sheet(
+			workbook,
+			wsSummary,
+			"SUMMARY"
+		);
+
+		/*
+		* ======================
+		* SHEET 2 - REKENING KORAN
+		* ======================
+		*/
+
+		let saldoBerjalan = 0;
+
+		const rekeningKoranData = data.rekening_koran.map((item) => {
+			const debit =
+			item.jenis_transaksi.toLowerCase() === "debit"
+				? item.nominal
+				: 0;
+
+			const kredit =
+			item.jenis_transaksi.toLowerCase() === "kredit"
+				? item.nominal
+				: 0;
+
+			saldoBerjalan += debit - kredit;
+
+			return {
+			Tanggal: item.tanggal_bayar,
+			OrderID: item.order_id,
+			Nama: item.nama,
+			Cluster: item.cluster,
+			Tipe: item.tipe_transaksi,
+			Keterangan: item.deskripsi,
+			Debit: debit,
+			Kredit: kredit,
+			Saldo: saldoBerjalan,
+			};
+		});
+
+		const wsRekeningKoran = XLSX.utils.json_to_sheet(
+			rekeningKoranData
+		);
+
+		XLSX.utils.book_append_sheet(
+			workbook,
+			wsRekeningKoran,
+			"REKENING_KORAN"
+		);
+
+		/*
+		* ======================
+		* SHEET 3 - PENGGUNAAN DANA
+		* ======================
+		*/
+
+		const penggunaanDanaData =
+			data.penggunaan_dana.result.map((item) => ({
+			Tanggal: item.tanggal_input,
+			OrderID: item.order_id,
+			Cluster: item.cluster,
+			Nominal: item.nominal,
+			Jenis: item.jenis_transaksi,
+			}));
+
+		const wsPenggunaanDana =
+			XLSX.utils.json_to_sheet(penggunaanDanaData);
+
+		XLSX.utils.book_append_sheet(
+			workbook,
+			wsPenggunaanDana,
+			"PENGGUNAAN_DANA"
+		);
+
+		/*
+		* ======================
+		* SHEET 4 - PEMASUKAN DANA
+		* ======================
+		*/
+
+		const pemasukanDanaData = data.rekening_koran
+			.filter(
+			(item) =>
+				item.jenis_transaksi.toLowerCase() === "debit"
+			)
+			.map((item) => ({
+			Tanggal: item.tanggal_bayar,
+			Nama: item.nama,
+			Cluster: item.cluster,
+			Tipe: item.tipe_transaksi,
+			JumlahBulan: item.jumlah_bulan,
+			Nominal: item.nominal,
+			}));
+
+		const wsPemasukanDana =
+			XLSX.utils.json_to_sheet(pemasukanDanaData);
+
+		XLSX.utils.book_append_sheet(
+			workbook,
+			wsPemasukanDana,
+			"PEMASUKAN_DANA"
+		);
+
+		/*
+		* DOWNLOAD FILE
+		* ======================
+		*/
+
+		const excelBuffer = XLSX.write(workbook, {
+			bookType: "xlsx",
+			type: "array",
+		});
+
+		const file = new Blob([excelBuffer], {
+			type:
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		});
+
+		saveAs(
+			file,
+			`Laporan_Keuangan_${new Date().getTime()}.xlsx`
+		);
 	}
     
     return (
@@ -384,7 +772,7 @@ const LaporangKeuanganList = () => {
 						</div>
 					</div>
 					<div style={{ width:10 }} />
-					<div style={{ backgroundColor:'#FFFFFF', border:'1px solid #002C00', padding:10, borderRadius:10, cursor:'pointer' }} onClick={() => handleExport()}>
+					<div style={{ backgroundColor:'#FFFFFF', border:'1px solid #002C00', padding:10, borderRadius:10, cursor:'pointer' }} onClick={() => handleLaporanKeuangan(ListLaporanKeuangan)}>
 						<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
 							<img src={IconExport} alt="logo" style={{ height:20, width:20 }}  />
 							<div style={{ width:5 }} />
@@ -401,7 +789,7 @@ const LaporangKeuanganList = () => {
 				<div className="col-lg-4 mb-3">
 					<div className="finance-card saldo">
 						<div className="finance-icon">
-							💰
+							<img src={IconWallet} alt="logo" style={{ height:30, width:30 }} />
 						</div>
 						<div>
 							<div className="finance-title">
@@ -419,11 +807,11 @@ const LaporangKeuanganList = () => {
 				<div className="col-lg-4 mb-3">
 					<div className="finance-card kredit">
 						<div className="finance-icon">
-							📥
+							<img src={IconArrowRightUp} alt="logo" style={{ height:30, width:30, transform: "rotate(180deg)" }} />
 						</div>
 						<div>
 							<div className="finance-title">
-								Total Pemasukan (Kredit)
+								Total Pemasukan (Debit)
 							</div>
 							<div className="finance-value">
 								{formatRupiah(TotalKredit)}
@@ -437,11 +825,11 @@ const LaporangKeuanganList = () => {
 				<div className="col-lg-4 mb-3">
 					<div className="finance-card debit">
 						<div className="finance-icon">
-							📤
+							<img src={IconArrowRightUp} alt="logo" style={{ height:30, width:30 }} />
 						</div>
 						<div>
 							<div className="finance-title">
-								Total Pengeluaran
+								Total Pengeluaran (Kredit)
 							</div>
 							<div className="finance-value">
 								{formatRupiah(TotalDebit)}
@@ -482,7 +870,7 @@ const LaporangKeuanganList = () => {
 						</div>
 						<div>
 							<div className="finance-title">
-								Total Pemasukan (Kredit)
+								Total Pemasukan (Debit)
 							</div>
 							<div className="finance-value">
 								{formatRupiah(TotalKredit)}
@@ -500,7 +888,7 @@ const LaporangKeuanganList = () => {
 						</div>
 						<div>
 							<div className="finance-title">
-								Total Pengeluaran
+								Total Pengeluaran (Kredit)
 							</div>
 							<div className="finance-value">
 								{formatRupiah(TotalDebit)}
@@ -643,7 +1031,7 @@ const LaporangKeuanganList = () => {
 						<div>Detail Warga</div>
 						<div>Detail Transaksi</div>
 						<div>Nominal</div>
-						<div>Tanggal Input</div>
+						<div>Tanggal Transaksi</div>
 						<div>Aksi</div>
 					</div>}
 					{ListLaporanKeuangan?.length > 0 ?
@@ -656,7 +1044,7 @@ const LaporangKeuanganList = () => {
 
 								<span
 									className={
-										item.jenis_transaksi?.toLowerCase() === "kredit"
+										item.jenis_transaksi?.toLowerCase() === "debit"
 										? "badge-kredit"
 										: "badge-debit"
 									}
@@ -680,16 +1068,6 @@ const LaporangKeuanganList = () => {
 									{item.keterangan || "-"}
 								</div>
 
-								<div
-									className={
-										item.jenis_transaksi?.toLowerCase() === "kredit"
-										? "text-success"
-										: "text-danger"
-									}
-								>
-									{item.jenis_transaksi}
-								</div>
-
 								<div>
 									Jumlah Bulan : {item.jumlah_bulan || "-"}
 								</div>
@@ -698,7 +1076,7 @@ const LaporangKeuanganList = () => {
 							<div>
 								<div
 									className={
-										item.jenis_transaksi?.toLowerCase() === "kredit"
+										item.jenis_transaksi?.toLowerCase() === "debit"
 										? "nominal-kredit"
 										: "nominal-debit"
 									}
@@ -720,40 +1098,36 @@ const LaporangKeuanganList = () => {
 								</Dropdown.Toggle>
 
 								<Dropdown.Menu>
-
 									<Dropdown.Item
-										onClick={() =>
-											handleDetail(item)
-										}
+										onClick={() => {
+											setShowModalUpdateLaporanKeuangan(true)
+											setOrderId(item.order_id)
+											setJenisTransaksi(item.jenis_transaksi.toLowerCase())
+											setTipeTransaksi(item.tipe_transaksi)
+											setNominal(item.nominal)
+											setTanggalBayar(convertToDateInput(item.tanggal_bayar))
+											setDeskripsi(item.deskripsi)
+										}}
 									>
-										Detail
+										Edit Data
 									</Dropdown.Item>
 
 									<Dropdown.Item
-										onClick={() =>
-											handleEdit(item)
-										}
+										onClick={() => {
+											setAlertState("confirm")
+											setIdRekeningKoran(item.id)
+											setShowAlert(true)
+											setConfirmMessage("Apakah Anda yakin ingin menghapus \n" + item.judul + "?")
+										}}
 									>
-										Edit
-									</Dropdown.Item>
-
-									<Dropdown.Item
-										onClick={() =>
-											handleDelete(item)
-										}
-									>
-										Hapus
+										Hapus Data
 									</Dropdown.Item>
 								</Dropdown.Menu>
 							</Dropdown>
-
 						</div>
 					))
 					:
 					<div className="empty-state">
-						<div className="empty-icon">
-							💰
-						</div>
 						<div className="empty-title">
 							Belum Ada Transaksi Keuangan
 						</div>
@@ -794,7 +1168,40 @@ const LaporangKeuanganList = () => {
 					</div>
 				</div>}
 
-				{SessionMessage !== "" ?
+				<ModalUpdateLaporanKeuangan
+					showModal={ShowModalUpdateLaporanKeuangan}
+					
+					orderId={OrderId}
+					jenisTransaksi={JenisTransaksi}
+					tipeTransaksi={TipeTransaksi}
+					nominal={formatRupiah(Nominal)}
+					onChangeNominal={(event) => {
+						const value = event.target.value.replace(/\D/g, "")
+						setNominal(value)
+					}}
+					tanggalBayar={TanggalBayar}
+					deskripsi={Deskripsi}
+
+					onClose={() => setShowModalUpdateLaporanKeuangan(false)}
+					onUpdate={() => handleEdit()}
+				/>
+
+				<Alert
+					alertState={AlertState}
+					onConfirm={() => handleConfirmAlert(AlertState)}
+					onCancel={() => setShowAlert(false)}
+					onEscapeKey={() => setShowAlert(false)}
+					onOutsideClick={() => setShowAlert(false)}
+					showAlert={ShowAlert}
+					sessionMessage={SessionMessage}
+					successMessage={SuccessMessage}
+					errorMessageAlert={ErrorMessageAlert}
+					errorMessageAlertLogout={ErrorMessageAlertLogout}
+					validationMessage={ValidationMessage}
+					confirmMessage={ConfirmMessage}
+				/>
+
+				{/* {SessionMessage !== "" ?
 				<SweetAlert 
 					warning 
 					show={ShowAlert}
@@ -847,7 +1254,7 @@ const LaporangKeuanganList = () => {
 					btnSize="sm">
 					{ErrorMessageAlertLogout}
 				</SweetAlert>
-				:""}
+				:""} */}
 
 			</div>
 		</div>

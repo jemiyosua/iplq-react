@@ -198,7 +198,6 @@ const Login = () => {
                 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
                 @keyframes spin { to { transform: rotate(360deg); } }
                 * { box-sizing: border-box; margin: 0; padding: 0; }
-                body { background: #002C00; }
                 input::placeholder { color: #9ca3af; }
             `}</style>
 
@@ -400,7 +399,7 @@ const COLORS = {
     gray500: "#6b7280",
     gray700: "#374151",
     gray900: "#111827",
-  };
+};
   
 const styles = {
     root: {
@@ -457,7 +456,7 @@ const styles = {
     },
     leftPanel: {
 		flex: 1,
-		background: "rgba(0,20,0,0.7)",
+		background: "#002C00",
 		backdropFilter: "blur(12px)",
 		borderRight: "1px solid rgba(154,232,0,0.12)",
 		display: "flex",
@@ -505,35 +504,35 @@ const styles = {
 		marginBottom: "2.5rem",
     },
     statsRow: {
-      display: "flex",
-      gap: "2rem",
-      alignItems: "center",
+		display: "flex",
+		gap: "2rem",
+		alignItems: "center",
     },
     statNum: {
-      fontSize: 22,
-      fontWeight: 600,
-      color: COLORS.primary,
+		fontSize: 22,
+		fontWeight: 600,
+		color: COLORS.primary,
     },
     statLabel: {
-      fontSize: 11,
-      color: "rgba(154,232,0,0.4)",
-      letterSpacing: "0.08em",
-      textTransform: "uppercase",
-      marginTop: 2,
+		fontSize: 11,
+		color: "rgba(154,232,0,0.4)",
+		letterSpacing: "0.08em",
+		textTransform: "uppercase",
+		marginTop: 2,
     },
     statDivider: {
-      width: 1,
-      height: 36,
-      background: "rgba(154,232,0,0.15)",
+		width: 1,
+		height: 36,
+		background: "rgba(154,232,0,0.15)",
     },
     rightPanel: {
-      width: 360,
-      background: COLORS.white,
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "center",
-      padding: "3rem 2.5rem",
-      position: "relative",
+		width: 360,
+		background: COLORS.white,
+		display: "flex",
+		flexDirection: "column",
+		justifyContent: "center",
+		padding: "3rem 2.5rem",
+		position: "relative",
     },
     versionTag: {
       position: "absolute",
@@ -749,6 +748,6 @@ const styles = {
       borderRadius: 2,
       transition: "width 1.8s ease",
     },
-  };
+};
 
 export default Login;

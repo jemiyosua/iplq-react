@@ -12,9 +12,9 @@ export default function LoadingLogo() {
 					className="loading-logo"
 				/>
 
-				<p className="loading-text">
+				{/* <p className="loading-text">
 				Loading...
-				</p>
+				</p> */}
 			{/* </div> */}
 		</div>
 	);

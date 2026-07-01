@@ -80,7 +80,7 @@ const Iuran = () => {
         }else{
             dispatch(setForm("ParamKey",CookieParamKey))
             dispatch(setForm("Username",CookieUsername))
-            dispatch(setForm("PageActive","IURAN"))
+            dispatch(setForm("PageActive","TAGIHAN_IURAN"))
         }
 
     },[])

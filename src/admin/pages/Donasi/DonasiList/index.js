@@ -22,6 +22,7 @@ import {
 	Tooltip,
 	ResponsiveContainer,
 } from "recharts";
+import { IconArrowRightUp, IconExport, IconWallet } from '../../../assets';
 
 const Donasi = () => {
     const history = useHistory(historyConfig);
@@ -369,99 +370,94 @@ const Donasi = () => {
     
     return (
 		<div className="container-fluid p-4 min-vh-100">
+			<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+				<div style={{ display:'flex', justifyContent:'flex-start', alignItems:'center' }}>
+					<div>
+						<div style={{ fontSize:30, fontWeight:'bold' }}>Donasi</div>
+						<div style={{ fontSize:15 }}>Kelola dan pantau semua transaksi keuangan</div>
+					</div>
+				</div>
+				<div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center' }}>
+					{/* <div style={{ backgroundColor:'#FFFFFF', border:'1px solid #002C00', padding:10, borderRadius:10, cursor:'pointer' }} onClick={() => handleInputPemasukan()}>
+						<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+							<img src={IconAdd} alt="logo" style={{ height:20, width:20 }}  />
+							<div style={{ width:5 }} />
+							<div style={{ color:'#002C00', fontWeight:'bold' }}>Input Pemasukan</div>
+						</div>
+					</div>
+					<div style={{ width:10 }} /> */}
+					<div style={{ backgroundColor:'#FFFFFF', border:'1px solid #002C00', padding:10, borderRadius:10, cursor:'pointer' }} onClick={() => handleExport()}>
+						<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+							<img src={IconExport} alt="logo" style={{ height:20, width:20 }}  />
+							<div style={{ width:5 }} />
+							<div style={{ color:'#002C00', fontWeight:'bold' }}>Export Data</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div style={{ height:30 }} />
+
+			<div className="row mb-3">
+				<div className="col-lg-3 mb-3">
+					<div className="finance-card saldo-awal">
+						<div className="finance-icon">
+							<img src={IconWallet} alt="logo" style={{ height:30, width:30 }} />
+						</div>
+						<div>
+							<div className="finance-title">
+								Total Saldo Terkumpul
+							</div>
+							<div className="finance-value">
+								{formatRupiah(TotalSettlement)}
+							</div>
+							<div className="finance-sub-title">
+								Saldo Donasi
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div className="col-lg-3 mb-3">
+					<div className="finance-card kredit">
+						<div className="finance-icon">
+							<img src={IconArrowRightUp} alt="logo" style={{ height:30, width:30, transform: "rotate(180deg)" }} />
+						</div>
+						<div>
+							<div className="finance-title">
+								Total Donasi Pending
+							</div>
+							<div className="finance-value">
+								{formatRupiah(TotalPending)}
+							</div>
+							<div className="finance-sub-title">
+								Donasi Pending
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div className="col-lg-3 mb-3">
+					<div className="finance-card saldo-akhir">
+						<div className="finance-icon">
+							<img src={IconWallet} alt="logo" style={{ height:30, width:30 }} />
+						</div>
+						<div>
+							<div className="finance-title">
+								Collection Rate Donasi
+							</div>
+							<div className="finance-value">
+								{CollectionRate.toFixed(1)}%
+							</div>
+							<div className="finance-sub-title">
+								Collection Rate Donasi
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<div className="card border-0 shadow rounded-4 p-3">
-
-				{SessionMessage !== "" ?
-				<SweetAlert 
-					warning 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						logout()
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{SessionMessage}
-				</SweetAlert>
-				:""}
-	
-				{SuccessMessage !== "" ?
-				<SweetAlert 
-					success 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setSuccessMessage("")
-						history.replace("/dashboard")
-					}}
-					btnSize="sm">
-					{SuccessMessage}
-				</SweetAlert>
-				:""}          
-	
-				{ErrorMessageAlert !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlert("")
-					}}
-					btnSize="sm">
-					{ErrorMessageAlert}
-				</SweetAlert>
-				:""}
-	
-				{ErrorMessageAlertLogout !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlertLogout("")
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{ErrorMessageAlertLogout}
-				</SweetAlert>
-				:""}
-
-				{/* Header */}
-				<div className="d-flex justify-content-between align-items-center mb-3">
-					<div className="d-flex justify-content-between align-items-center gap-2">
-						<FaMoneyBillWheat />
-						<h5 className="mb-0 fw-bold">List Donasi</h5>
-					</div>
-				</div>
-
-				<div className="row mb-3">
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Total Donasi Terkumpul</small>
-						<h5 className="text-success">
-							{formatRupiah(TotalSettlement)}
-						</h5>
-						</div>
-					</div>
-
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Total Donasi Pending</small>
-						<h5 className="text-warning">
-							{formatRupiah(TotalPending)}
-						</h5>
-						</div>
-					</div>
-
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Collection Rate Donasi</small>
-						<h5>{CollectionRate.toFixed(1)}%</h5>
-						</div>
-					</div>
-				</div>
-
-				<div style={{ height:30 }} />
 
 				<div className="filter-container">
 					<input
@@ -520,16 +516,6 @@ const Donasi = () => {
 					>
 						Reset
 					</button>
-
-					<button
-						className="btn-export"
-						onClick={() => {
-							handleExport()
-						}}
-					>
-						<FaFileDownload /> Export Data
-					</button>
-					
 				</div>
 
 				{/* Table */}
@@ -560,7 +546,7 @@ const Donasi = () => {
 							))
 							:
 							<tr>
-								<td colspan={7} style={{ color:'red', fontWeight:'bold', textAlign:'center' }}>Donasi tidak ditemukan</td>
+								<td colspan={7} style={{ color:'red', fontWeight:'bold', textAlign:'center' }}>Donasi belum ada</td>
 							</tr>
 							}
 						</tbody>
@@ -569,10 +555,10 @@ const Donasi = () => {
 
 				{/* Footer */}
 				<div className="d-flex justify-content-between align-items-center mt-3">
-					{/* <small className="text-muted">Total Data : {TotalRecords}</small> */}
 
 					<div style={{ fontWeight:'bold' }}>Total Data : {TotalRecords}</div>
 
+					{ListDonasi.length > 0 &&
 					<div className="d-flex gap-2">
 						<Pagination
 							currentPage={CurrentPage}
@@ -583,8 +569,63 @@ const Donasi = () => {
 								}
 							}}
 						/>
-					</div>
+					</div>}
 				</div>
+
+				{SessionMessage !== "" ?
+				<SweetAlert 
+					warning 
+					show={ShowAlert}
+					onConfirm={() => {
+						setShowAlert(false)
+						logout()
+						window.location.href="/admin/login";
+					}}
+					btnSize="sm">
+					{SessionMessage}
+				</SweetAlert>
+				:""}
+	
+				{SuccessMessage !== "" ?
+				<SweetAlert 
+					success 
+					show={ShowAlert}
+					onConfirm={() => {
+						setShowAlert(false)
+						setSuccessMessage("")
+						history.replace("/dashboard")
+					}}
+					btnSize="sm">
+					{SuccessMessage}
+				</SweetAlert>
+				:""}          
+	
+				{ErrorMessageAlert !== "" ?
+				<SweetAlert 
+					danger 
+					show={ShowAlert}
+					onConfirm={() => {
+						setShowAlert(false)
+						setErrorMessageAlert("")
+					}}
+					btnSize="sm">
+					{ErrorMessageAlert}
+				</SweetAlert>
+				:""}
+	
+				{ErrorMessageAlertLogout !== "" ?
+				<SweetAlert 
+					danger 
+					show={ShowAlert}
+					onConfirm={() => {
+						setShowAlert(false)
+						setErrorMessageAlertLogout("")
+						window.location.href="/admin/login";
+					}}
+					btnSize="sm">
+					{ErrorMessageAlertLogout}
+				</SweetAlert>
+				:""}
 
 			</div>
 		</div>

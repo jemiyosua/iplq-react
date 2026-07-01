@@ -20,10 +20,13 @@ const Routes = () => {
 				<Route exact path="/admin/laporan-keuangan">
 					<MainApp />
 				</Route>
-				<Route exact path="/admin/ipl">
+				<Route exact path="/admin/input-laporan-keuangan">
 					<MainApp />
 				</Route>
-				<Route exact path="/admin/iuran">
+				<Route exact path="/admin/tagihan-ipl">
+					<MainApp />
+				</Route>
+				<Route exact path="/admin/tagihan-iuran">
 					<MainApp />
 				</Route>
 				<Route exact path="/admin/transaksi-iuran">
@@ -51,6 +54,18 @@ const Routes = () => {
 					<MainApp />
 				</Route>
 				<Route exact path="/admin/laporan-pengaduan">
+					<MainApp />
+				</Route>
+				<Route exact path="/admin/master-cluster">
+					<MainApp />
+				</Route>
+				<Route exact path="/admin/rsvp">
+					<MainApp />
+				</Route>
+				<Route exact path="/admin/tarik-dana">
+					<MainApp />
+				</Route>
+				<Route exact path="/admin/nomor-rekening">
 					<MainApp />
 				</Route>
 				<Route path='/'>
