@@ -1,521 +1,384 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
-import { Header, Footer, Input, Button, Gap, Pagination } from '../../../components';
-import './fasilitas-booking.css'
+import '../../../../styles/admin-shared.css';
 import { useDispatch } from 'react-redux';
-import { AlertMessage, paths } from '../../../utils'
-import { historyConfig, generateSignature, fetchStatus } from '../../../utils/functions';
+import { AlertMessage, paths } from '../../../utils';
+import { generateSignature, fetchStatus } from '../../../utils/functions';
 import { setForm } from '../../../redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import DataTable from 'react-data-table-component';
 import SweetAlert from 'react-bootstrap-sweetalert';
-import { FaMoneyBillWheat } from 'react-icons/fa6';
-import { FaArrowAltCircleLeft, FaFileDownload } from 'react-icons/fa';
+import {
+	FaArrowLeft,
+	FaCalendarAlt,
+	FaCheckCircle,
+	FaFileDownload,
+	FaFilter,
+	FaRedoAlt,
+	FaSearch,
+	FaTimesCircle,
+} from 'react-icons/fa';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import {
-	BarChart,
-	Bar,
-	XAxis,
-	YAxis,
-	Tooltip,
-	ResponsiveContainer,
-} from "recharts";
 import LoadingLogo from '../../../components/molecules/LoadingLogo';
+import { Pagination } from '../../../components';
 
 const FasilitasBooking = () => {
-    const history = useHistory(historyConfig);
-    const dispatch = useDispatch();
-    const containerRef = useRef(null);
-    // const [cookies, setCookie,removeCookie] = useCookies(['user']);
-	const [cookies, setCookie,removeCookie] = useCookies(['user']);
-	const [Name, setName] = useState("")
+	const history = useHistory();
+	const dispatch = useDispatch();
+	const [cookies, , removeCookie] = useCookies(['user']);
 
-	const [ListFasilitasBooking, setListFasilitasBooking] = useState([])
-
+	const [ListFasilitasBooking, setListFasilitasBooking] = useState([]);
 	const [CurrentPage, setCurrentPage] = useState(1);
-	const [RowPage, setRowPage] = useState(10);
-	const [TotalPage, setTotalPage] = useState(0)
-	const [TotalRecords, setTotalRecords] = useState(0)
-	const [TotalAktif, setTotalAktif] = useState(0)
-	const [TotalTidakAktif, setTotalTidakAktif] = useState(0)
+	const [RowPage] = useState(10);
+	const [TotalPage, setTotalPage] = useState(1);
+	const [TotalRecords, setTotalRecords] = useState(0);
+	const [TotalAktif, setTotalAktif] = useState(0);
+	const [TotalTidakAktif, setTotalTidakAktif] = useState(0);
 
-	const [Loading, setLoading] = useState(false)
-	
-	const [ShowAlert, setShowAlert] = useState(true)
-    const [SessionMessage, setSessionMessage] = useState("")
-    const [SuccessMessage, setSuccessMessage] = useState("")
-    const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
-    const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
+	const [LoadingFasilitasBooking, setLoadingFasilitasBooking] = useState(false);
 
-	const [LoadingFasilitasBooking, setLoadingFasilitasBooking] = useState(false)
-
-	const [open,setOpen] = useState(true)
+	const [ShowAlert, setShowAlert] = useState(true);
+	const [SessionMessage, setSessionMessage] = useState('');
+	const [SuccessMessage, setSuccessMessage] = useState('');
+	const [ErrorMessageAlert, setErrorMessageAlert] = useState('');
+	const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState('');
 
 	const [GlobalSearch, setGlobalSearch] = useState('');
 	const [FilterStatus, setFilterStatus] = useState('');
 
-	useEffect(() => {
-        window.scrollTo(0, 0)
-
-        var CookieNama = getCookie("nama");
-        setName(CookieNama)
-
-		var CookieParamKey = getCookie("paramkey");
-        var CookieUsername = getCookie("username");
-        
-        if (CookieParamKey === null || CookieParamKey === "" || CookieUsername === null || CookieUsername === ""){
-            window.location.href="/admin/login";
-        }else{
-			if (cookies.varCookieFasilitasId == "" || cookies.varCookieFasilitasId == undefined) {
-				window.location.href="/admin/fasilitas";
-			} else {
-				dispatch(setForm("ParamKey",CookieParamKey))
-				dispatch(setForm("Username",CookieUsername))
-				dispatch(setForm("PageActive","FASILITAS"))
-			}
-        }
-
-    },[])
-
-	useEffect(() => {
-		getListFasilitasBooking("");
-	}, [CurrentPage]);
-
-	// useEffect(() => {
-	// 	console.log("masuk sini")
-	// 	const delay = setTimeout(() => {
-	// 		setCurrentPage(1);
-	// 	}, 500);
-
-	// 	return () => clearTimeout(delay);
-	// }, [GlobalSearch]);
-
-	const getCookie = (tipe) => {
+	const getCookie = useCallback((tipe) => {
 		var SecretCookie = cookies.varCookie;
-		if (SecretCookie !== "" && SecretCookie != null && typeof SecretCookie=="string") {
-			var LongSecretCookie = SecretCookie.split("|");
+		if (SecretCookie !== '' && SecretCookie != null && typeof SecretCookie === 'string') {
+			var LongSecretCookie = SecretCookie.split('|');
 			var username = LongSecretCookie[0];
 			var paramKey = LongSecretCookie[1];
 			var accessLogin = parseInt(LongSecretCookie[2]);
 			var accessName = LongSecretCookie[3];
 			var cluster = LongSecretCookie[4];
 			var clusterId = LongSecretCookie[5];
-		
-			if (tipe === "username") {
-				return username;
-			} else if (tipe === "paramkey") {
-				return paramKey;
-			} else if (tipe === "access") {
-				return accessLogin;
-			} else if (tipe === "access_name") {
-				return accessName;
-			} else if (tipe === "cluster") {
-				return cluster;
-			} else if (tipe === "cluster_id") {
-				return clusterId;
-			} else {
-				return null;
-			}
-		} else {
+
+			if (tipe === 'username') return username;
+			if (tipe === 'paramkey') return paramKey;
+			if (tipe === 'access') return accessLogin;
+			if (tipe === 'access_name') return accessName;
+			if (tipe === 'cluster') return cluster;
+			if (tipe === 'cluster_id') return clusterId;
 			return null;
 		}
-	}
+		return null;
+	}, [cookies.varCookie]);
 
-	const logout = ()=>{
-        removeCookie('varCookie', { path: '/'})
-        removeCookie('varMerchantId', { path: '/'})
-        removeCookie('varIdVoucher', { path: '/'})
-        dispatch(setForm("ParamKey",''))
-        dispatch(setForm("Username",''))
-        dispatch(setForm("Name",''))
-        dispatch(setForm("Role",''))
-        if(window){
-            sessionStorage.clear();
-		}
-    }
+	const logout = useCallback(() => {
+		removeCookie('varCookie', { path: '/' });
+		removeCookie('varMerchantId', { path: '/' });
+		removeCookie('varIdVoucher', { path: '/' });
+		removeCookie('varCookieFasilitasId', { path: '/' });
+		removeCookie('varCookieDonasiId', { path: '/' });
+		dispatch(setForm('ParamKey', ''));
+		dispatch(setForm('Username', ''));
+		dispatch(setForm('Name', ''));
+		dispatch(setForm('Role', ''));
+		if (window) { sessionStorage.clear(); }
+	}, [dispatch, removeCookie]);
 
-	const toggleSidebar = () =>{
-		setOpen(!open)
-	}
+	const getListFasilitasBooking = useCallback((posisi = '') => {
+		var cookieUsername = getCookie('username');
+		var cookieParamKey = getCookie('paramkey');
+		let fasilitasId = cookies.varCookieFasilitasId;
 
-	const getListFasilitasBooking = (posisi) => {
-		var cookieUsername = getCookie("username");
-		var cookieParamKey = getCookie("paramkey");
-		let fasilitasId = cookies.varCookieFasilitasId
-
-		let globalSearch = GlobalSearch
-		let filterStatus = FilterStatus
-		if (posisi == "reset") {
-			globalSearch = ""
-			filterStatus = ""
+		let globalSearch = GlobalSearch;
+		let filterStatus = FilterStatus;
+		if (posisi === 'reset') {
+			globalSearch = '';
+			filterStatus = '';
 		}
 
 		var requestBody = JSON.stringify({
-			"username": cookieUsername,
-			"paramkey": cookieParamKey,
-			"method": "SELECT",
-			"fasilitas_id": fasilitasId,
-			"global_search": globalSearch,
-			"status": filterStatus,
-			"page": CurrentPage,
-			"row_page": RowPage,
-			"order_by": "",
-			"order": ""
+			username: cookieUsername,
+			paramkey: cookieParamKey,
+			method: 'SELECT',
+			fasilitas_id: fasilitasId,
+			global_search: globalSearch,
+			status: filterStatus,
+			page: CurrentPage,
+			row_page: RowPage,
+			order_by: '',
+			order: '',
 		});
 
-		setLoadingFasilitasBooking(true)
+		setLoadingFasilitasBooking(true);
 
 		var url = paths.URL_API_ADMIN + 'FasilitasBooking';
-		var Signature  = generateSignature(requestBody)
+		var Signature = generateSignature(requestBody);
 
 		fetch(url, {
-			method: "POST",
+			method: 'POST',
 			body: requestBody,
-			headers: {
-				'Content-Type': 'application/json',
-				'Signature': Signature
-			},
+			headers: { 'Content-Type': 'application/json', Signature: Signature },
 		})
-		.then(fetchStatus)
-		.then(response => response.json())
-		.then((data) => {
-			setLoadingFasilitasBooking(false)
-
-			if (data.error_code == "0") {
-				removeCookie('varCookieFasilitasId', { path: '/'})
-
-				setListFasilitasBooking(data.result)
-				setTotalAktif(data.total_aktif)
-				setTotalTidakAktif(data.total_tidak_aktif)
-				setTotalPage(data.total_page)
-				setTotalRecords(data.total_record)
-				// setTotal(data.result_summary.total)
-				return
-			} else {
-				if (data.error_code === "2") {
-					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
-					setShowAlert(true);
-					return;
+			.then(fetchStatus)
+			.then((response) => response.json())
+			.then((data) => {
+				setLoadingFasilitasBooking(false);
+				if (data.error_code === '0' || data.error_code === 0) {
+					setListFasilitasBooking(data.result || []);
+					setTotalAktif(Number(data.total_aktif) || 0);
+					setTotalTidakAktif(Number(data.total_tidak_aktif) || 0);
+					setTotalPage(Number(data.total_page) || 1);
+					setTotalRecords(Number(data.total_record) || 0);
 				} else {
-					setErrorMessageAlert(data.error_message);
-					setShowAlert(true);
-					return;
+					if (data.error_code === '2' || data.error_code === 2) {
+						setSessionMessage('Session Anda Telah Habis. Silahkan Login Kembali.');
+						setShowAlert(true);
+					} else {
+						setErrorMessageAlert(data.error_message);
+						setShowAlert(true);
+					}
 				}
-			}
-		})
-		.catch((error) => {
-			setLoadingFasilitasBooking(false)
-
-			if (error.message === 401) {
-				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
+			})
+			.catch((error) => {
+				setLoadingFasilitasBooking(false);
+				if (error.message === 401) {
+					setErrorMessageAlert('Maaf anda tidak memiliki ijin untuk mengakses halaman ini.');
+				} else {
+					setErrorMessageAlert(AlertMessage.failedConnect);
+				}
 				setShowAlert(true);
-				return false;
-			} else if (error.message !== 401) {
-				setErrorMessageAlert(AlertMessage.failedConnect);
-				setShowAlert(true);
-				return false;
-			}
-		});
-	}
+			});
+	}, [CurrentPage, FilterStatus, GlobalSearch, RowPage, getCookie, cookies.varCookieFasilitasId]);
 
-	const formatRupiah = (value) => {
-		return new Intl.NumberFormat("id-ID", {
-			style: "currency",
-			currency: "IDR",
-			minimumFractionDigits: 0
-		}).format(value);
-	}
+	useEffect(() => {
+		window.scrollTo(0, 0);
+		var cookieParamKey = getCookie('paramkey');
+		var cookieUsername = getCookie('username');
+
+		if (!cookieParamKey || !cookieUsername) {
+			history.push('/admin/login');
+		} else {
+			if (!cookies.varCookieFasilitasId) {
+				history.push('/admin/fasilitas');
+			} else {
+				dispatch(setForm('ParamKey', cookieParamKey));
+				dispatch(setForm('Username', cookieUsername));
+				dispatch(setForm('PageActive', 'FASILITAS'));
+			}
+		}
+	}, [dispatch, getCookie, history, cookies.varCookieFasilitasId]);
+
+	useEffect(() => {
+		if (cookies.varCookieFasilitasId) {
+			getListFasilitasBooking('');
+		}
+	}, [getListFasilitasBooking]);
+
+	const formatNumber = (value) => {
+		return new Intl.NumberFormat('id-ID').format(value || 0);
+	};
 
 	const statusBadge = (status) => {
-		switch (status) {
-			case 1:
-				return <div style={{ color:'#84cc16', fontWeight:'bold', fontSize:15 }}>Aktif</div>
-			case 0:
-				return <div style={{ color:'red', fontWeight:'bold', fontSize:15 }}>Tidak Aktif</div>
-			default:
-				return null;
+		if (Number(status) === 1) {
+			return <span className="admin-status-badge active">Aktif</span>;
 		}
+		return <span className="admin-status-badge inactive">Tidak Aktif</span>;
+	};
+
+	const exportToExcel = (data, fileName = 'data') => {
+		const worksheet = XLSX.utils.json_to_sheet(data);
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, 'Booking Fasilitas');
+		const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+		const fileData = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+		saveAs(fileData, `${fileName}.xlsx`);
 	};
 
 	const handleExport = () => {
 		const formatted = ListFasilitasBooking.map((item) => ({
-			"Order ID": item.order_id || "-",
-			"Transaksi ID": item.transaction_id || "-",
-			"Nama": item.nama_user,
-			"No Rumah": item.nomor_rumah,
-			"Cluster": item.cluster,
-			"Bulan Invoice": formatBulan(item.bulan_invoice),
-			"Tagihan": formatRupiah(item.tagihan),
-			"Biaya Aplikasi": formatRupiah(item.margin),
-			"Tanggal Bayar": item.tanggal_bayar,
-			"Status Transaksi": item.transaction_status,
+			'Booking ID': item.booking_id || '-',
+			'Cluster': item.cluster || '-',
+			'Nama Pemesan': item.nama || '-',
+			'Nama Fasilitas': item.nama_fasilitas || '-',
+			'Jam Mulai': item.jam_mulai_booking || '-',
+			'Jumlah Orang': item.jumlah_orang || 0,
+			'Status': Number(item.status) === 1 ? 'Aktif' : 'Tidak Aktif',
 		}));
-
 		const now = new Date();
-
-		const day = String(now.getDate()).padStart(2, "0");
-		const month = String(now.getMonth() + 1).padStart(2, "0");
+		const day = String(now.getDate()).padStart(2, '0');
+		const month = String(now.getMonth() + 1).padStart(2, '0');
 		const year = now.getFullYear();
-		const dateFinal = `${day}-${month}-${year}`;
-
-		exportToExcel(formatted, "export-data-fasilitas-"+dateFinal);
+		exportToExcel(formatted, `export-booking-fasilitas-${day}-${month}-${year}`);
 	};
 
-	const exportToExcel = (data, fileName = "data") => {
-		// ubah JSON → worksheet
-		const worksheet = XLSX.utils.json_to_sheet(data);
-
-		// buat workbook
-		const workbook = XLSX.utils.book_new();
-		XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-		// convert ke buffer
-		const excelBuffer = XLSX.write(workbook, {
-			bookType: "xlsx",
-			type: "array",
-		});
-
-		// save file
-		const fileData = new Blob([excelBuffer], {
-			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-		});
-
-		saveAs(fileData, `${fileName}.xlsx`);
+	const handleFilter = () => {
+		setListFasilitasBooking([]);
+		if (CurrentPage === 1) { getListFasilitasBooking(''); } else { setCurrentPage(1); }
 	};
 
-	const formatBulan = (val) => {
-		if (!val) return "-";
-
-		const [year, month] = val.split("-");
-		const date = new Date(year, month - 1);
-
-		return date.toLocaleString("id-ID", {
-			month: "long",
-			year: "numeric",
-		});
+	const handleReset = () => {
+		setGlobalSearch('');
+		setFilterStatus('');
+		setListFasilitasBooking([]);
+		if (CurrentPage === 1) { getListFasilitasBooking('reset'); } else { setCurrentPage(1); }
 	};
 
-	const handleDetailFasilitasiBooking = (id) => {
-		console.log(id)
-	}
+	const summaryCards = [
+		{ title: 'Booking Aktif', value: formatNumber(TotalAktif), description: 'Booking yang sedang aktif', icon: <FaCheckCircle />, tone: 'green' },
+		{ title: 'Booking Tidak Aktif', value: formatNumber(TotalTidakAktif), description: 'Booking nonaktif', icon: <FaTimesCircle />, tone: 'red' },
+	];
 
-	const handleBack = () => {
-		window.location.href = "/admin/fasilitas"
-	}
-    
-    return (
+	return (
 		<>
 			{LoadingFasilitasBooking && <LoadingLogo />}
 
-			<div className="container-fluid p-4 min-vh-100">
-				<div className="card border-0 shadow rounded-4 p-3">
-
-					{SessionMessage !== "" ?
-					<SweetAlert 
-						warning 
-						show={ShowAlert}
-						onConfirm={() => {
-							setShowAlert(false)
-							logout()
-							window.location.href="/admin/login";
-						}}
-						btnSize="sm">
+			<div className="admin-page">
+				{SessionMessage !== '' && (
+					<SweetAlert warning show={ShowAlert} onConfirm={() => { setShowAlert(false); logout(); history.push('/admin/login'); }} btnSize="sm">
 						{SessionMessage}
 					</SweetAlert>
-					:""}
-		
-					{SuccessMessage !== "" ?
-					<SweetAlert 
-						success 
-						show={ShowAlert}
-						onConfirm={() => {
-							setShowAlert(false)
-							setSuccessMessage("")
-							history.replace("/dashboard")
-						}}
-						btnSize="sm">
+				)}
+				{SuccessMessage !== '' && (
+					<SweetAlert success show={ShowAlert} onConfirm={() => { setShowAlert(false); setSuccessMessage(''); history.replace('/admin/fasilitas'); }} btnSize="sm">
 						{SuccessMessage}
 					</SweetAlert>
-					:""}          
-		
-					{ErrorMessageAlert !== "" ?
-					<SweetAlert 
-						danger 
-						show={ShowAlert}
-						onConfirm={() => {
-							setShowAlert(false)
-							setErrorMessageAlert("")
-						}}
-						btnSize="sm">
+				)}
+				{ErrorMessageAlert !== '' && (
+					<SweetAlert danger show={ShowAlert} onConfirm={() => { setShowAlert(false); setErrorMessageAlert(''); }} btnSize="sm">
 						{ErrorMessageAlert}
 					</SweetAlert>
-					:""}
-		
-					{ErrorMessageAlertLogout !== "" ?
-					<SweetAlert 
-						danger 
-						show={ShowAlert}
-						onConfirm={() => {
-							setShowAlert(false)
-							setErrorMessageAlertLogout("")
-							window.location.href="/admin/login";
-						}}
-						btnSize="sm">
+				)}
+				{ErrorMessageAlertLogout !== '' && (
+					<SweetAlert danger show={ShowAlert} onConfirm={() => { setShowAlert(false); setErrorMessageAlertLogout(''); history.push('/admin/login'); }} btnSize="sm">
 						{ErrorMessageAlertLogout}
 					</SweetAlert>
-					:""}
+				)}
 
-					{/* Header */}
-					<div className="d-flex justify-content-between align-items-center mb-3" onClick={() => handleBack()} style={{ cursor:'pointer' }}>
-						<div className="d-flex justify-content-between align-items-center gap-2">
-							<FaArrowAltCircleLeft />
-							<h5 className="mb-0 fw-bold">List Fasilitas Booking</h5>
-						</div>
-					</div>
-
-					<div className="row mb-3">
-						<div className="col-md-3">
-							<div className="card p-3 rounded-4 shadow-sm">
-							<small>Booking Aktif</small>
-							<h5 className="text-success">
-								{TotalAktif}
-							</h5>
-							</div>
-						</div>
-
-						<div className="col-md-3">
-							<div className="card p-3 rounded-4 shadow-sm">
-							<small>Booking Tidak Aktif</small>
-							<h5 className="text-success">
-								{TotalTidakAktif}
-							</h5>
-							</div>
-						</div>
-					</div>
-
-					<div style={{ height:30 }} />
-
-					<div className="filter-container">
-						<input
-							type="text"
-							className="filter-input"
-							placeholder="🔍 Cari Nama"
-							value={GlobalSearch}
-							onChange={(e) => setGlobalSearch(e.target.value)}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") {
-									setCurrentPage(1);
-									getListFasilitasBooking("");
-								}
-							}}
-						/>
-
-						<select
-							className="filter-select"
-							value={FilterStatus}
-							onChange={(e) => {
-								setFilterStatus(e.target.value)
+				<div className="admin-header">
+					<div>
+						<button
+							onClick={() => history.push('/admin/fasilitas')}
+							style={{
+								display: 'inline-flex',
+								alignItems: 'center',
+								gap: 8,
+								background: 'none',
+								border: 'none',
+								color: '#2563eb',
+								fontSize: 14,
+								fontWeight: 600,
+								cursor: 'pointer',
+								padding: 0,
+								marginBottom: 8,
 							}}
 						>
-							<option value="">Status Fasilitas</option>
+							<FaArrowLeft /> Kembali ke Daftar Fasilitas
+						</button>
+						<div className="admin-eyebrow">Booking Fasilitas</div>
+						<h1>Booking Fasilitas</h1>
+						<p>Pantau booking dan jadwal penggunaan fasilitas.</p>
+					</div>
+				</div>
+
+				<div className="admin-summary-grid">
+					{summaryCards.map((item) => (
+						<div className={`admin-summary-card ${item.tone}`} key={item.title}>
+							<div>
+								<span>{item.title}</span>
+								<strong>{item.value}</strong>
+								<small>{item.description}</small>
+							</div>
+							<div className="admin-summary-icon">{item.icon}</div>
+						</div>
+					))}
+				</div>
+
+				<div className="admin-panel">
+					<div className="admin-panel-header">
+						<div>
+							<h2><FaCalendarAlt /> Daftar Booking</h2>
+							<p>Total data: {formatNumber(TotalRecords)}</p>
+						</div>
+						<button className="admin-btn-primary" onClick={handleExport} disabled={ListFasilitasBooking.length === 0}>
+							<FaFileDownload /> Export Data
+						</button>
+					</div>
+
+					<div className="admin-filter-grid">
+						<div className="admin-search-field">
+							<FaSearch />
+							<input
+								type="text"
+								placeholder="Cari nama pemesan atau cluster"
+								value={GlobalSearch}
+								onChange={(e) => setGlobalSearch(e.target.value)}
+								onKeyDown={(e) => { if (e.key === 'Enter') handleFilter(); }}
+							/>
+						</div>
+
+						<select value={FilterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+							<option value="">Status Booking</option>
 							<option value="1">Aktif</option>
 							<option value="0">Tidak Aktif</option>
 						</select>
 
-						<button
-							className="btn-filter"
-							onClick={() => {
-								setListFasilitasBooking([])
-								setCurrentPage(1)
-								getListFasilitasBooking("")
-							}}
-						>
-							Filter
+						<button className="admin-btn-filter" onClick={handleFilter}>
+							<FaFilter /> Filter
 						</button>
 
-						<button
-							className="btn-reset"
-							onClick={() => {
-								setCurrentPage(1)
-								setGlobalSearch("")
-								setFilterStatus("")
-								getListFasilitasBooking("reset")
-							}}
-						>
-							Reset
+						<button className="admin-btn-secondary" onClick={handleReset}>
+							<FaRedoAlt /> Reset
 						</button>
-
-						<button
-							className="btn-export"
-							onClick={() => {
-								handleExport()
-							}}
-						>
-							<FaFileDownload /> Export Data
-						</button>
-						
 					</div>
 
-					{/* Table */}
-					<div className="table-responsive">
-						<table className="table align-middle">
-							<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
-							<tr>
-								<th>Booking ID</th>
-								<th>Cluster</th>
-								<th>Nama Pemesan</th>
-								<th>Nama Fasilitas</th>
-								<th>Jam Mulai</th>
-								<th>Jumlah Orang</th>
-								<th>Status Booking</th>
-							</tr>
+					<div className="table-responsive admin-table-wrap">
+						<table className="table admin-table align-middle">
+							<thead>
+								<tr>
+									<th>Booking ID</th>
+									<th>Cluster</th>
+									<th>Nama Pemesan</th>
+									<th>Nama Fasilitas</th>
+									<th>Jam Mulai</th>
+									<th>Jumlah Orang</th>
+									<th>Status</th>
+								</tr>
 							</thead>
 							<tbody>
-								{ListFasilitasBooking.length > 0 ? ListFasilitasBooking?.map((item, index) => (
-									<tr key={index} onClick={() => handleDetailFasilitasiBooking(item.id)} style={{ cursor:'pointer' }}>
-										<td>{item.booking_id}</td>
-										<td>{item.cluster}</td>
-										<td>{item.nama}</td>
-										<td>{item.nama_fasilitas}</td>
-										<td>{item.jam_mulai_booking}</td>
-										<td>{item.jumlah_orang}</td>
+								{ListFasilitasBooking?.length > 0 ? ListFasilitasBooking.map((item, index) => (
+									<tr key={item.id || index}>
+										<td><strong>{item.booking_id || '-'}</strong></td>
+										<td>{item.cluster || '-'}</td>
+										<td>{item.nama || '-'}</td>
+										<td>{item.nama_fasilitas || '-'}</td>
+										<td>{item.jam_mulai_booking || '-'}</td>
+										<td>{item.jumlah_orang || '-'}</td>
 										<td>{statusBadge(item.status)}</td>
 									</tr>
-								))
-								:
-								<tr>
-									<td colspan={7} style={{ color:'red', fontWeight:'bold', textAlign:'center' }}>Booking tidak tersedia</td>
-								</tr>
-								}
+								)) : (
+									<tr>
+										<td colSpan={7}>
+											<div className="admin-empty-state">
+												<strong>Booking tidak ditemukan</strong>
+												<span>Coba ubah filter atau kata pencarian.</span>
+											</div>
+										</td>
+									</tr>
+								)}
 							</tbody>
 						</table>
 					</div>
 
-					{/* Footer */}
-					<div className="d-flex justify-content-between align-items-center mt-3">
-						{/* <small className="text-muted">Total Data : {TotalRecords}</small> */}
-
-						<div style={{ fontWeight:'bold' }}>Total Data : {TotalRecords}</div>
-
-						<div className="d-flex gap-2">
-							<Pagination
-								currentPage={CurrentPage}
-								totalPage={TotalPage}
-								onPageChange={(page) => {
-									if (!LoadingFasilitasBooking) {
-										setCurrentPage(page);
-									}
-								}}
-							/>
-						</div>
+					<div className="admin-footer">
+						<div>Total Data : {formatNumber(TotalRecords)}</div>
+						<Pagination
+							currentPage={CurrentPage}
+							totalPage={Math.max(Number(TotalPage) || 1, 1)}
+							onPageChange={(page) => { if (!LoadingFasilitasBooking) setCurrentPage(page); }}
+						/>
 					</div>
-
 				</div>
 			</div>
 		</>
 	);
-}
+};
 
 export default FasilitasBooking;

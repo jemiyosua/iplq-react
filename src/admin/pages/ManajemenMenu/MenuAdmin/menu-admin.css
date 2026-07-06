@@ -1,5 +1,49 @@
-/* Modal Overlay */
-.donasi-modal-overlay {
+/* Menu Admin - specific styles */
+.menu-href {
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #475569;
+    font-family: monospace;
+}
+
+.menu-sub-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border: 1px solid #d7e2dc;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #0f766e;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+
+.menu-sub-toggle:hover {
+    background: #dcfce7;
+    border-color: #16a34a;
+}
+
+.menu-sub-row {
+    background: #f8fafb !important;
+}
+
+.menu-sub-row td {
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.menu-sub-indicator {
+    color: #16a34a;
+    font-weight: 800;
+    margin-right: 8px;
+}
+
+/* Modal */
+.menu-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -14,31 +58,23 @@
     padding: 24px;
 }
 
-/* Modal Container */
-.donasi-modal {
+.menu-modal {
     width: 100%;
-    max-width: 560px;
+    max-width: 520px;
     max-height: 90vh;
     overflow-y: auto;
     background: #ffffff;
     border-radius: 12px;
     box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
-    animation: donasi-modal-in 0.2s ease;
+    animation: menu-modal-in 0.2s ease;
 }
 
-@keyframes donasi-modal-in {
-    from {
-        opacity: 0;
-        transform: translateY(16px) scale(0.97);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+@keyframes menu-modal-in {
+    from { opacity: 0; transform: translateY(16px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Modal Header */
-.donasi-modal-header {
+.menu-modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -46,14 +82,14 @@
     border-bottom: 1px solid #e5e7eb;
 }
 
-.donasi-modal-header h3 {
+.menu-modal-header h3 {
     margin: 0;
     font-size: 18px;
     font-weight: 800;
     color: #0b2218;
 }
 
-.donasi-modal-close {
+.menu-modal-close {
     width: 34px;
     height: 34px;
     display: flex;
@@ -68,40 +104,38 @@
     transition: 0.15s ease;
 }
 
-.donasi-modal-close:hover {
+.menu-modal-close:hover {
     background: #fee2e2;
     color: #dc2626;
 }
 
-/* Modal Body */
-.donasi-modal-body {
+.menu-modal-body {
     padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 18px;
 }
 
-.donasi-modal-row {
+.menu-modal-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 14px;
 }
 
-.donasi-modal-field {
+.menu-modal-field {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.donasi-modal-field label {
+.menu-modal-field label {
     color: #475569;
     font-size: 13px;
     font-weight: 700;
 }
 
-.donasi-modal-field input,
-.donasi-modal-field select,
-.donasi-modal-field textarea {
+.menu-modal-field input,
+.menu-modal-field select {
     width: 100%;
     height: 44px;
     padding: 0 12px;
@@ -115,21 +149,13 @@
     transition: 0.15s ease;
 }
 
-.donasi-modal-field textarea {
-    height: auto;
-    padding: 12px;
-    resize: vertical;
-}
-
-.donasi-modal-field input:focus,
-.donasi-modal-field select:focus,
-.donasi-modal-field textarea:focus {
+.menu-modal-field input:focus,
+.menu-modal-field select:focus {
     border-color: #16a34a;
     box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
 }
 
-/* Modal Footer */
-.donasi-modal-footer {
+.menu-modal-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -138,21 +164,17 @@
     border-top: 1px solid #e5e7eb;
 }
 
-/* Responsive */
 @media (max-width: 576px) {
-    .donasi-modal {
+    .menu-modal {
         max-width: none;
-        margin: 0;
         border-radius: 12px 12px 0 0;
         max-height: 85vh;
     }
-
-    .donasi-modal-overlay {
+    .menu-modal-overlay {
         align-items: flex-end;
         padding: 0;
     }
-
-    .donasi-modal-row {
+    .menu-modal-row {
         grid-template-columns: 1fr;
     }
 }

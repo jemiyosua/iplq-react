@@ -14,58 +14,7 @@ const Routes = () => {
 				<Route path='/admin/Login'>
 					<Login />
 				</Route>
-				<Route exact path="/admin/dashboard">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/laporan-keuangan">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/input-laporan-keuangan">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/tagihan-ipl">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/tagihan-iuran">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/transaksi-iuran">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/transaksi-ipl">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/donasi">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/donasi-detail">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/data-warga">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/data-warga-import">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/fasilitas">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/fasilitas-booking">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/laporan-pengaduan">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/master-cluster">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/rsvp">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/tarik-dana">
-					<MainApp />
-				</Route>
-				<Route exact path="/admin/nomor-rekening">
+				<Route path="/admin">
 					<MainApp />
 				</Route>
 				<Route path='/'>

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useCookies } from 'react-cookie'
 import { useSelector } from 'react-redux'
-import { BrowserRouter , Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
+import { Route, Switch } from 'react-router-dom'
 import LeftMenu from '../../components/molecules/LeftMenu'
-import { historyConfig } from '../../utils/functions'
 import Dashboard from '../Dashboard'
 import Midtrans from '../Midtrans'
 import Billing from '../Billing'
@@ -23,11 +22,14 @@ import LaporangKeuanganList from '../LaporanKeuangan/LaporanKeuanganList'
 import InputLaporanKeuangan from '../LaporanKeuangan/InputLaporanKeuangan'
 import MasterCluster from '../MasterCluster'
 import RSVPList from '../RSVP/RSVPList'
+import RSVPDetail from '../RSVP/RSVPDetail'
 import TarikDana from '../TarikDana/ListTarikDana'
 import ListNomorRekening from '../TarikDana/ListNomorRekening'
+import ListBank from '../TarikDana/ListBank'
+import MenuAdmin from '../ManajemenMenu/MenuAdmin'
+import MenuAplikasi from '../ManajemenMenu/MenuAplikasi'
 
 const MainApp = () => {
-    const history = useHistory(historyConfig);
     const {form}=useSelector(state=>state.PaketReducer);
 
     const [cookies, setCookie, removeCookie] = useCookies(['user']);
@@ -81,64 +83,74 @@ const MainApp = () => {
 
                     <div className="content-wrapper" style={{ paddingTop:70, paddingLeft:30, paddingRight:15, overflow:'hidden' }}> 
                         {/* <Header/> */}
-                        <BrowserRouter basename="/admin">
-                            <Switch>
-                                <Route exact path="/dashboard">
-                                    <Dashboard />
-                                </Route>
-                                <Route path="/laporan-keuangan">
-                                    <LaporangKeuanganList />
-                                </Route>
-                                <Route path="/input-laporan-keuangan">
-                                    <InputLaporanKeuangan />
-                                </Route>
-                                <Route path="/tagihan-ipl">
-                                    <IPL />
-                                </Route>
-                                <Route path="/tagihan-iuran">
-                                    <Iuran />
-                                </Route>
-								<Route path="/transaksi-ipl">
-                                    <TransaksiIPL />
-                                </Route>
-                                <Route path="/transaksi-iuran">
-                                    <TransaksiIuran />
-                                </Route>
-								<Route path="/donasi">
-                                    <Donasi />
-                                </Route>
-								<Route path="/donasi-detail">
-                                    <DonasiDetail />
-                                </Route>
-								<Route path="/data-warga">
-                                    <DataWarga />
-                                </Route>
-								<Route path="/data-warga-import">
-                                    <DataWargaImport />
-                                </Route>
-								<Route path="/fasilitas">
-                                    <FasilitasList />
-                                </Route>
-                                <Route path="/fasilitas-booking">
-                                    <FasilitasBooking />
-                                </Route>
-                                <Route path="/laporan-pengaduan">
-                                    <LaporanPengaduanList />
-                                </Route>
-                                <Route path="/master-cluster">
-                                    <MasterCluster />
-                                </Route>
-                                <Route path="/rsvp">
-                                    <RSVPList />
-                                </Route>
-                                <Route path="/tarik-dana">
-                                    <TarikDana />
-                                </Route>
-                                <Route path="/nomor-rekening">
-                                    <ListNomorRekening />
-                                </Route>
-                            </Switch>
-                        </BrowserRouter>
+                        <Switch>
+                            <Route exact path="/admin/dashboard">
+                                <Dashboard />
+                            </Route>
+                            <Route exact path="/admin/laporan-keuangan">
+                                <LaporangKeuanganList />
+                            </Route>
+                            <Route exact path="/admin/input-laporan-keuangan">
+                                <InputLaporanKeuangan />
+                            </Route>
+                            <Route exact path="/admin/tagihan-ipl">
+                                <IPL />
+                            </Route>
+                            <Route exact path="/admin/tagihan-iuran">
+                                <Iuran />
+                            </Route>
+							<Route exact path="/admin/transaksi-ipl">
+                                <TransaksiIPL />
+                            </Route>
+                            <Route exact path="/admin/transaksi-iuran">
+                                <TransaksiIuran />
+                            </Route>
+							<Route exact path="/admin/donasi">
+                                <Donasi />
+                            </Route>
+							<Route exact path="/admin/donasi-detail">
+                                <DonasiDetail />
+                            </Route>
+							<Route exact path="/admin/data-warga">
+                                <DataWarga />
+                            </Route>
+							<Route exact path="/admin/data-warga-import">
+                                <DataWargaImport />
+                            </Route>
+							<Route exact path="/admin/fasilitas">
+                                <FasilitasList />
+                            </Route>
+                            <Route exact path="/admin/fasilitas-booking">
+                                <FasilitasBooking />
+                            </Route>
+                            <Route exact path="/admin/laporan-pengaduan">
+                                <LaporanPengaduanList />
+                            </Route>
+                            <Route exact path="/admin/master-cluster">
+                                <MasterCluster />
+                            </Route>
+                            <Route exact path="/admin/rsvp">
+                                <RSVPList />
+                            </Route>
+                            <Route exact path="/admin/rsvp-detail">
+                                <RSVPDetail />
+                            </Route>
+                            <Route exact path="/admin/tarik-dana">
+                                <TarikDana />
+                            </Route>
+                            <Route exact path="/admin/nomor-rekening">
+                                <ListNomorRekening />
+                            </Route>
+                            <Route exact path="/admin/list-bank">
+                                <ListBank />
+                            </Route>
+                            <Route exact path="/admin/menu-admin">
+                                <MenuAdmin />
+                            </Route>
+                            <Route exact path="/admin/menu-aplikasi">
+                                <MenuAplikasi />
+                            </Route>
+                        </Switch>
                     </div>
                 </div>
             </div>

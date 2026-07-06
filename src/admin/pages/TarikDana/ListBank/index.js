@@ -9,11 +9,11 @@ import { setForm } from '../../../redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import SweetAlert from 'react-bootstrap-sweetalert';
 import {
-	FaBuilding,
 	FaCheckCircle,
-	FaEye,
+	FaEdit,
 	FaFileDownload,
 	FaFilter,
+	FaPlus,
 	FaRedoAlt,
 	FaSearch,
 	FaTimesCircle,
@@ -22,39 +22,45 @@ import {
 } from 'react-icons/fa';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import LoadingLogo from '../../../components/molecules/LoadingLogo';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 import { Pagination } from '../../../components';
 
-const FasilitasList = () => {
+const ListBank = () => {
 	const history = useHistory();
 	const dispatch = useDispatch();
-	const [cookies, setCookie, removeCookie] = useCookies(['user']);
+	const [cookies, , removeCookie] = useCookies(['user']);
 
-	const [ListFasilitas, setListFasilitas] = useState([]);
+	const [ListData, setListData] = useState([]);
 	const [CurrentPage, setCurrentPage] = useState(1);
 	const [RowPage] = useState(10);
 	const [TotalPage, setTotalPage] = useState(1);
 	const [TotalRecords, setTotalRecords] = useState(0);
 	const [TotalAktif, setTotalAktif] = useState(0);
 	const [TotalTidakAktif, setTotalTidakAktif] = useState(0);
-	const [TotalTersedia, setTotalTersedia] = useState(0);
-	const [TotalTidakTersedia, setTotalTidakTersedia] = useState(0);
 
-	const [LoadingFasilitas, setLoadingFasilitas] = useState(false);
+	const [Loading, setLoading] = useState(false);
 
 	const [ShowAlert, setShowAlert] = useState(false);
 	const [SessionMessage, setSessionMessage] = useState('');
 	const [SuccessMessage, setSuccessMessage] = useState('');
 	const [ErrorMessageAlert, setErrorMessageAlert] = useState('');
 	const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState('');
-
-	const [AlertState, setAlertState] = useState('');
 	const [ConfirmMessage, setConfirmMessage] = useState('');
-	const [SelectedItem, setSelectedItem] = useState(null);
-	const [UpdateType, setUpdateType] = useState(''); // 'tersedia' atau 'aktif'
+	const [AlertState, setAlertState] = useState('');
 
 	const [GlobalSearch, setGlobalSearch] = useState('');
 	const [FilterStatus, setFilterStatus] = useState('');
+
+	// State untuk confirm update status
+	const [SelectedItem, setSelectedItem] = useState(null);
+	const [UpdateType, setUpdateType] = useState('');
+
+	// State untuk modal input/edit bank
+	const [ShowModalBank, setShowModalBank] = useState(false);
+	const [ModalMode, setModalMode] = useState('insert'); // 'insert' atau 'update'
+	const [IdBank, setIdBank] = useState('');
+	const [NamaBank, setNamaBank] = useState('');
 
 	const getCookie = useCallback((tipe) => {
 		var SecretCookie = cookies.varCookie;
@@ -82,8 +88,6 @@ const FasilitasList = () => {
 		removeCookie('varCookie', { path: '/' });
 		removeCookie('varMerchantId', { path: '/' });
 		removeCookie('varIdVoucher', { path: '/' });
-		removeCookie('varCookieFasilitasId', { path: '/' });
-		removeCookie('varCookieDonasiId', { path: '/' });
 		dispatch(setForm('ParamKey', ''));
 		dispatch(setForm('Username', ''));
 		dispatch(setForm('Name', ''));
@@ -91,7 +95,7 @@ const FasilitasList = () => {
 		if (window) { sessionStorage.clear(); }
 	}, [dispatch, removeCookie]);
 
-	const getListFasilitas = useCallback((posisi = '') => {
+	const getListBank = useCallback((posisi = '') => {
 		var cookieUsername = getCookie('username');
 		var cookieParamKey = getCookie('paramkey');
 
@@ -110,13 +114,13 @@ const FasilitasList = () => {
 			status: filterStatus,
 			page: CurrentPage,
 			row_page: RowPage,
-			order_by: '',
-			order: '',
+			order_by: 'nama_bank',
+			order: 'ASC',
 		});
 
-		setLoadingFasilitas(true);
+		setLoading(true);
 
-		var url = paths.URL_API_ADMIN + 'Fasilitas';
+		var url = paths.URL_API_ADMIN + 'Bank';
 		var Signature = generateSignature(requestBody);
 
 		fetch(url, {
@@ -127,13 +131,11 @@ const FasilitasList = () => {
 			.then(fetchStatus)
 			.then((response) => response.json())
 			.then((data) => {
-				setLoadingFasilitas(false);
+				setLoading(false);
 				if (data.error_code === '0' || data.error_code === 0) {
-					setListFasilitas(data.result || []);
+					setListData(data.result || []);
 					setTotalAktif(Number(data.total_aktif) || 0);
 					setTotalTidakAktif(Number(data.total_tidak_aktif) || 0);
-					setTotalTersedia(Number(data.total_tersedia) || 0);
-					setTotalTidakTersedia(Number(data.total_tidak_tersedia) || 0);
 					setTotalPage(Number(data.total_page) || 1);
 					setTotalRecords(Number(data.total_record) || 0);
 				} else {
@@ -147,7 +149,7 @@ const FasilitasList = () => {
 				}
 			})
 			.catch((error) => {
-				setLoadingFasilitas(false);
+				setLoading(false);
 				if (error.message === 401) {
 					setErrorMessageAlert('Maaf anda tidak memiliki ijin untuk mengakses halaman ini.');
 				} else {
@@ -157,25 +159,20 @@ const FasilitasList = () => {
 			});
 	}, [CurrentPage, FilterStatus, GlobalSearch, RowPage, getCookie]);
 
-	const handleUpdateStatusTersedia = useCallback(() => {
-		if (!SelectedItem) return;
-
+	const handleInputBank = useCallback(() => {
 		var cookieUsername = getCookie('username');
 		var cookieParamKey = getCookie('paramkey');
-
-		const newStatus = Number(SelectedItem.flag_tersedia) === 1 ? "0" : "1";
 
 		var requestBody = JSON.stringify({
 			username: cookieUsername,
 			paramkey: cookieParamKey,
-			method: 'UPDATE',
-			id: parseInt(SelectedItem.id),
-			flag_tersedia: newStatus,
+			method: 'INSERT',
+			nama_bank: NamaBank,
 		});
 
-		setLoadingFasilitas(true);
+		setLoading(true);
 
-		var url = paths.URL_API_ADMIN + 'Fasilitas';
+		var url = paths.URL_API_ADMIN + 'Bank';
 		var Signature = generateSignature(requestBody);
 
 		fetch(url, {
@@ -186,11 +183,13 @@ const FasilitasList = () => {
 			.then(fetchStatus)
 			.then((response) => response.json())
 			.then((data) => {
-				setLoadingFasilitas(false);
+				setLoading(false);
 				if (data.error_code === '0' || data.error_code === 0) {
-					getListFasilitas('');
+					getListBank('');
+					setShowModalBank(false);
+					resetFormBank();
 					setAlertState('success');
-					setSuccessMessage('Status tersedia berhasil diupdate');
+					setSuccessMessage('Bank baru berhasil ditambahkan');
 					setShowAlert(true);
 				} else {
 					if (data.error_code === '2' || data.error_code === 2) {
@@ -204,7 +203,7 @@ const FasilitasList = () => {
 				}
 			})
 			.catch((error) => {
-				setLoadingFasilitas(false);
+				setLoading(false);
 				setAlertState('error');
 				if (error.message === 401) {
 					setErrorMessageAlert('Maaf anda tidak memiliki ijin untuk mengakses halaman ini.');
@@ -213,27 +212,23 @@ const FasilitasList = () => {
 				}
 				setShowAlert(true);
 			});
-	}, [SelectedItem, getCookie, getListFasilitas]);
+	}, [getCookie, NamaBank, getListBank]);
 
-	const handleUpdateStatusAktif = useCallback(() => {
-		if (!SelectedItem) return;
-
+	const handleUpdateNamaBank = useCallback(() => {
 		var cookieUsername = getCookie('username');
 		var cookieParamKey = getCookie('paramkey');
-
-		const newStatus = Number(SelectedItem.status) === 1 ? "0" : "1";
 
 		var requestBody = JSON.stringify({
 			username: cookieUsername,
 			paramkey: cookieParamKey,
 			method: 'UPDATE',
-			id: parseInt(SelectedItem.id),
-			status: newStatus,
+			id: parseInt(IdBank),
+			nama_bank: NamaBank,
 		});
 
-		setLoadingFasilitas(true);
+		setLoading(true);
 
-		var url = paths.URL_API_ADMIN + 'Fasilitas';
+		var url = paths.URL_API_ADMIN + 'Bank';
 		var Signature = generateSignature(requestBody);
 
 		fetch(url, {
@@ -244,9 +239,66 @@ const FasilitasList = () => {
 			.then(fetchStatus)
 			.then((response) => response.json())
 			.then((data) => {
-				setLoadingFasilitas(false);
+				setLoading(false);
 				if (data.error_code === '0' || data.error_code === 0) {
-					getListFasilitas('');
+					getListBank('');
+					setShowModalBank(false);
+					resetFormBank();
+					setAlertState('success');
+					setSuccessMessage('Nama bank berhasil diupdate');
+					setShowAlert(true);
+				} else {
+					if (data.error_code === '2' || data.error_code === 2) {
+						setSessionMessage('Session Anda Telah Habis. Silahkan Login Kembali.');
+						setShowAlert(true);
+					} else {
+						setAlertState('error');
+						setErrorMessageAlert(data.error_message);
+						setShowAlert(true);
+					}
+				}
+			})
+			.catch((error) => {
+				setLoading(false);
+				setAlertState('error');
+				if (error.message === 401) {
+					setErrorMessageAlert('Maaf anda tidak memiliki ijin untuk mengakses halaman ini.');
+				} else {
+					setErrorMessageAlert(AlertMessage.failedConnect);
+				}
+				setShowAlert(true);
+			});
+	}, [getCookie, IdBank, NamaBank, getListBank]);
+
+	const handleUpdateStatusAktif = useCallback(() => {
+		if (!SelectedItem) return;
+		var cookieUsername = getCookie('username');
+		var cookieParamKey = getCookie('paramkey');
+		const newStatus = Number(SelectedItem.status) === 1 ? "0" : "1";
+
+		var requestBody = JSON.stringify({
+			username: cookieUsername,
+			paramkey: cookieParamKey,
+			method: 'UPDATE',
+			id: parseInt(SelectedItem.id),
+			status: newStatus,
+		});
+
+		setLoading(true);
+		var url = paths.URL_API_ADMIN + 'Bank';
+		var Signature = generateSignature(requestBody);
+
+		fetch(url, {
+			method: 'POST',
+			body: requestBody,
+			headers: { 'Content-Type': 'application/json', Signature: Signature },
+		})
+			.then(fetchStatus)
+			.then((response) => response.json())
+			.then((data) => {
+				setLoading(false);
+				if (data.error_code === '0' || data.error_code === 0) {
+					getListBank('');
 					setAlertState('success');
 					setSuccessMessage('Status aktif berhasil diupdate');
 					setShowAlert(true);
@@ -262,7 +314,7 @@ const FasilitasList = () => {
 				}
 			})
 			.catch((error) => {
-				setLoadingFasilitas(false);
+				setLoading(false);
 				setAlertState('error');
 				if (error.message === 401) {
 					setErrorMessageAlert('Maaf anda tidak memiliki ijin untuk mengakses halaman ini.');
@@ -271,37 +323,7 @@ const FasilitasList = () => {
 				}
 				setShowAlert(true);
 			});
-	}, [SelectedItem, getCookie, getListFasilitas]);
-
-	const handleConfirmUpdateTersedia = (item) => {
-		setSelectedItem(item);
-		setUpdateType('tersedia');
-		const newStatusLabel = Number(item.flag_tersedia) === 1 ? 'Tidak Tersedia' : 'Tersedia';
-		setAlertState('confirm');
-		setConfirmMessage(`Ubah status fasilitas "${item.nama_Fasilitas}" menjadi "${newStatusLabel}"?`);
-		setShowAlert(true);
-	};
-
-	const handleConfirmUpdateAktif = (item) => {
-		setSelectedItem(item);
-		setUpdateType('aktif');
-		const newStatusLabel = Number(item.status) === 1 ? 'Tidak Aktif' : 'Aktif';
-		setAlertState('confirm');
-		setConfirmMessage(`Ubah status fasilitas "${item.nama_Fasilitas}" menjadi "${newStatusLabel}"?`);
-		setShowAlert(true);
-	};
-
-	const handleConfirmAction = () => {
-		setShowAlert(false);
-		setConfirmMessage('');
-		if (UpdateType === 'tersedia') {
-			handleUpdateStatusTersedia();
-		} else if (UpdateType === 'aktif') {
-			handleUpdateStatusAktif();
-		}
-		setSelectedItem(null);
-		setUpdateType('');
-	};
+	}, [SelectedItem, getCookie, getListBank]);
 
 	useEffect(() => {
 		window.scrollTo(0, 0);
@@ -312,16 +334,45 @@ const FasilitasList = () => {
 		} else {
 			dispatch(setForm('ParamKey', cookieParamKey));
 			dispatch(setForm('Username', cookieUsername));
-			dispatch(setForm('PageActive', 'FASILITAS'));
+			dispatch(setForm('PageActive', 'LIST_BANK'));
 		}
 	}, [dispatch, getCookie, history]);
 
 	useEffect(() => {
-		getListFasilitas('');
-	}, [getListFasilitas]);
+		getListBank('');
+	}, [getListBank]);
 
-	const formatRupiah = (value) => {
-		return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value || 0);
+	const resetFormBank = () => {
+		setIdBank('');
+		setNamaBank('');
+		setModalMode('insert');
+	};
+
+	const handleOpenInputBank = () => {
+		resetFormBank();
+		setModalMode('insert');
+		setShowModalBank(true);
+	};
+
+	const handleOpenEditBank = (item) => {
+		setIdBank(item.id);
+		setNamaBank(item.nama_bank || '');
+		setModalMode('update');
+		setShowModalBank(true);
+	};
+
+	const handleSubmitBank = () => {
+		if (!NamaBank.trim()) {
+			setAlertState('error');
+			setErrorMessageAlert('Nama bank tidak boleh kosong');
+			setShowAlert(true);
+			return;
+		}
+		if (ModalMode === 'insert') {
+			handleInputBank();
+		} else {
+			handleUpdateNamaBank();
+		}
 	};
 
 	const formatNumber = (value) => {
@@ -335,67 +386,66 @@ const FasilitasList = () => {
 		return <span className="admin-status-badge inactive">Tidak Aktif</span>;
 	};
 
-	const statusTersediaBadge = (flag) => {
-		if (Number(flag) === 1) {
-			return <span className="admin-status-badge info">Tersedia</span>;
+	const handleConfirmUpdateAktif = (item) => {
+		setSelectedItem(item);
+		setUpdateType('aktif');
+		const newStatusLabel = Number(item.status) === 1 ? 'Tidak Aktif' : 'Aktif';
+		setAlertState('confirm');
+		setConfirmMessage(`Ubah status bank "${item.nama_bank}" menjadi "${newStatusLabel}"?`);
+		setShowAlert(true);
+	};
+
+	const handleConfirmAction = () => {
+		setShowAlert(false);
+		setConfirmMessage('');
+		if (UpdateType === 'aktif') {
+			handleUpdateStatusAktif();
 		}
-		return <span className="admin-status-badge pending">Tidak Tersedia</span>;
+		setSelectedItem(null);
+		setUpdateType('');
 	};
 
 	const exportToExcel = (data, fileName = 'data') => {
 		const worksheet = XLSX.utils.json_to_sheet(data);
 		const workbook = XLSX.utils.book_new();
-		XLSX.utils.book_append_sheet(workbook, worksheet, 'Fasilitas');
+		XLSX.utils.book_append_sheet(workbook, worksheet, 'List Bank');
 		const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
 		const fileData = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 		saveAs(fileData, `${fileName}.xlsx`);
 	};
 
 	const handleExport = () => {
-		const formatted = ListFasilitas.map((item) => ({
-			'Cluster': item.cluster || '-',
-			'Nama Fasilitas': item.nama_Fasilitas || '-',
-			'Jam Buka': item.jam_buka || '-',
-			'Jam Tutup': item.jam_tutup || '-',
-			'Harga': item.harga || 0,
-			'Status Tersedia': Number(item.flag_tersedia) === 1 ? 'Tersedia' : 'Tidak Tersedia',
+		const formatted = ListData.map((item) => ({
+			'Nama Bank': item.nama_bank || '-',
 			'Status Aktif': Number(item.status) === 1 ? 'Aktif' : 'Tidak Aktif',
+			'Tanggal Input': item.tanggal_input || '-',
 		}));
 		const now = new Date();
 		const day = String(now.getDate()).padStart(2, '0');
 		const month = String(now.getMonth() + 1).padStart(2, '0');
 		const year = now.getFullYear();
-		exportToExcel(formatted, `export-data-fasilitas-${day}-${month}-${year}`);
+		exportToExcel(formatted, `export-list-bank-${day}-${month}-${year}`);
 	};
 
 	const handleFilter = () => {
-		setListFasilitas([]);
-		if (CurrentPage === 1) { getListFasilitas(''); } else { setCurrentPage(1); }
+		setListData([]);
+		if (CurrentPage === 1) { getListBank(''); } else { setCurrentPage(1); }
 	};
 
 	const handleReset = () => {
 		setGlobalSearch('');
 		setFilterStatus('');
-		setListFasilitas([]);
-		if (CurrentPage === 1) { getListFasilitas('reset'); } else { setCurrentPage(1); }
-	};
-
-	const handleFasilitasBooking = (id) => {
-		setCookie('varCookieFasilitasId', id, { path: '/' });
-		history.push('/admin/fasilitas-booking');
+		setListData([]);
+		if (CurrentPage === 1) { getListBank('reset'); } else { setCurrentPage(1); }
 	};
 
 	const summaryCards = [
-		{ title: 'Fasilitas Aktif', value: formatNumber(TotalAktif), description: 'Fasilitas yang sedang aktif', icon: <FaCheckCircle />, tone: 'green' },
-		{ title: 'Tidak Aktif', value: formatNumber(TotalTidakAktif), description: 'Fasilitas nonaktif', icon: <FaTimesCircle />, tone: 'red' },
-		{ title: 'Tersedia', value: formatNumber(TotalTersedia), description: 'Siap digunakan', icon: <FaBuilding />, tone: 'blue' },
-		{ title: 'Tidak Tersedia', value: formatNumber(TotalTidakTersedia), description: 'Sedang tidak tersedia', icon: <FaBuilding />, tone: 'yellow' },
+		{ title: 'Bank Aktif', value: formatNumber(TotalAktif), description: 'Bank yang sedang aktif', icon: <FaCheckCircle />, tone: 'green' },
+		{ title: 'Tidak Aktif', value: formatNumber(TotalTidakAktif), description: 'Bank nonaktif', icon: <FaTimesCircle />, tone: 'red' },
 	];
 
 	return (
 		<>
-			{LoadingFasilitas && <LoadingLogo />}
-
 			<div className="admin-page">
 				{SessionMessage !== '' && (
 					<SweetAlert warning show={ShowAlert} onConfirm={() => { setShowAlert(false); logout(); history.push('/admin/login'); }} btnSize="sm">
@@ -434,32 +484,50 @@ const FasilitasList = () => {
 
 				<div className="admin-header">
 					<div>
-						<div className="admin-eyebrow">Manajemen Fasilitas</div>
-						<h1>Fasilitas</h1>
-						<p>Kelola dan pantau fasilitas perumahan.</p>
+						<div className="admin-eyebrow">Manajemen Tarik Dana</div>
+						<h1>List Bank</h1>
+						<p>Kelola daftar bank untuk pencairan dana.</p>
 					</div>
-					<button className="admin-btn-primary" onClick={handleExport} disabled={ListFasilitas.length === 0}>
-						<FaFileDownload /> Export Data
-					</button>
+					<div style={{ display: 'flex', gap: 10 }}>
+						<button className="admin-btn-primary" onClick={handleOpenInputBank}>
+							<FaPlus /> Input Bank Baru
+						</button>
+						<button className="admin-btn-primary" onClick={handleExport} disabled={ListData.length === 0}>
+							<FaFileDownload /> Export Data
+						</button>
+					</div>
 				</div>
 
-				<div className="admin-summary-grid">
-					{summaryCards.map((item) => (
-						<div className={`admin-summary-card ${item.tone}`} key={item.title}>
-							<div>
-								<span>{item.title}</span>
-								<strong>{item.value}</strong>
-								<small>{item.description}</small>
+				{/* Summary Cards */}
+				{Loading ? (
+					<div className="admin-summary-grid">
+						{[1, 2].map((i) => (
+							<div className="admin-summary-card" key={i} style={{ padding: 20 }}>
+								<Skeleton width={120} height={14} style={{ marginBottom: 8 }} />
+								<Skeleton width={80} height={28} style={{ marginBottom: 6 }} />
+								<Skeleton width={160} height={12} />
 							</div>
-							<div className="admin-summary-icon">{item.icon}</div>
-						</div>
-					))}
-				</div>
+						))}
+					</div>
+				) : (
+					<div className="admin-summary-grid">
+						{summaryCards.map((item) => (
+							<div className={`admin-summary-card ${item.tone}`} key={item.title}>
+								<div>
+									<span>{item.title}</span>
+									<strong>{item.value}</strong>
+									<small>{item.description}</small>
+								</div>
+								<div className="admin-summary-icon">{item.icon}</div>
+							</div>
+						))}
+					</div>
+				)}
 
 				<div className="admin-panel">
 					<div className="admin-panel-header">
 						<div>
-							<h2>Daftar Fasilitas</h2>
+							<h2>Daftar Bank</h2>
 							<p>Total data: {formatNumber(TotalRecords)}</p>
 						</div>
 					</div>
@@ -469,7 +537,7 @@ const FasilitasList = () => {
 							<FaSearch />
 							<input
 								type="text"
-								placeholder="Cari fasilitas atau cluster"
+								placeholder="Cari nama bank..."
 								value={GlobalSearch}
 								onChange={(e) => setGlobalSearch(e.target.value)}
 								onKeyDown={(e) => { if (e.key === 'Enter') handleFilter(); }}
@@ -477,7 +545,7 @@ const FasilitasList = () => {
 						</div>
 
 						<select value={FilterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-							<option value="">Status Fasilitas</option>
+							<option value="">Semua Status</option>
 							<option value="1">Aktif</option>
 							<option value="0">Tidak Aktif</option>
 						</select>
@@ -495,36 +563,25 @@ const FasilitasList = () => {
 						<table className="table admin-table align-middle">
 							<thead>
 								<tr>
-									<th>Cluster</th>
-									<th>Detail Fasilitas</th>
-									<th>Status Tersedia</th>
+									<th></th>
+									<th>Nama Bank</th>
 									<th>Status Aktif</th>
 									<th>Aksi</th>
 								</tr>
 							</thead>
 							<tbody>
-								{ListFasilitas?.length > 0 ? ListFasilitas.map((item, index) => (
+								{Loading ? (
+									Array.from({ length: RowPage }).map((_, index) => (
+										<tr key={`skeleton-${index}`}>
+											<td><Skeleton width={30} height={20} /></td>
+											<td><Skeleton width={180} height={18} /></td>
+											<td><Skeleton width={80} height={24} borderRadius={12} /></td>
+											<td><Skeleton width={30} height={20} /></td>
+										</tr>
+									))
+								) : ListData?.length > 0 ? ListData.map((item, index) => (
 									<tr key={item.id || index}>
-										<td><strong>{item.cluster || '-'}</strong></td>
 										<td>
-											<strong>{item.nama_Fasilitas || '-'}</strong>
-											<span>Jam Buka: {item.jam_buka || '-'}</span>
-											<span>Jam Tutup: {item.jam_tutup || '-'}</span>
-											<span>Harga: {formatRupiah(item.harga)}</span>
-										</td>
-										<td>
-											{/* {statusTersediaBadge(item.flag_tersedia)} */}
-											<button
-												className="admin-btn-icon"
-												onClick={() => handleConfirmUpdateTersedia(item)}
-												title={Number(item.flag_tersedia) === 1 ? 'Set Tidak Tersedia' : 'Set Tersedia'}
-												style={{ color: Number(item.flag_tersedia) === 1 ? '#2563eb' : '#9ca3af' }}
-											>
-												{Number(item.flag_tersedia) === 1 ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
-											</button>
-										</td>
-										<td>
-											{/* {statusAktifBadge(item.status)} */}
 											<button
 												className="admin-btn-icon"
 												onClick={() => handleConfirmUpdateAktif(item)}
@@ -534,20 +591,27 @@ const FasilitasList = () => {
 												{Number(item.status) === 1 ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
 											</button>
 										</td>
+										<td><strong>{item.nama_bank || '-'}</strong></td>
+										<td>{statusAktifBadge(item.status)}</td>
 										<td>
-											<div style={{ display: 'flex', gap: 8 }}>
-												<button className="admin-btn-icon" onClick={() => handleFasilitasBooking(item.id)} title="Lihat Booking">
-													<FaEye />
-												</button>
-											</div>
+											<button
+												className="admin-btn-icon"
+												onClick={() => handleOpenEditBank(item)}
+												title="Edit Nama Bank"
+											>
+												<FaEdit />
+											</button>
 										</td>
 									</tr>
 								)) : (
 									<tr>
-										<td colSpan={5}>
+										<td colSpan={4}>
 											<div className="admin-empty-state">
-												<strong>Fasilitas tidak ditemukan</strong>
-												<span>Coba ubah filter atau kata pencarian.</span>
+												<strong>Belum ada data bank</strong>
+												<span>Daftar bank untuk tarik dana akan muncul di sini.</span>
+												<button className="admin-btn-primary" style={{ marginTop: 12 }} onClick={handleOpenInputBank}>
+													<FaPlus /> Input Bank Baru
+												</button>
 											</div>
 										</td>
 									</tr>
@@ -561,13 +625,46 @@ const FasilitasList = () => {
 						<Pagination
 							currentPage={CurrentPage}
 							totalPage={Math.max(Number(TotalPage) || 1, 1)}
-							onPageChange={(page) => { if (!LoadingFasilitas) setCurrentPage(page); }}
+							onPageChange={(page) => { if (!Loading) setCurrentPage(page); }}
 						/>
 					</div>
 				</div>
+
+				{/* Modal Input / Edit Bank */}
+				{ShowModalBank && (
+					<div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+						<div className="modal-dialog modal-dialog-centered">
+							<div className="modal-content">
+								<div className="modal-header">
+									<h5 className="modal-title">
+										{ModalMode === 'insert' ? 'Input Bank Baru' : 'Update Nama Bank'}
+									</h5>
+									<button type="button" className="btn-close" onClick={() => { setShowModalBank(false); resetFormBank(); }}></button>
+								</div>
+								<div className="modal-body">
+									<div className="mb-3">
+										<label className="form-label">Nama Bank <span style={{ color: 'red' }}>*</span></label>
+										<input
+											type="text"
+											className="form-control"
+											placeholder="Masukkan nama bank"
+											value={NamaBank}
+											onChange={(e) => setNamaBank(e.target.value)}
+										/>
+									</div>
+								</div>
+								<div className="modal-footer">
+									<button type="button" className="btn btn-primary" onClick={handleSubmitBank}>
+										{ModalMode === 'insert' ? 'Simpan' : 'Update'}
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
 		</>
 	);
 };
 
-export default FasilitasList;
+export default ListBank;

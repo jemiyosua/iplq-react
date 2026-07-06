@@ -1,662 +1,391 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
-import { Header, Footer, Input, Button, Gap, Pagination } from '../../../components';
-import './transaksi-ipl.css'
+import '../../../../styles/admin-shared.css';
 import { useDispatch } from 'react-redux';
-import { AlertMessage, paths } from '../../../../utils'
-import { historyConfig, generateSignature, fetchStatus } from '../../../../utils/functions';
+import { AlertMessage, paths } from '../../../../utils';
+import { generateSignature, fetchStatus } from '../../../../utils/functions';
 import { setForm } from '../../../../redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import DataTable from 'react-data-table-component';
 import SweetAlert from 'react-bootstrap-sweetalert';
-import { FaMoneyBillWheat } from 'react-icons/fa6';
-import { FaFileDownload, FaMoneyCheck } from 'react-icons/fa';
+import {
+	FaExchangeAlt,
+	FaFileDownload,
+	FaFilter,
+	FaRedoAlt,
+	FaSearch,
+} from 'react-icons/fa';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import {
-	BarChart,
-	Bar,
-	XAxis,
-	YAxis,
-	Tooltip,
-	ResponsiveContainer,
-} from "recharts";
-
-import {ModalDetailTransaksiIPL}  from '../../../components';
-
+import LoadingLogo from '../../../components/molecules/LoadingLogo';
+import { Pagination, ModalDetailTransaksiIPL } from '../../../components';
 
 const TransaksiIPL = () => {
-    const history = useHistory(historyConfig);
-    const dispatch = useDispatch();
-    const containerRef = useRef(null);
-    // const [cookies, setCookie,removeCookie] = useCookies(['user']);
-	const [cookies, setCookie,removeCookie] = useCookies(['user']);
-	const [Name, setName] = useState("")
+	const history = useHistory();
+	const dispatch = useDispatch();
+	const [cookies, , removeCookie] = useCookies(['user']);
 
-	const [ListIPL, setListIPL] = useState([])
-	const [ListTunggakan, setListTunggakan] = useState([])
+	const [ListIPL, setListIPL] = useState([]);
 	const [CurrentPage, setCurrentPage] = useState(1);
-	const [RowPage, setRowPage] = useState(10);
-	const [TotalPage, setTotalPage] = useState(0)
-	const [TotalRecords, setTotalRecords] = useState(0)
-	const [Total, setTotal] = useState(0)
-	const [Terkumpul, setTerkumpul] = useState(0)
-	const [BelumTerkumpul, setBelumTerkumpul] = useState(0)
-	const [CollectionRate, setCollectionRate] = useState(0)
+	const [RowPage] = useState(10);
+	const [TotalPage, setTotalPage] = useState(1);
+	const [TotalRecords, setTotalRecords] = useState(0);
 
-	const [Loading, setLoading] = useState(false)
-	
-	const [ShowAlert, setShowAlert] = useState(true)
-    const [SessionMessage, setSessionMessage] = useState("")
-    const [SuccessMessage, setSuccessMessage] = useState("")
-    const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
-    const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
+	const [LoadingIPL, setLoadingIPL] = useState(false);
 
-	const [LoadingIPL, setLoadingIPL] = useState(false)
-
-	const [open,setOpen] = useState(true)
-
-	const [TotalCluster, setTotalCluster] = useState(0)
-	const [TotalRumah, setTotalRumah] = useState(0)
-	const [TotalWarga, setTotalWarga] = useState(0)
-	const [TotalTransaksi, setTotalTransaksi] = useState(0)
-	const [TotalPembayaran, setTotalPembayaran] = useState(0)
+	const [ShowAlert, setShowAlert] = useState(true);
+	const [SessionMessage, setSessionMessage] = useState('');
+	const [SuccessMessage, setSuccessMessage] = useState('');
+	const [ErrorMessageAlert, setErrorMessageAlert] = useState('');
+	const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState('');
 
 	const [GlobalSearch, setGlobalSearch] = useState('');
 	const [FilterStatus, setFilterStatus] = useState('');
-    const [FilterBulan, setFilterBulan] = useState('');
-    const [FilterBeginDate, setFilterBeginDate] = useState('');
-    const [FilterEndDate, setFilterEndDate] = useState('');
+	const [FilterBulan, setFilterBulan] = useState('');
+	const [FilterBeginDate, setFilterBeginDate] = useState('');
+	const [FilterEndDate, setFilterEndDate] = useState('');
 
-    // ----- Modal Detail Transaksi IPL -----
-    const [showModalDetailIPL, setShowModalDetailIPL] = useState(false);
-    const [detailTransaksiIPL, setDetailTransaksiIPL] = useState([]);
-    const [detailTransaksiID, setDetailTransaksiID] = useState("");
-    const [detailOrderID, setDetailOrderID] = useState("");
-    const [detailStatusTransaksi, setDetailStatusTransaksi] = useState("");
-    
+	// Modal Detail
+	const [showModalDetailIPL, setShowModalDetailIPL] = useState(false);
+	const [detailTransaksiIPL, setDetailTransaksiIPL] = useState([]);
+	const [detailTransaksiID, setDetailTransaksiID] = useState('');
+	const [detailOrderID, setDetailOrderID] = useState('');
+	const [detailStatusTransaksi, setDetailStatusTransaksi] = useState('');
 
-	useEffect(() => {
-        window.scrollTo(0, 0)
-
-		console.log("MASUK IPL")
-
-        var CookieNama = getCookie("nama");
-        setName(CookieNama)
-
-		var CookieParamKey = getCookie("paramkey");
-        var CookieUsername = getCookie("username");
-        
-        if (CookieParamKey === null || CookieParamKey === "" || CookieUsername === null || CookieUsername === ""){
-            window.location.href="/admin/login";
-        }else{
-            dispatch(setForm("ParamKey",CookieParamKey))
-            dispatch(setForm("Username",CookieUsername))
-            dispatch(setForm("PageActive","TRANSAKSI_IPL"))
-        }
-
-    },[])
-
-	useEffect(() => {
-		getListIPL("");
-	}, [CurrentPage]);
-
-
-	const getCookie = (tipe) => {
+	const getCookie = useCallback((tipe) => {
 		var SecretCookie = cookies.varCookie;
-		if (SecretCookie !== "" && SecretCookie != null && typeof SecretCookie=="string") {
-			var LongSecretCookie = SecretCookie.split("|");
-			var username = LongSecretCookie[0];
-			var paramKey = LongSecretCookie[1];
-			var accessLogin = parseInt(LongSecretCookie[2]);
-			var accessName = LongSecretCookie[3];
-			var cluster = LongSecretCookie[4];
-			var clusterId = LongSecretCookie[5];
-		
-			if (tipe === "username") {
-				return username;
-			} else if (tipe === "paramkey") {
-				return paramKey;
-			} else if (tipe === "access") {
-				return accessLogin;
-			} else if (tipe === "access_name") {
-				return accessName;
-			} else if (tipe === "cluster") {
-				return cluster;
-			} else if (tipe === "cluster_id") {
-				return clusterId;
-			} else {
-				return null;
-			}
-		} else {
+		if (SecretCookie !== '' && SecretCookie != null && typeof SecretCookie === 'string') {
+			var LongSecretCookie = SecretCookie.split('|');
+			if (tipe === 'username') return LongSecretCookie[0];
+			if (tipe === 'paramkey') return LongSecretCookie[1];
+			if (tipe === 'access') return parseInt(LongSecretCookie[2]);
+			if (tipe === 'access_name') return LongSecretCookie[3];
+			if (tipe === 'cluster') return LongSecretCookie[4];
+			if (tipe === 'cluster_id') return LongSecretCookie[5];
 			return null;
 		}
-	}
+		return null;
+	}, [cookies.varCookie]);
 
-	const logout = ()=>{
-        removeCookie('varCookie', { path: '/'})
-        removeCookie('varMerchantId', { path: '/'})
-        removeCookie('varIdVoucher', { path: '/'})
-        dispatch(setForm("ParamKey",''))
-        dispatch(setForm("Username",''))
-        dispatch(setForm("Name",''))
-        dispatch(setForm("Role",''))
-        if(window){
-            sessionStorage.clear();
-		}
-    }
+	const logout = useCallback(() => {
+		removeCookie('varCookie', { path: '/' });
+		removeCookie('varMerchantId', { path: '/' });
+		removeCookie('varIdVoucher', { path: '/' });
+		dispatch(setForm('ParamKey', ''));
+		dispatch(setForm('Username', ''));
+		dispatch(setForm('Name', ''));
+		dispatch(setForm('Role', ''));
+		if (window) { sessionStorage.clear(); }
+	}, [dispatch, removeCookie]);
 
-	const toggleSidebar = () =>{
-		setOpen(!open)
-	}
+	const getListIPL = useCallback((posisi = '') => {
+		var cookieUsername = getCookie('username');
+		var cookieParamKey = getCookie('paramkey');
+		var cookieAccessLogin = getCookie('access');
+		var cookieClusterId = getCookie('cluster_id');
 
-	const getListIPL = (posisi) => {
+		let globalSearch = GlobalSearch;
+		let filterStatus = FilterStatus;
+		let beginDate = FilterBeginDate;
+		let endDate = FilterEndDate;
 
-		var cookieUsername = getCookie("username");
-		var cookieParamKey = getCookie("paramkey");
-		var cookieAccessLogin = getCookie("access");
-		var cookieClusterId = getCookie("cluster_id");
-
-		let globalSearch = GlobalSearch
-		let filterStatus = FilterStatus
-        let beginDate = FilterBeginDate
-        let endDate = FilterEndDate
-
-		if (posisi == "reset") {
-			globalSearch = ""
-			filterStatus = ""
-            beginDate = ""
-            endDate = ""
+		if (posisi === 'reset') {
+			globalSearch = '';
+			filterStatus = '';
+			beginDate = '';
+			endDate = '';
 		}
 
 		var requestBody = JSON.stringify({
-			"username": cookieUsername,
-			"paramkey": cookieParamKey,
-			"method": "SELECT",
-			"jenis_transaksi": "ipl",
-			"global_search": globalSearch,
-			"transaction_status": filterStatus,
-            "start_date_bayar": beginDate,
-            "end_date_bayar": endDate,
-			"access": cookieAccessLogin,
-			"cluster_id": parseInt(cookieClusterId),
-			"page": CurrentPage,
-			"row_page": RowPage,
-			"order_by": "",
-			"order": ""
+			username: cookieUsername,
+			paramkey: cookieParamKey,
+			method: 'SELECT',
+			jenis_transaksi: 'ipl',
+			global_search: globalSearch,
+			transaction_status: filterStatus,
+			start_date_bayar: beginDate,
+			end_date_bayar: endDate,
+			access: cookieAccessLogin,
+			cluster_id: parseInt(cookieClusterId),
+			page: CurrentPage,
+			row_page: RowPage,
+			order_by: '',
+			order: '',
 		});
 
-		setLoadingIPL(true)
+		setLoadingIPL(true);
 
 		var url = paths.URL_API_ADMIN + 'TransaksiTagihan';
-		var Signature  = generateSignature(requestBody)
+		var Signature = generateSignature(requestBody);
 
 		fetch(url, {
-			method: "POST",
+			method: 'POST',
 			body: requestBody,
-			headers: {
-				'Content-Type': 'application/json',
-				'Signature': Signature
-			},
+			headers: { 'Content-Type': 'application/json', Signature: Signature },
 		})
-		.then(fetchStatus)
-		.then(response => response.json())
-		.then((data) => {
-			setLoadingIPL(false)
-
-			if (data.error_code === "0") {
-                        
-                setListIPL(data.result)
-                setTotalPage(data.total_page)
-                setTotalRecords(data.total_record)
-
-				// setTotal(data.result_summary.total)
-				// setTerkumpul(data.result_summary.terkumpul)
-				// setBelumTerkumpul(data.result_summary.belum)
-				// const collectionRate =
-				// 	data.result_summary.total > 0
-				// 		? (data.result_summary.terkumpul / data.result_summary.total) * 100
-				// 		: 0;
-				// setCollectionRate(collectionRate)
-
-				return
-			} else {
-				if (data.error_code === "2") {
-					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
-					setShowAlert(true);
-					return;
+			.then(fetchStatus)
+			.then((response) => response.json())
+			.then((data) => {
+				setLoadingIPL(false);
+				if (data.error_code === '0' || data.error_code === 0) {
+					setListIPL(data.result || []);
+					setTotalPage(Number(data.total_page) || 1);
+					setTotalRecords(Number(data.total_record) || 0);
 				} else {
-					setErrorMessageAlert(data.error_message);
+					if (data.error_code === '2' || data.error_code === 2) {
+						setSessionMessage('Session Anda Telah Habis. Silahkan Login Kembali.');
+					} else {
+						setErrorMessageAlert(data.error_message);
+					}
 					setShowAlert(true);
-					return;
 				}
-			}
-		})
-		.catch((error) => {
-			setLoadingIPL(false)
-
-			if (error.message === 401) {
-				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
+			})
+			.catch((error) => {
+				setLoadingIPL(false);
+				if (error.message === 401) {
+					setErrorMessageAlert('Maaf anda tidak memiliki ijin untuk mengakses halaman ini.');
+				} else {
+					setErrorMessageAlert(AlertMessage.failedConnect);
+				}
 				setShowAlert(true);
-				return false;
-			} else if (error.message !== 401) {
-				setErrorMessageAlert(AlertMessage.failedConnect);
-				setShowAlert(true);
-				return false;
-			}
-		});
+			});
+	}, [CurrentPage, FilterBeginDate, FilterEndDate, FilterStatus, GlobalSearch, RowPage, getCookie]);
 
+	useEffect(() => {
+		window.scrollTo(0, 0);
+		var cookieParamKey = getCookie('paramkey');
+		var cookieUsername = getCookie('username');
+		if (!cookieParamKey || !cookieUsername) {
+			history.push('/admin/login');
+		} else {
+			dispatch(setForm('ParamKey', cookieParamKey));
+			dispatch(setForm('Username', cookieUsername));
+			dispatch(setForm('PageActive', 'TRANSAKSI_IPL'));
+		}
+	}, [dispatch, getCookie, history]);
 
-	}
-    const handleOpenModal = (item) => {
-		setLoadingIPL(true);
-        setDetailOrderID(item.order_id);
-        setDetailTransaksiID(item.transaksi_id);
-        setDetailStatusTransaksi(item.transaction_status);
-
-
-        const sortedData = [...item.payment_detail].sort((a, b) => a.id - b.id);
-        setDetailTransaksiIPL(sortedData);
-		
-        setShowModalDetailIPL(true);
-	}
-
-    const handleCloseModal = () => {
-        setShowModalDetailIPL(false);
-    }
-
-    const handleFilterBulan = (bulan) => {
-        setFilterBulan(bulan);
-
-        const [year, month] = bulan.split("-");
-
-        const start = new Date(year, month - 1, 1);
-        const end = new Date(year, month, 0);
-
-        const format = (date) => {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, "0");
-            const d = String(date.getDate()).padStart(2, "0");
-            return `${y}-${m}-${d}`;
-          };
-
-        setFilterBeginDate(format(start));
-        setFilterEndDate(format(end));
-
-    }
+	useEffect(() => {
+		getListIPL('');
+	}, [getListIPL]);
 
 	const formatRupiah = (value) => {
-		return new Intl.NumberFormat("id-ID", {
-			style: "currency",
-			currency: "IDR",
-			minimumFractionDigits: 0
-		}).format(value);
-	}
+		return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value || 0);
+	};
+
+	const formatNumber = (value) => {
+		return new Intl.NumberFormat('id-ID').format(value || 0);
+	};
 
 	const statusBadge = (status) => {
-		switch (status) {
-			case "settlement":
-				return <div style={{ color:'#84cc16', fontWeight:'bold', fontSize:15 }}>{status}</div>
-			case "pending":
-				return <div style={{ color:'orange', fontWeight:'bold', fontSize:15 }}>{status}</div>
-			default:
-				return null;
-		}
+		if (status === 'settlement') return <span className="admin-status-badge settlement">Settlement</span>;
+		if (status === 'pending') return <span className="admin-status-badge pending">Pending</span>;
+		return <span className="admin-status-badge">-</span>;
+	};
+
+	const handleFilterBulan = (bulan) => {
+		setFilterBulan(bulan);
+		const [year, month] = bulan.split('-');
+		const start = new Date(year, month - 1, 1);
+		const end = new Date(year, month, 0);
+		const format = (date) => {
+			const y = date.getFullYear();
+			const m = String(date.getMonth() + 1).padStart(2, '0');
+			const d = String(date.getDate()).padStart(2, '0');
+			return `${y}-${m}-${d}`;
+		};
+		setFilterBeginDate(format(start));
+		setFilterEndDate(format(end));
+	};
+
+	const exportToExcel = (data, fileName = 'data') => {
+		const worksheet = XLSX.utils.json_to_sheet(data);
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, 'Transaksi IPL');
+		const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+		const fileData = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+		saveAs(fileData, `${fileName}.xlsx`);
 	};
 
 	const handleExport = () => {
 		const formatted = ListIPL.map((item) => ({
-			"Order ID": item.order_id || "-",
-			"Transaksi ID": item.transaction_id || "-",
-			"Nama": item.nama_user,
-			"No Rumah": item.nomor_rumah,
-			"Cluster": item.cluster,
-			"Bulan Invoice": formatBulan(item.bulan_invoice),
-			"Tagihan": formatRupiah(item.tagihan),
-			"Biaya Aplikasi": formatRupiah(item.margin),
-			"Tanggal Bayar": item.tanggal_bayar,
-			"Status Transaksi": item.transaction_status,
+			'Order ID': item.order_id || '-',
+			'Transaksi ID': item.transaksi_id || '-',
+			Tagihan: item.total_tagihan_nominal || 0,
+			Nama: item.nama_user || '-',
+			Cluster: item.cluster || '-',
+			'Jumlah Bulan': item.jumlah_bulan_tagihan_bayar || 0,
+			'Tanggal Bayar': item.tanggal_bayar || '-',
+			Status: item.transaction_status || '-',
 		}));
-
 		const now = new Date();
-
-		const day = String(now.getDate()).padStart(2, "0");
-		const month = String(now.getMonth() + 1).padStart(2, "0");
+		const day = String(now.getDate()).padStart(2, '0');
+		const month = String(now.getMonth() + 1).padStart(2, '0');
 		const year = now.getFullYear();
-		const dateFinal = `${day}-${month}-${year}`;
-
-		exportToExcel(formatted, "export-data-ipl-"+dateFinal);
+		exportToExcel(formatted, `export-transaksi-ipl-${day}-${month}-${year}`);
 	};
 
-	const exportToExcel = (data, fileName = "data") => {
-		// ubah JSON → worksheet
-		const worksheet = XLSX.utils.json_to_sheet(data);
-
-		// buat workbook
-		const workbook = XLSX.utils.book_new();
-		XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-		// convert ke buffer
-		const excelBuffer = XLSX.write(workbook, {
-			bookType: "xlsx",
-			type: "array",
-		});
-
-		// save file
-		const fileData = new Blob([excelBuffer], {
-			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-		});
-
-		saveAs(fileData, `${fileName}.xlsx`);
+	const handleFilter = () => {
+		setListIPL([]);
+		if (CurrentPage === 1) { getListIPL(''); } else { setCurrentPage(1); }
 	};
 
-	const formatBulan = (val) => {
-		if (!val) return "-";
-
-		const [year, month] = val.split("-");
-		const date = new Date(year, month - 1);
-
-		return date.toLocaleString("id-ID", {
-			month: "long",
-			year: "numeric",
-		});
+	const handleReset = () => {
+		setGlobalSearch('');
+		setFilterStatus('');
+		setFilterBulan('');
+		setFilterBeginDate('');
+		setFilterEndDate('');
+		setListIPL([]);
+		if (CurrentPage === 1) { getListIPL('reset'); } else { setCurrentPage(1); }
 	};
 
-	// ---------- SUMMARY IPL ----------
-	// 2. DATA PER BULAN
-	const perBulanMap = {};
+	const handleOpenModal = (item) => {
+		setDetailOrderID(item.order_id);
+		setDetailTransaksiID(item.transaksi_id);
+		setDetailStatusTransaksi(item.transaction_status);
+		const sortedData = [...(item.payment_detail || [])].sort((a, b) => a.id - b.id);
+		setDetailTransaksiIPL(sortedData);
+		setShowModalDetailIPL(true);
+	};
 
-	ListIPL.forEach((item) => {
-		const bulan = item.bulan_invoice;
+	return (
+		<>
+			{LoadingIPL && <LoadingLogo />}
 
-		if (!perBulanMap[bulan]) {
-			perBulanMap[bulan] = {
-				bulan,
-				total: 0,
-				bayar: 0,
-			};
-		}
+			<div className="admin-page">
+				{SessionMessage !== '' && (
+					<SweetAlert warning show={ShowAlert} onConfirm={() => { setShowAlert(false); logout(); history.push('/admin/login'); }} btnSize="sm">{SessionMessage}</SweetAlert>
+				)}
+				{SuccessMessage !== '' && (
+					<SweetAlert success show={ShowAlert} onConfirm={() => { setShowAlert(false); setSuccessMessage(''); }} btnSize="sm">{SuccessMessage}</SweetAlert>
+				)}
+				{ErrorMessageAlert !== '' && (
+					<SweetAlert danger show={ShowAlert} onConfirm={() => { setShowAlert(false); setErrorMessageAlert(''); }} btnSize="sm">{ErrorMessageAlert}</SweetAlert>
+				)}
+				{ErrorMessageAlertLogout !== '' && (
+					<SweetAlert danger show={ShowAlert} onConfirm={() => { setShowAlert(false); setErrorMessageAlertLogout(''); history.push('/admin/login'); }} btnSize="sm">{ErrorMessageAlertLogout}</SweetAlert>
+				)}
 
-		const nominal = Number(item.tagihan || 0);
-
-		perBulanMap[bulan].total += nominal;
-
-		if (item.transaction_status === "settlement") {
-			perBulanMap[bulan].bayar += nominal;
-		}
-	});
-
-	const chartData = Object.values(perBulanMap);
-
-	// 4. PER CLUSTER
-	const clusterMap = {};
-
-	ListIPL.forEach((item) => {
-		const cluster = item.cluster;
-
-		if (!clusterMap[cluster]) {
-			clusterMap[cluster] = {
-				cluster,
-				total: 0,
-				bayar: 0,
-			};
-		}
-
-		const nominal = Number(item.tagihan || 0);
-
-		clusterMap[cluster].total += nominal;
-
-		if (item.transaction_status === "settlement") {
-			clusterMap[cluster].bayar += nominal;
-		}
-	});
-
-	const clusterData = Object.values(clusterMap);
-	// ---------- END OF SUMMARY IPL ----------
-    
-    return (
-		<div className="container-fluid p-4 min-vh-100">
-			<div className="card border-0 shadow rounded-4 p-3">
-
-				{SessionMessage !== "" ?
-				<SweetAlert 
-					warning 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						logout()
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{SessionMessage}
-				</SweetAlert>
-				:""}
-	
-				{SuccessMessage !== "" ?
-				<SweetAlert 
-					success 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setSuccessMessage("")
-						history.replace("/dashboard")
-					}}
-					btnSize="sm">
-					{SuccessMessage}
-				</SweetAlert>
-				:""}          
-	
-				{ErrorMessageAlert !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlert("")
-					}}
-					btnSize="sm">
-					{ErrorMessageAlert}
-				</SweetAlert>
-				:""}
-	
-				{ErrorMessageAlertLogout !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlertLogout("")
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{ErrorMessageAlertLogout}
-				</SweetAlert>
-				:""}
-
-				{/* Header */}
-				<div className="d-flex justify-content-between align-items-center mb-3">
-					<div className="d-flex justify-content-between align-items-center gap-2">
-						<FaMoneyBillWheat />
-						<h5 className="mb-0 fw-bold">IPL Warga</h5>
+				<div className="admin-header">
+					<div>
+						<div className="admin-eyebrow">Transaksi</div>
+						<h1>Transaksi IPL</h1>
+						<p>Pantau semua transaksi pembayaran IPL warga.</p>
 					</div>
-				</div>
-
-				{/* <div className="row mb-3">
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Total Tagihan</small>
-						<h5>{formatRupiah(Total)}</h5>
-						</div>
-					</div>
-
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Terkumpul</small>
-						<h5 className="text-success">
-							{formatRupiah(Terkumpul)}
-						</h5>
-						</div>
-					</div>
-
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Belum</small>
-						<h5 className="text-danger">
-							{formatRupiah(BelumTerkumpul)}
-						</h5>
-						</div>
-					</div>
-
-					<div className="col-md-3">
-						<div className="card p-3 rounded-4 shadow-sm">
-						<small>Collection Rate</small>
-						<h5>{CollectionRate.toFixed(1)}%</h5>
-						</div>
-					</div>
-				</div> */}
-
-				<div style={{ height:30 }} />
-
-				<div className="filter-container">
-					<input
-						type="text"
-						className="filter-input"
-						placeholder="🔍 Cari Order ID / Transaksi ID / Nama Warga / Cluster"
-						value={GlobalSearch}
-						onChange={(e) => setGlobalSearch(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								setCurrentPage(1);
-								getListIPL("");
-							}
-						}}
-					/>
-
-					<select
-						className="filter-select"
-						value={FilterStatus}
-						onChange={(e) => {
-							setFilterStatus(e.target.value)
-						}}
-					>
-						<option value="">Status Transaksi</option>
-						<option value="settlement">Settlement</option>
-						<option value="pending">Pending</option>
-					</select>
-
-					<input
-						type="month"
-						className="filter-input"
-						value={FilterBulan}
-						onChange={(e) => handleFilterBulan(e.target.value)}
-					/>
-
-					<button
-						className="btn-filter"
-						onClick={() => {
-							setCurrentPage(1)
-							getListIPL("")
-						}}
-					>
-						Filter
-					</button>
-
-					<button
-						className="btn-reset"
-						onClick={() => {
-							setCurrentPage(1)
-							setGlobalSearch("")
-							setFilterStatus("")
-                            setFilterBulan("")
-                            setFilterBeginDate("")
-                            setFilterEndDate("")
-							getListIPL("reset")
-						}}
-					>
-						Reset
-					</button>
-
-					<button
-						className="btn-export"
-						onClick={() => {
-							handleExport()
-						}}
-					>
+					<button className="admin-btn-primary" onClick={handleExport} disabled={ListIPL.length === 0}>
 						<FaFileDownload /> Export Data
 					</button>
-					
 				</div>
 
-				{/* Table */}
-				<div className="table-responsive">
-					<table className="table align-middle">
-						<thead style={{ backgroundColor: '#0b3d0b', color: '#FFFFFF' }}>
-						<tr >
-							<th>Order ID</th>
-							<th>Transaksi ID</th>
-							<th>Tagihan</th>
-							<th>Nama</th>
-							<th>Cluster</th>
-							<th>Jumlah Bulan Tagihan</th>
-							<th>Tanggal Bayar</th>
-							<th>Status Transaksi</th>
-						</tr>
-						</thead>
-						<tbody>
-							{ListIPL?.map((item, index) => (
-								<tr key={index} 
-                                    onClick={() => handleOpenModal(item)} 
-                                    style={{ cursor: "pointer" }} >
-									<td>{item.order_id ? item.order_id : '-'}</td>
-									<td>{item.transaksi_id ? item.transaksi_id : '-'}</td>
-									<td>{formatRupiah(item.total_tagihan_nominal)}</td>
-									<td style={{ fontWeight:'bold' }}>{item.nama_user}</td>
-									<td>{item.cluster}</td>
-									<td>{item.jumlah_bulan_tagihan_bayar}</td>
-									<td>{item.tanggal_bayar? item.tanggal_bayar : '-'}</td>
-									<td>{statusBadge(item.transaction_status)}</td>
+				<div className="admin-summary-grid cols-3">
+					<div className="admin-summary-card blue">
+						<div>
+							<span>Total Transaksi</span>
+							<strong>{formatNumber(TotalRecords)}</strong>
+							<small>Keseluruhan data</small>
+						</div>
+						<div className="admin-summary-icon"><FaExchangeAlt /></div>
+					</div>
+				</div>
+
+				<div className="admin-panel">
+					<div className="admin-panel-header">
+						<div>
+							<h2>Daftar Transaksi IPL</h2>
+							<p>Total data: {formatNumber(TotalRecords)}</p>
+						</div>
+					</div>
+
+					<div className="admin-filter-grid">
+						<div className="admin-search-field">
+							<FaSearch />
+							<input
+								type="text"
+								placeholder="Cari order ID, nama warga, atau cluster"
+								value={GlobalSearch}
+								onChange={(e) => setGlobalSearch(e.target.value)}
+								onKeyDown={(e) => { if (e.key === 'Enter') handleFilter(); }}
+							/>
+						</div>
+
+						<select value={FilterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+							<option value="">Status Transaksi</option>
+							<option value="settlement">Settlement</option>
+							<option value="pending">Pending</option>
+						</select>
+
+						<input type="month" value={FilterBulan} onChange={(e) => handleFilterBulan(e.target.value)} />
+
+						<button className="admin-btn-filter" onClick={handleFilter}>
+							<FaFilter /> Filter
+						</button>
+
+						<button className="admin-btn-secondary" onClick={handleReset}>
+							<FaRedoAlt /> Reset
+						</button>
+					</div>
+
+					<div className="table-responsive admin-table-wrap">
+						<table className="table admin-table align-middle" style={{ minWidth: 1000 }}>
+							<thead>
+								<tr>
+									<th>Order ID</th>
+									<th>Transaksi ID</th>
+									<th>Tagihan</th>
+									<th>Nama</th>
+									<th>Cluster</th>
+									<th>Jml Bulan</th>
+									<th>Tgl Bayar</th>
+									<th>Status</th>
 								</tr>
+							</thead>
+							<tbody>
+								{ListIPL?.length > 0 ? ListIPL.map((item, index) => (
+									<tr key={item.order_id || index} onClick={() => handleOpenModal(item)} style={{ cursor: 'pointer' }}>
+										<td>{item.order_id || '-'}</td>
+										<td>{item.transaksi_id || '-'}</td>
+										<td><strong>{formatRupiah(item.total_tagihan_nominal)}</strong></td>
+										<td><strong>{item.nama_user || '-'}</strong></td>
+										<td>{item.cluster || '-'}</td>
+										<td>{item.jumlah_bulan_tagihan_bayar || '-'}</td>
+										<td>{item.tanggal_bayar || '-'}</td>
+										<td>{statusBadge(item.transaction_status)}</td>
+									</tr>
+								)) : (
+									<tr>
+										<td colSpan={8}>
+											<div className="admin-empty-state">
+												<strong>Transaksi IPL tidak ditemukan</strong>
+												<span>Coba ubah filter atau kata pencarian.</span>
+											</div>
+										</td>
+									</tr>
+								)}
+							</tbody>
+						</table>
+					</div>
 
-                                
-							))}
-
-                            
-						</tbody>
-					</table>
-				</div>
-
-                <ModalDetailTransaksiIPL
-                    showModal={showModalDetailIPL}
-                    listDetailTransaksiIPL={detailTransaksiIPL}
-                    orderID={detailOrderID}
-                    transaksiID={detailTransaksiID}
-                    statusTransaksi={detailStatusTransaksi}
-                    onClickClose={() => handleCloseModal()}
-                />
-
-				{/* Footer */}
-				<div className="d-flex justify-content-between align-items-center mt-3">
-					{/* <small className="text-muted">Total Data : {TotalRecords}</small> */}
-
-					<div style={{ fontWeight:'bold' }}>Total Data : {TotalRecords}</div>
-
-					<div className="d-flex gap-2">
+					<div className="admin-footer">
+						<div>Total Data : {formatNumber(TotalRecords)}</div>
 						<Pagination
 							currentPage={CurrentPage}
-							totalPage={TotalPage}
-							onPageChange={(page) => {
-								if (!LoadingIPL) {
-									setCurrentPage(page);
-								}
-							}}
+							totalPage={Math.max(Number(TotalPage) || 1, 1)}
+							onPageChange={(page) => { if (!LoadingIPL) setCurrentPage(page); }}
 						/>
 					</div>
 				</div>
 
+				<ModalDetailTransaksiIPL
+					showModal={showModalDetailIPL}
+					listDetailTransaksiIPL={detailTransaksiIPL}
+					orderID={detailOrderID}
+					transaksiID={detailTransaksiID}
+					statusTransaksi={detailStatusTransaksi}
+					onClickClose={() => setShowModalDetailIPL(false)}
+				/>
 			</div>
-		</div>
+		</>
 	);
-}
+};
 
 export default TransaksiIPL;

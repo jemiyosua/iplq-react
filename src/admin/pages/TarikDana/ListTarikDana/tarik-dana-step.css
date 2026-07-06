@@ -1,32 +1,34 @@
-.stepper {
+/* Tarik Dana - Stepper indicator */
+.tarik-dana-stepper {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.tarik-dana-step-item {
   display: flex;
   align-items: center;
 }
 
-.step-item {
-  display: flex;
-  align-items: center;
-}
-
-.circle {
-  width: 18px;
-  height: 18px;
+.tarik-dana-circle {
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: #d9d9d9;
+  background: #e2e8f0;
   transition: 0.3s ease;
 }
 
-.circle.active {
-  background: #16a085;
+.tarik-dana-circle.active {
+  background: #16a34a;
 }
 
-.line {
-  width: 60px;
+.tarik-dana-line {
+  width: 32px;
   height: 3px;
-  background: #d9d9d9;
+  background: #e2e8f0;
   transition: 0.3s ease;
 }
 
-.line.active {
-  background: #16a085;
+.tarik-dana-line.active {
+  background: #16a34a;
 }
