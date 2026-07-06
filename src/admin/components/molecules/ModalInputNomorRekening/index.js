@@ -8,6 +8,8 @@ const ModalInputNomorRekening = ({
 	onChangeNomorRekening,
 	namaRekening,
 	onChangeNamaRekening,
+	listBank,
+	idBank,
 	namaBank,
 	onChangeNamaBank,
 
@@ -43,12 +45,12 @@ const ModalInputNomorRekening = ({
 
 				<div className="form-group">
 					<label>Nama Bank</label>
-					<input
-						type="text"
-						value={namaBank}
-						onChange={onChangeNamaBank}
-						style={{ color:'#111111' }}
-					/>
+					<select value={idBank} onChange={onChangeNamaBank}>
+						<option value="">-- Pilih Bank --</option>
+						{listBank.map((item,index) => {
+							return <option value={item.id}>{item.nama_bank}</option>
+						})}
+					</select>
 				</div>
 
 				<div className="form-group">

@@ -1,0 +1,133 @@
+/* Global responsive behavior for admin list tables. */
+.mainapp,
+.content-wrapper {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.table-wrapper,
+.table-responsive,
+.table-container,
+.lk-table,
+.rdt_TableWrapper {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.table-wrapper,
+.table-responsive,
+.table-container,
+.rdt_TableWrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-wrapper table,
+.table-responsive table,
+.table-container table,
+table.table,
+table.data-table,
+table.custom-table,
+table.responsive-table,
+.rdt_Table {
+    width: 100%;
+    max-width: 100%;
+}
+
+.table-wrapper table,
+.table-responsive table,
+.table-container table,
+table.table,
+table.data-table,
+table.custom-table {
+    min-width: 720px;
+}
+
+.table-wrapper th,
+.table-wrapper td,
+.table-responsive th,
+.table-responsive td,
+.table-container th,
+.table-container td,
+table.table th,
+table.table td,
+table.data-table th,
+table.data-table td,
+table.custom-table th,
+table.custom-table td {
+    vertical-align: top;
+    overflow-wrap: anywhere;
+}
+
+.table-search {
+    width: min(100%, 360px);
+}
+
+.table-pagination {
+    flex-wrap: wrap;
+}
+
+.filter-container {
+    max-width: 100%;
+}
+
+.filter-container > * {
+    min-width: 0;
+}
+
+@media (max-width: 1199px) {
+    .filter-container {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+    }
+
+    .table-container {
+        padding: 14px;
+        border-radius: 10px;
+    }
+
+    .table-wrapper table,
+    .table-responsive table,
+    .table-container table,
+    table.table,
+    table.data-table,
+    table.custom-table {
+        min-width: 640px;
+    }
+
+    .filter-container {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-container > *,
+    .filter-container button,
+    .filter-container input,
+    .filter-container select,
+    .filter-input,
+    .filter-select,
+    .table-search {
+        width: 100%;
+    }
+
+    .table-pagination {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-wrapper table,
+    .table-responsive table,
+    .table-container table,
+    table.table,
+    table.data-table,
+    table.custom-table {
+        min-width: 580px;
+    }
+}

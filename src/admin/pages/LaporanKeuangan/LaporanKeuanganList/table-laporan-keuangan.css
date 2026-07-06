@@ -1,19 +1,24 @@
 .lk-table {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .lk-header,
 .lk-row {
     display: grid;
     grid-template-columns:
-        2fr
-        1.5fr
-        1.5fr
-        1fr
-        1fr
-        70px;
-    gap: 20px;
+        minmax(160px, 2fr)
+        minmax(140px, 1.5fr)
+        minmax(140px, 1.5fr)
+        minmax(120px, 1fr)
+        minmax(130px, 1fr)
+        minmax(64px, 70px);
+    gap: 16px;
     align-items: center;
+    min-width: 920px;
 }
 
 .lk-header {
@@ -31,6 +36,11 @@
 
 .lk-row:hover {
     background: #f8fafc;
+}
+
+.lk-row > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .order-id {
@@ -88,7 +98,11 @@
     cursor: pointer;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+
+    .lk-table {
+        overflow-x: visible;
+    }
 
     .lk-header {
         display: none;
@@ -104,6 +118,7 @@
         border-radius: 16px;
 
         margin-bottom: 16px;
+        min-width: 0;
     }
 
 }

@@ -5,6 +5,7 @@ import { store } from '../redux';
 import { CookiesProvider } from 'react-cookie';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter, Switch, Route } from "react-router-dom";
+import '../../styles/responsive-tables.css';
 
 function App() {
 	return (

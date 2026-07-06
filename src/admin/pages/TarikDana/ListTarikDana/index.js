@@ -1,141 +1,80 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
-import { Header, Footer, Input, Button, Gap, Pagination, Alert, ModalUpdateLaporanKeuangan, ModalInputPengajuan } from '../../../components';
-import './laporan-keuangan.css'
-import './table-laporan-keuangan.css'
-import './tarik-dana-step.css'
 import { useDispatch } from 'react-redux';
-import { AlertMessage, paths } from '../../../../utils'
-import { historyConfig, generateSignature, fetchStatus } from '../../../../utils/functions';
-import { setForm } from '../../../../redux';
+import { AlertMessage, paths } from '../../../utils';
+import { generateSignature, fetchStatus } from '../../../utils/functions';
+import { setForm } from '../../../redux';
+import { Pagination, ModalInputPengajuan, Alert } from '../../../components';
+import LoadingLogo from '../../../components/molecules/LoadingLogo';
+import '../../../../styles/admin-shared.css';
+import './tarik-dana-step.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import DataTable from 'react-data-table-component';
-import SweetAlert from 'react-bootstrap-sweetalert';
-import { FaMoneyBillWheat } from 'react-icons/fa6';
-import { FaFileDownload, FaMoneyCheck } from 'react-icons/fa';
+import {
+	FaClock,
+	FaCheckCircle,
+	FaMoneyBillWave,
+	FaFileDownload,
+	FaFilter,
+	FaRedoAlt,
+	FaSearch,
+	FaEye,
+	FaPlus,
+	FaExchangeAlt,
+} from 'react-icons/fa';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import {
-	BarChart,
-	Bar,
-	XAxis,
-	YAxis,
-	Tooltip,
-	ResponsiveContainer,
-} from "recharts";
-import { IconAdd, IconArrowRightUp, IconCheck, IconDownload, IconDownloadGreen, IconExport, IconEye, IconFilter, IconReset, IconUploadRed, IconWallet } from '../../../assets';
-import Dropdown from 'react-bootstrap/Dropdown';
 
 const ListTarikDana = () => {
-    const history = useHistory(historyConfig);
-    const dispatch = useDispatch();
-    const containerRef = useRef(null);
-    // const [cookies, setCookie,removeCookie] = useCookies(['user']);
-	const [cookies, setCookie,removeCookie] = useCookies(['user']);
-	const [Name, setName] = useState("")
+	const history = useHistory();
+	const dispatch = useDispatch();
+	const [cookies, , removeCookie] = useCookies(['user']);
 
-	const [ListTarikDana, setListTarikDana] = useState([])
-	const [ListNomorRekening, setListNomorRekening] = useState([])
+	const [ListData, setListData] = useState([]);
+	const [ListNomorRekening, setListNomorRekening] = useState([]);
 
 	const [CurrentPage, setCurrentPage] = useState(1);
-	const [RowPage, setRowPage] = useState(10);
-	const [TotalPage, setTotalPage] = useState(0)
-	const [TotalRecords, setTotalRecords] = useState(0)
-	
-	const [TotalMenungguPersetujuan, setTotalMenungguPersetujuan] = useState(0)
-	const [TotalDisetujui, setTotalDisetujui] = useState(0)
-	const [TotalCair, setTotalCair] = useState(0)
+	const [RowPage] = useState(10);
+	const [TotalPage, setTotalPage] = useState(1);
+	const [TotalRecords, setTotalRecords] = useState(0);
 
-	const [Loading, setLoading] = useState(false)
+	const [TotalMenungguPersetujuan, setTotalMenungguPersetujuan] = useState(0);
+	const [TotalDisetujui, setTotalDisetujui] = useState(0);
+	const [TotalCair, setTotalCair] = useState(0);
 
-	const [LoadingLaporanKeuangan, setLoadingLaporanKeuangan] = useState(false)
-
-	const [ShowModalInputPengajuan, setShowModalInputPengajuan] = useState(false)
-
-	const [TotalCluster, setTotalCluster] = useState(0)
-	const [TotalRumah, setTotalRumah] = useState(0)
-	const [TotalWarga, setTotalWarga] = useState(0)
-	const [TotalTransaksi, setTotalTransaksi] = useState(0)
-	const [TotalPembayaran, setTotalPembayaran] = useState(0)
+	const [Loading, setLoading] = useState(false);
+	const [ShowModalInputPengajuan, setShowModalInputPengajuan] = useState(false);
 
 	const [GlobalSearch, setGlobalSearch] = useState('');
 	const [FilterJenisTransaksi, setFilterJenisTransaksi] = useState('');
 	const [FilterBulan, setFilterBulan] = useState('');
-	const [FilterBeginDate, setFilterBeginDate] = useState('');
-	const [FilterEndDate, setFilterEndDate] = useState('');
-	const [ChartData, setChartData] = useState([
-		{
-			bulan: "Jan",
-			pemasukan: 1200000,
-			pengeluaran: 300000
-		},
-		{
-			bulan: "Feb",
-			pemasukan: 900000,
-			pengeluaran: 200000
-		},
-		{
-			bulan: "Mar",
-			pemasukan: 1500000,
-			pengeluaran: 500000
-		}
-	]);
 
-	// ---------- alert ----------
-	const [AlertState, setAlertState] = useState("")
-	const [ShowAlert, setShowAlert] = useState(true)
-	const [SessionMessage, setSessionMessage] = useState("")
-	const [SuccessMessage, setSuccessMessage] = useState("")
-	const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
-	const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
-	const [ValidationMessage, setValidationMessage] = useState("")
-	const [ConfirmMessage, setConfirmMessage] = useState("")
+	// Alert state
+	const [AlertState, setAlertState] = useState("");
+	const [ShowAlert, setShowAlert] = useState(true);
+	const [SessionMessage, setSessionMessage] = useState("");
+	const [SuccessMessage, setSuccessMessage] = useState("");
+	const [ErrorMessageAlert, setErrorMessageAlert] = useState("");
+	const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("");
+	const [ValidationMessage, setValidationMessage] = useState("");
+	const [ConfirmMessage, setConfirmMessage] = useState("");
 
-	const [IdRekeningKoran, setIdRekeningKoran] = useState(0)
+	// Form state
+	const [Keperluan, setKeperluan] = useState("");
+	const [Jumlah, setJumlah] = useState("");
+	const [RekeningTujuan, setRekeningTujuan] = useState("");
+	const [IdTarikDana, setIdTarikDana] = useState(0);
 
-	const [Keperluan, setKeperluan] = useState("")
-	const [Jumlah, setJumlah] = useState("")
-	const [RekeningTujuan, setRekeningTujuan] = useState("")
+	// State untuk update status pengajuan
+	const [ShowModalUpdateStatus, setShowModalUpdateStatus] = useState(false);
+	const [SelectedPengajuan, setSelectedPengajuan] = useState(null);
+	const [NewStatus, setNewStatus] = useState("");
 
 	const steps = [1, 2, 3];
 
-	useEffect(() => {
-        window.scrollTo(0, 0)
-
-        var CookieNama = getCookie("nama");
-        setName(CookieNama)
-
-		var CookieParamKey = getCookie("paramkey");
-        var CookieUsername = getCookie("username");
-        
-        if (CookieParamKey === null || CookieParamKey === "" || CookieUsername === null || CookieUsername === ""){
-            window.location.href="/admin/login";
-        }else{
-            dispatch(setForm("ParamKey",CookieParamKey))
-            dispatch(setForm("Username",CookieUsername))
-            dispatch(setForm("PageActive","TARIK_DANA"))
-        }
-
-    },[])
-
-	useEffect(() => {
-		getListTarikDana("");
-		getListNomorRekening();
-	}, [CurrentPage]);
-
-	// useEffect(() => {
-	// 	console.log("masuk sini")
-	// 	const delay = setTimeout(() => {
-	// 		setCurrentPage(1);
-	// 	}, 500);
-
-	// 	return () => clearTimeout(delay);
-	// }, [GlobalSearch]);
-
-	const getCookie = (tipe) => {
+	const getCookie = useCallback((tipe) => {
 		var SecretCookie = cookies.varCookie;
-		if (SecretCookie !== "" && SecretCookie != null && typeof SecretCookie=="string") {
+		if (SecretCookie !== "" && SecretCookie != null && typeof SecretCookie === "string") {
 			var LongSecretCookie = SecretCookie.split("|");
 			var username = LongSecretCookie[0];
 			var paramKey = LongSecretCookie[1];
@@ -143,51 +82,43 @@ const ListTarikDana = () => {
 			var accessName = LongSecretCookie[3];
 			var cluster = LongSecretCookie[4];
 			var clusterId = LongSecretCookie[5];
-		
-			if (tipe === "username") {
-				return username;
-			} else if (tipe === "paramkey") {
-				return paramKey;
-			} else if (tipe === "access") {
-				return accessLogin;
-			} else if (tipe === "access_name") {
-				return accessName;
-			} else if (tipe === "cluster") {
-				return cluster;
-			} else if (tipe === "cluster_id") {
-				return clusterId;
-			} else {
-				return null;
-			}
-		} else {
+
+			if (tipe === "username") return username;
+			if (tipe === "paramkey") return paramKey;
+			if (tipe === "access") return accessLogin;
+			if (tipe === "access_name") return accessName;
+			if (tipe === "cluster") return cluster;
+			if (tipe === "cluster_id") return clusterId;
 			return null;
 		}
-	}
+		return null;
+	}, [cookies.varCookie]);
 
-	const logout = ()=>{
-        removeCookie('varCookie', { path: '/'})
-        removeCookie('varMerchantId', { path: '/'})
-        removeCookie('varIdVoucher', { path: '/'})
-        dispatch(setForm("ParamKey",''))
-        dispatch(setForm("Username",''))
-        dispatch(setForm("Name",''))
-        dispatch(setForm("Role",''))
-        if(window){
-            sessionStorage.clear();
+	const logout = useCallback(() => {
+		removeCookie('varCookie', { path: '/' });
+		removeCookie('varMerchantId', { path: '/' });
+		removeCookie('varIdVoucher', { path: '/' });
+		dispatch(setForm("ParamKey", ''));
+		dispatch(setForm("Username", ''));
+		dispatch(setForm("Name", ''));
+		dispatch(setForm("Role", ''));
+		if (window) {
+			sessionStorage.clear();
 		}
-    }
+	}, [dispatch, removeCookie]);
 
-	const getListTarikDana = (posisi) => {
+	const getListTarikDana = useCallback((posisi = "") => {
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
 
-		let globalSearch = GlobalSearch
-		let filterJenisTransaksi = FilterJenisTransaksi
-		let filterBulan = FilterBulan
-		if (posisi == "reset") {
-			globalSearch = ""
-			filterJenisTransaksi = ""
-			filterBulan = ""
+		let globalSearch = GlobalSearch;
+		let filterJenisTransaksi = FilterJenisTransaksi;
+		let filterBulan = FilterBulan;
+
+		if (posisi === "reset") {
+			globalSearch = "";
+			filterJenisTransaksi = "";
+			filterBulan = "";
 		}
 
 		var requestBody = JSON.stringify({
@@ -203,10 +134,10 @@ const ListTarikDana = () => {
 			"order": ""
 		});
 
-		setLoadingLaporanKeuangan(true)
+		setLoading(true);
 
 		var url = paths.URL_API_ADMIN + 'TarikDana';
-		var Signature  = generateSignature(requestBody)
+		var Signature = generateSignature(requestBody);
 
 		fetch(url, {
 			method: "POST",
@@ -219,171 +150,41 @@ const ListTarikDana = () => {
 		.then(fetchStatus)
 		.then(response => response.json())
 		.then((data) => {
-			setLoadingLaporanKeuangan(false)
+			setLoading(false);
 
-			if (data.error_code == "0") {
-				setListTarikDana(data.result)
-
-				setTotalMenungguPersetujuan(data.total_menungggu_persetujuan)
-				setTotalDisetujui(data.total_disetujui)
-				setTotalCair(data.total_tercairkan)
-
-				setTotalPage(data.total_page)
-				setTotalRecords(data.total_record)
-				return
+			if (data.error_code === '0' || data.error_code === 0) {
+				setListData(data.result || []);
+				setTotalMenungguPersetujuan(data.total_menungggu_persetujuan || 0);
+				setTotalDisetujui(data.total_disetujui || 0);
+				setTotalCair(data.total_tercairkan || 0);
+				setTotalPage(Number(data.total_page) || 1);
+				setTotalRecords(Number(data.total_record) || 0);
 			} else {
-				if (data.error_code === "2") {
+				if (data.error_code === '2' || data.error_code === 2) {
+					setAlertState("session");
 					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
 					setShowAlert(true);
-					return;
 				} else {
+					setAlertState("error");
 					setErrorMessageAlert(data.error_message);
 					setShowAlert(true);
-					return;
 				}
 			}
 		})
 		.catch((error) => {
-			setLoadingLaporanKeuangan(false)
+			setLoading(false);
+			setAlertState("error");
 
 			if (error.message === 401) {
 				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
-				setShowAlert(true);
-				return false;
-			} else if (error.message !== 401) {
-				setErrorMessageAlert(AlertMessage.failedConnect);
-				setShowAlert(true);
-				return false;
-			}
-		});
-	}
-
-	const handleInputPengajuan = () => {
-		var cookieUsername = getCookie("username");
-		var cookieParamKey = getCookie("paramkey");
-
-		var requestBody = JSON.stringify({
-			"username": cookieUsername,
-			"paramkey": cookieParamKey,
-			"method": "INSERT",
-			"keperluan": Keperluan,
-			"jumlah": parseInt(Jumlah),
-			"rekening_tujuan": parseInt(RekeningTujuan)
-		});
-
-		var url = paths.URL_API_ADMIN + 'TarikDana';
-		var Signature  = generateSignature(requestBody)
-
-		fetch(url, {
-			method: "POST",
-			body: requestBody,
-			headers: {
-				'Content-Type': 'application/json',
-				'Signature': Signature
-			},
-		})
-		.then(fetchStatus)
-		.then(response => response.json())
-		.then((data) => {
-			if (data.error_code == "0") {
-				getListTarikDana()
-				setShowModalInputPengajuan(false)
-
-				setAlertState("success")
-				setSuccessMessage("Data berhasil diupdate");
-				setShowAlert(true);
-				return;
 			} else {
-				if (data.error_code === "2") {
-					setAlertState("session")
-					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
-					setShowAlert(true);
-					return;
-				} else {
-					setAlertState("error")
-					setErrorMessageAlert(data.error_message);
-					setShowAlert(true);
-					return;
-				}
-			}
-		})
-		.catch((error) => {
-			setAlertState("error")
-			
-			if (error.message === 401) {
-				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
-				setShowAlert(true);
-				return false;
-			} else if (error.message !== 401) {
 				setErrorMessageAlert(AlertMessage.failedConnect);
-				setShowAlert(true);
-				return false;
 			}
+			setShowAlert(true);
 		});
-	}
+	}, [CurrentPage, FilterBulan, FilterJenisTransaksi, GlobalSearch, RowPage, getCookie]);
 
-	const handleDelete = () => {
-		var cookieUsername = getCookie("username");
-		var cookieParamKey = getCookie("paramkey");
-
-		var requestBody = JSON.stringify({
-			"username": cookieUsername,
-			"paramkey": cookieParamKey,
-			"method": "DELETE",
-			"id_rekening_koran": parseInt(IdRekeningKoran)
-		});
-
-		var url = paths.URL_API_ADMIN + 'LaporanKeuangan';
-		var Signature  = generateSignature(requestBody)
-
-		fetch(url, {
-			method: "POST",
-			body: requestBody,
-			headers: {
-				'Content-Type': 'application/json',
-				'Signature': Signature
-			},
-		})
-		.then(fetchStatus)
-		.then(response => response.json())
-		.then((data) => {
-			if (data.error_code == "0") {
-				getListTarikDana()
-
-				setAlertState("success")
-				setSuccessMessage("Data berhasil dihapus");
-				setShowAlert(true);
-				return;
-			} else {
-				if (data.error_code === "2") {
-					setAlertState("session")
-					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
-					setShowAlert(true);
-					return;
-				} else {
-					setAlertState("error")
-					setErrorMessageAlert(data.error_message);
-					setShowAlert(true);
-					return;
-				}
-			}
-		})
-		.catch((error) => {
-			setAlertState("error")
-			
-			if (error.message === 401) {
-				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
-				setShowAlert(true);
-				return false;
-			} else if (error.message !== 401) {
-				setErrorMessageAlert(AlertMessage.failedConnect);
-				setShowAlert(true);
-				return false;
-			}
-		});
-	}
-
-	const getListNomorRekening = () => {
+	const getListNomorRekening = useCallback(() => {
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
 
@@ -397,10 +198,8 @@ const ListTarikDana = () => {
 			"order": ""
 		});
 
-		// setLoadingNomorRekening(true)
-
-		var url = paths.URL_API_ADMIN + 'RekeningTarikDana';
-		var Signature  = generateSignature(requestBody)
+		var url = paths.URL_API_ADMIN + 'Bank';
+		var Signature = generateSignature(requestBody);
 
 		fetch(url, {
 			method: "POST",
@@ -413,611 +212,542 @@ const ListTarikDana = () => {
 		.then(fetchStatus)
 		.then(response => response.json())
 		.then((data) => {
-			// setLoadingNomorRekening(false)
-
-			if (data.error_code == "0") {
-				setListNomorRekening(data.result)
-
-				setTotalPage(data.total_page)
-				setTotalRecords(data.total_record)
-				return
+			if (data.error_code === "0") {
+				setListNomorRekening(data.result || []);
 			} else {
 				if (data.error_code === "2") {
+					setAlertState("session");
 					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
 					setShowAlert(true);
-					return;
 				} else {
+					setAlertState("error");
 					setErrorMessageAlert(data.error_message);
 					setShowAlert(true);
-					return;
 				}
 			}
 		})
 		.catch((error) => {
-			// setLoadingNomorRekening(false)
-
+			setAlertState("error");
 			if (error.message === 401) {
 				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
-				setShowAlert(true);
-				return false;
-			} else if (error.message !== 401) {
+			} else {
 				setErrorMessageAlert(AlertMessage.failedConnect);
-				setShowAlert(true);
-				return false;
 			}
+			setShowAlert(true);
 		});
-	}
+	}, [getCookie]);
+
+	const handleInputPengajuan = useCallback(() => {
+		var cookieUsername = getCookie("username");
+		var cookieParamKey = getCookie("paramkey");
+
+		var requestBody = JSON.stringify({
+			"username": cookieUsername,
+			"paramkey": cookieParamKey,
+			"method": "INSERT",
+			"keperluan": Keperluan,
+			"jumlah": parseInt(Jumlah),
+			"rekening_tujuan": parseInt(RekeningTujuan)
+		});
+
+		var url = paths.URL_API_ADMIN + 'TarikDana';
+		var Signature = generateSignature(requestBody);
+
+		fetch(url, {
+			method: "POST",
+			body: requestBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'Signature': Signature
+			},
+		})
+		.then(fetchStatus)
+		.then(response => response.json())
+		.then((data) => {
+			if (data.error_code === "0") {
+				getListTarikDana();
+				setShowModalInputPengajuan(false);
+				setKeperluan("");
+				setJumlah("");
+				setRekeningTujuan("");
+				setAlertState("success");
+				setSuccessMessage("Pengajuan berhasil disubmit");
+				setShowAlert(true);
+			} else {
+				if (data.error_code === "2") {
+					setAlertState("session");
+					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
+					setShowAlert(true);
+				} else {
+					setAlertState("error");
+					setErrorMessageAlert(data.error_message);
+					setShowAlert(true);
+				}
+			}
+		})
+		.catch((error) => {
+			setAlertState("error");
+			if (error.message === 401) {
+				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
+			} else {
+				setErrorMessageAlert(AlertMessage.failedConnect);
+			}
+			setShowAlert(true);
+		});
+	}, [getCookie, Keperluan, Jumlah, RekeningTujuan, getListTarikDana]);
+
+	const handleDelete = useCallback(() => {
+		var cookieUsername = getCookie("username");
+		var cookieParamKey = getCookie("paramkey");
+
+		var requestBody = JSON.stringify({
+			"username": cookieUsername,
+			"paramkey": cookieParamKey,
+			"method": "DELETE",
+			"id": parseInt(IdTarikDana)
+		});
+
+		var url = paths.URL_API_ADMIN + 'LaporanKeuangan';
+		var Signature = generateSignature(requestBody);
+
+		fetch(url, {
+			method: "POST",
+			body: requestBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'Signature': Signature
+			},
+		})
+		.then(fetchStatus)
+		.then(response => response.json())
+		.then((data) => {
+			if (data.error_code === "0") {
+				getListTarikDana();
+				setAlertState("success");
+				setSuccessMessage("Data berhasil dihapus");
+				setShowAlert(true);
+			} else {
+				if (data.error_code === "2") {
+					setAlertState("session");
+					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
+					setShowAlert(true);
+				} else {
+					setAlertState("error");
+					setErrorMessageAlert(data.error_message);
+					setShowAlert(true);
+				}
+			}
+		})
+		.catch((error) => {
+			setAlertState("error");
+			if (error.message === 401) {
+				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
+			} else {
+				setErrorMessageAlert(AlertMessage.failedConnect);
+			}
+			setShowAlert(true);
+		});
+	}, [getCookie, IdTarikDana, getListTarikDana]);
+
+	const handleUpdateStatusPengajuan = useCallback(() => {
+		if (!SelectedPengajuan || !NewStatus) return;
+
+		var cookieUsername = getCookie("username");
+		var cookieParamKey = getCookie("paramkey");
+
+		var requestBody = JSON.stringify({
+			"username": cookieUsername,
+			"paramkey": cookieParamKey,
+			"method": "UPDATE",
+			"id": parseInt(SelectedPengajuan.id),
+			"status": NewStatus
+		});
+
+		setLoading(true);
+
+		var url = paths.URL_API_ADMIN + 'TarikDana';
+		var Signature = generateSignature(requestBody);
+
+		fetch(url, {
+			method: "POST",
+			body: requestBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'Signature': Signature
+			},
+		})
+		.then(fetchStatus)
+		.then(response => response.json())
+		.then((data) => {
+			setLoading(false);
+			if (data.error_code === "0" || data.error_code === 0) {
+				getListTarikDana("");
+				setShowModalUpdateStatus(false);
+				setSelectedPengajuan(null);
+				setNewStatus("");
+				setAlertState("success");
+				setSuccessMessage("Status pengajuan berhasil diupdate");
+				setShowAlert(true);
+			} else {
+				if (data.error_code === "2" || data.error_code === 2) {
+					setAlertState("session");
+					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
+					setShowAlert(true);
+				} else {
+					setAlertState("error");
+					setErrorMessageAlert(data.error_message);
+					setShowAlert(true);
+				}
+			}
+		})
+		.catch((error) => {
+			setLoading(false);
+			setAlertState("error");
+			if (error.message === 401) {
+				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
+			} else {
+				setErrorMessageAlert(AlertMessage.failedConnect);
+			}
+			setShowAlert(true);
+		});
+	}, [SelectedPengajuan, NewStatus, getCookie, getListTarikDana]);
+
+	const handleOpenUpdateStatus = (item) => {
+		setSelectedPengajuan(item);
+		setNewStatus("");
+		setShowModalUpdateStatus(true);
+	};
+
+	useEffect(() => {
+		window.scrollTo(0, 0);
+
+		var cookieParamKey = getCookie("paramkey");
+		var cookieUsername = getCookie("username");
+
+		if (!cookieParamKey || !cookieUsername) {
+			history.push("/admin/login");
+		} else {
+			dispatch(setForm("ParamKey", cookieParamKey));
+			dispatch(setForm("Username", cookieUsername));
+			dispatch(setForm("PageActive", "TARIK_DANA"));
+		}
+	}, [dispatch, getCookie, history]);
+
+	useEffect(() => {
+		getListTarikDana("");
+		getListNomorRekening();
+	}, [getListTarikDana, getListNomorRekening]);
 
 	const formatRupiah = (value) => {
 		return new Intl.NumberFormat("id-ID", {
 			style: "currency",
 			currency: "IDR",
 			minimumFractionDigits: 0
-		}).format(value);
-	}
+		}).format(value || 0);
+	};
+
+	const formatNumber = (value) => {
+		return new Intl.NumberFormat("id-ID").format(value || 0);
+	};
+
+	const summaryCards = useMemo(() => [
+		{
+			title: "Menunggu Persetujuan",
+			value: TotalMenungguPersetujuan,
+			description: "Total pengajuan menunggu",
+			icon: <FaClock />,
+			tone: "yellow",
+		},
+		{
+			title: "Disetujui - Menunggu Cair",
+			value: formatRupiah(TotalDisetujui),
+			description: "Siap dicairkan oleh Superadmin",
+			icon: <FaCheckCircle />,
+			tone: "blue",
+		},
+		{
+			title: "Dana Tercairkan",
+			value: formatRupiah(TotalCair),
+			description: "Total dana sudah cair",
+			icon: <FaMoneyBillWave />,
+			tone: "green",
+		},
+	], [TotalMenungguPersetujuan, TotalDisetujui, TotalCair]);
 
 	const handleExport = () => {
-		const formatted = ListTarikDana.map((item) => ({
-			"Order ID": item.order_id || "-",
-			"Transaksi ID": item.transaction_id || "-",
-			"Nama": item.nama_user,
-			"No Rumah": item.nomor_rumah,
-			"Cluster": item.cluster,
-			"Bulan Invoice": formatBulan(item.bulan_invoice),
-			"Tagihan": formatRupiah(item.tagihan),
-			"Biaya Aplikasi": formatRupiah(item.margin),
-			"Tanggal Bayar": item.tanggal_bayar,
-			"Status Transaksi": item.transaction_status,
+		const formatted = ListData.map((item) => ({
+			"ID": item.id_tarik_dana || "-",
+			"Tanggal": item.tanggal_input || "-",
+			"Keperluan": item.keperluan || "-",
+			"Jumlah": item.jumlah || 0,
+			"Status": item.tahap || "-",
 		}));
 
 		const now = new Date();
-
 		const day = String(now.getDate()).padStart(2, "0");
 		const month = String(now.getMonth() + 1).padStart(2, "0");
 		const year = now.getFullYear();
-		const dateFinal = `${day}-${month}-${year}`;
 
-		exportToExcel(formatted, "export-data-iuran-"+dateFinal);
-	};
-
-	const exportToExcel = (data, fileName = "data") => {
-		// ubah JSON → worksheet
-		const worksheet = XLSX.utils.json_to_sheet(data);
-
-		// buat workbook
+		const worksheet = XLSX.utils.json_to_sheet(formatted);
 		const workbook = XLSX.utils.book_new();
-		XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+		XLSX.utils.book_append_sheet(workbook, worksheet, "Tarik Dana");
 
-		// convert ke buffer
 		const excelBuffer = XLSX.write(workbook, {
 			bookType: "xlsx",
 			type: "array",
 		});
 
-		// save file
 		const fileData = new Blob([excelBuffer], {
 			type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 		});
 
-		saveAs(fileData, `${fileName}.xlsx`);
+		saveAs(fileData, `export-tarik-dana-${day}-${month}-${year}.xlsx`);
 	};
 
-	const formatBulan = (val) => {
-		if (!val) return "-";
-
-		const [year, month] = val.split("-");
-		const date = new Date(year, month - 1);
-
-		return date.toLocaleString("id-ID", {
-			month: "long",
-			year: "numeric",
-		});
+	const handleFilter = () => {
+		setListData([]);
+		if (CurrentPage === 1) {
+			getListTarikDana("");
+		} else {
+			setCurrentPage(1);
+		}
 	};
 
-	const handleFilterBulan = (bulan) => {
-        setFilterBulan(bulan);
-
-        const [year, month] = bulan.split("-");
-
-        const start = new Date(year, month - 1, 1);
-        const end = new Date(year, month, 0);
-
-        const format = (date) => {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, "0");
-            const d = String(date.getDate()).padStart(2, "0");
-            return `${y}-${m}-${d}`;
-          };
-
-        setFilterBeginDate(format(start));
-        setFilterEndDate(format(end));
-    }
-
-	const handleInputPemasukan = () => {
-		window.location.href = "/admin/input-laporan-keuangan"
-	}
+	const handleReset = () => {
+		setGlobalSearch("");
+		setFilterJenisTransaksi("");
+		setFilterBulan("");
+		setListData([]);
+		if (CurrentPage === 1) {
+			getListTarikDana("reset");
+		} else {
+			setCurrentPage(1);
+		}
+	};
 
 	const handleConfirmAlert = (alertState) => {
-        if (alertState == "session") {
-            setShowAlert(false)
-            logout()
-        } else if (alertState == "success") {
-            setShowAlert(false)
-            setSuccessMessage("")
-        } else if (alertState == "error") {
-            setShowAlert(false)
-            setErrorMessageAlert("")
-        } else if (alertState == "logout") {
-            setShowAlert(false)
-            setErrorMessageAlertLogout("")
-            window.location.href="/admin/login"
-        } else if (alertState == "validation") {
-            setShowAlert(false)
-            setValidationMessage("")
-        } else if (alertState == "confirm") {
-            handleDelete()
-        }
-    }
-
-	const convertToDateInput = (tanggal) => {
-		const bulan = {
-			Januari: "01",
-			Februari: "02",
-			Maret: "03",
-			April: "04",
-			Mei: "05",
-			Juni: "06",
-			Juli: "07",
-			Agustus: "08",
-			September: "09",
-			Oktober: "10",
-			November: "11",
-			Desember: "12",
-		};
-
-		const [hari, namaBulan, tahun] = tanggal.split(" ");
-
-		return `${tahun}-${bulan[namaBulan]}-${hari.padStart(2, "0")}`;
+		if (alertState === "session") {
+			setShowAlert(false);
+			logout();
+			history.push("/admin/login");
+		} else if (alertState === "success") {
+			setShowAlert(false);
+			setSuccessMessage("");
+		} else if (alertState === "error") {
+			setShowAlert(false);
+			setErrorMessageAlert("");
+		} else if (alertState === "logout") {
+			setShowAlert(false);
+			setErrorMessageAlertLogout("");
+			history.push("/admin/login");
+		} else if (alertState === "validation") {
+			setShowAlert(false);
+			setValidationMessage("");
+		} else if (alertState === "confirm") {
+			handleDelete();
+		}
 	};
-
-	const handleExportLaporanKeuangan = (data) => {
-		const workbook = XLSX.utils.book_new();
-
-		/*
-		* ======================
-		* SHEET 1 - SUMMARY
-		* ======================
-		*/
-
-		const summaryData = [
-			["LAPORAN KEUANGAN"],
-			[],
-				["Saldo Awal", data.summary.saldo_awal],
-				["Total Pemasukan (Debit)", data.summary.total_debit],
-				["Total Pengeluaran (Kredit)", data.summary.total_kredit],
-				["Saldo Akhir", data.summary.total_saldo],
-			[],
-			["RINGKASAN PER BULAN"],
-			["Bulan", "Total Transaksi", "Total Nominal"],
-			...data.summary.detail_summary_bulan.map((item) => [
-				item.bulan,
-				item.total_transaksi,
-				item.total_nominal,
-			]),
-		];
-
-		const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-
-		XLSX.utils.book_append_sheet(
-			workbook,
-			wsSummary,
-			"SUMMARY"
-		);
-
-		/*
-		* ======================
-		* SHEET 2 - REKENING KORAN
-		* ======================
-		*/
-
-		let saldoBerjalan = 0;
-
-		const rekeningKoranData = data.rekening_koran.map((item) => {
-			const debit =
-			item.jenis_transaksi.toLowerCase() === "debit"
-				? item.nominal
-				: 0;
-
-			const kredit =
-			item.jenis_transaksi.toLowerCase() === "kredit"
-				? item.nominal
-				: 0;
-
-			saldoBerjalan += debit - kredit;
-
-			return {
-			Tanggal: item.tanggal_bayar,
-			OrderID: item.order_id,
-			Nama: item.nama,
-			Cluster: item.cluster,
-			Tipe: item.tipe_transaksi,
-			Keterangan: item.deskripsi,
-			Debit: debit,
-			Kredit: kredit,
-			Saldo: saldoBerjalan,
-			};
-		});
-
-		const wsRekeningKoran = XLSX.utils.json_to_sheet(
-			rekeningKoranData
-		);
-
-		XLSX.utils.book_append_sheet(
-			workbook,
-			wsRekeningKoran,
-			"REKENING_KORAN"
-		);
-
-		/*
-		* ======================
-		* SHEET 3 - PENGGUNAAN DANA
-		* ======================
-		*/
-
-		const penggunaanDanaData =
-			data.penggunaan_dana.result.map((item) => ({
-			Tanggal: item.tanggal_input,
-			OrderID: item.order_id,
-			Cluster: item.cluster,
-			Nominal: item.nominal,
-			Jenis: item.jenis_transaksi,
-			}));
-
-		const wsPenggunaanDana =
-			XLSX.utils.json_to_sheet(penggunaanDanaData);
-
-		XLSX.utils.book_append_sheet(
-			workbook,
-			wsPenggunaanDana,
-			"PENGGUNAAN_DANA"
-		);
-
-		/*
-		* ======================
-		* SHEET 4 - PEMASUKAN DANA
-		* ======================
-		*/
-
-		const pemasukanDanaData = data.rekening_koran
-			.filter(
-			(item) =>
-				item.jenis_transaksi.toLowerCase() === "debit"
-			)
-			.map((item) => ({
-			Tanggal: item.tanggal_bayar,
-			Nama: item.nama,
-			Cluster: item.cluster,
-			Tipe: item.tipe_transaksi,
-			JumlahBulan: item.jumlah_bulan,
-			Nominal: item.nominal,
-			}));
-
-		const wsPemasukanDana = XLSX.utils.json_to_sheet(pemasukanDanaData);
-
-		XLSX.utils.book_append_sheet(
-			workbook,
-			wsPemasukanDana,
-			"PEMASUKAN_DANA"
-		);
-
-		/*
-		* DOWNLOAD FILE
-		* ======================
-		*/
-
-		const excelBuffer = XLSX.write(workbook, {
-			bookType: "xlsx",
-			type: "array",
-		});
-
-		const file = new Blob([excelBuffer], {
-			type:
-			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-		});
-
-		saveAs(
-			file,
-			`Laporan_Keuangan_${new Date().getTime()}.xlsx`
-		);
-	}
 
 	const statusBadge = (status, desc) => {
 		switch (status) {
 			case 1:
-				return <div style={{ backgroundColor:'#FFF7E6', padding:5, borderRadius:10 }}>
-					<div style={{ color:'#8A5A00', fontWeight:'bold', fontSize:12 }}>{desc}</div>
-				</div>
+				return <span className="admin-status-badge pending">{desc}</span>;
 			case 2:
-				return <div style={{ backgroundColor:'#EAF1FF', padding:10, borderRadius:20 }}>
-					<div style={{ color:'#1E4FA3', fontWeight:'bold', fontSize:12 }}>{desc}</div>
-				</div>
+				return <span className="admin-status-badge info">{desc}</span>;
 			case 3:
-				return <div style={{ backgroundColor:'#E7F7EE', padding:10, borderRadius:20 }}>
-					<div style={{ color:'#0F7A42', fontWeight:'bold', fontSize:12 }}>{desc}</div>
-				</div>
+				return <span className="admin-status-badge active">{desc}</span>;
 			case 4:
-				return <div style={{ backgroundColor:'#FDECEC', padding:10, borderRadius:20 }}>
-					<div style={{ color:'#B3261E', fontWeight:'bold', fontSize:12 }}>{desc}</div>
-				</div>
+				return <span className="admin-status-badge inactive">{desc}</span>;
 			default:
 				return null;
 		}
 	};
-    
-    return (
-		
-		<div className="container-fluid p-4 min-vh-100">
 
-			<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-				<div style={{ display:'flex', justifyContent:'flex-start', alignItems:'center' }}>
+	return (
+		<>
+			{Loading && <LoadingLogo />}
+
+			<div className="admin-page">
+				<div className="admin-header">
 					<div>
-						<div style={{ fontSize:30, fontWeight:'bold' }}>Tarik Dana</div>
-						<div style={{ fontSize:15 }}>Kelola dan pantau SLA tarik dana cluster Anda</div>
+						<div className="admin-eyebrow">Manajemen Keuangan</div>
+						<h1>Tarik Dana</h1>
+						<p>Kelola pengajuan dan status pencairan dana.</p>
+					</div>
+					<div className="admin-header-actions">
+						<button
+							className="admin-btn-primary"
+							onClick={() => setShowModalInputPengajuan(true)}
+						>
+							<FaPlus /> Input Pengajuan
+						</button>
+						<button
+							className="admin-btn-secondary"
+							onClick={handleExport}
+							disabled={ListData.length === 0}
+						>
+							<FaFileDownload /> Export Data
+						</button>
 					</div>
 				</div>
-				<div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center' }}>
-					<div 
-					style={{ backgroundColor:'#FFFFFF', border:'1px solid #002C00', padding:10, borderRadius:10, cursor:'pointer' }} onClick={() => setShowModalInputPengajuan(true)}>
-						<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-							<img src={IconAdd} alt="logo" style={{ height:20, width:20 }}  />
-							<div style={{ width:5 }} />
-							<div style={{ color:'#002C00', fontWeight:'bold' }}>Input Pengajuan</div>
-						</div>
-					</div>
-					<div style={{ width:10 }} />
-					<div style={{ backgroundColor:'#FFFFFF', border:'1px solid #002C00', padding:10, borderRadius:10, cursor:'pointer' }}>
-						<div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-							<img src={IconExport} alt="logo" style={{ height:20, width:20 }}  />
-							<div style={{ width:5 }} />
-							<div style={{ color:'#002C00', fontWeight:'bold' }}>Export Data</div>
-						</div>
-					</div>
-				</div>
-			</div>
 
-			<div style={{ height:30 }} />
-
-			<div className="row mb-4">
-				<div className="col-lg-4 mb-3">
-					<div className="finance-card saldo">
-						<div className="finance-icon">
-							<img src={IconWallet} alt="logo" style={{ height:30, width:30 }} />
-						</div>
-						<div>
-							<div className="finance-title">
-								Menunggu Persetujuan
-							</div>
-							<div className="finance-value">
-								{setTotalMenungguPersetujuan}
-							</div>
-							<div className="finance-sub-title">
-								Total
-							</div>
-						</div>
-					</div>
-				</div>
-				<div className="col-lg-4 mb-3">
-					<div className="finance-card kredit">
-						<div className="finance-icon">
-							<img src={IconArrowRightUp} alt="logo" style={{ height:30, width:30, transform: "rotate(180deg)" }} />
-						</div>
-						<div>
-							<div className="finance-title">
-								Disetujui - Menunggu Cair
-							</div>
-							<div className="finance-value">
-								{formatRupiah(TotalDisetujui)}
-							</div>
-							<div className="finance-sub-title">
-								Siap dicairkan oleh Superadmin IPL-Q
-							</div>
-						</div>
-					</div>
-				</div>
-				<div className="col-lg-4 mb-3">
-					<div className="finance-card debit">
-						<div className="finance-icon">
-							<img src={IconArrowRightUp} alt="logo" style={{ height:30, width:30 }} />
-						</div>
-						<div>
-							<div className="finance-title">
-								Dana Tercairkan
-							</div>
-							<div className="finance-value">
-								{formatRupiah(TotalCair)}
-							</div>
-							<div className="finance-sub-title">
-								Total Dana Sudah Cair
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div className="card border-0 shadow rounded-4 p-3">
-				<div className="filter-container">
-					<input
-						type="text"
-						className="filter-input"
-						placeholder="Cari Cluster / Keperluan"
-						value={GlobalSearch}
-						onChange={(e) => setGlobalSearch(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								setCurrentPage(1);
-								getListTarikDana("");
-							}
-						}}
-					/>
-
-					<select
-						className="filter-select"
-						value={FilterJenisTransaksi}
-						onChange={(e) => {
-							setFilterJenisTransaksi(e.target.value)
-						}}
-					>
-						<option value="">Status Pengajuan</option>
-						<option value="0">Menunggu</option>
-						<option value="1">Disetujui</option>
-						<option value="2">Ditolak</option>
-					</select>
-
-					<input
-						type="month"
-						className="filter-input"
-						value={FilterBulan}
-						onChange={(e) => handleFilterBulan(e.target.value)}
-					/>
-
-					<button
-						className="btn-filter-lk"
-						onClick={() => {
-							setCurrentPage(1)
-							setListTarikDana([])
-							getListTarikDana("")
-						}}
-					>
-						<div style={{ display:'flex', justifyContent:'center', alignItems:'center' }}>
-							<img src={IconFilter} alt="logo" style={{ height:15, width:15, filter:"brightness(0) invert(1)" }} />
-							<div style={{ width:5 }} />
-							<div>Filter</div>
-						</div>
-					</button>
-
-					<button
-						className="btn-reset-lk"
-						onClick={() => {
-							setCurrentPage(1)
-							setGlobalSearch("")
-							setFilterJenisTransaksi("")
-							setFilterBulan("")
-							setFilterBeginDate("")
-							setFilterEndDate("")
-							setListTarikDana([])
-							getListTarikDana("reset")
-						}}
-					>
-						<div style={{ display:'flex', justifyContent:'center', alignItems:'center' }}>
-							<img src={IconReset} alt="logo" style={{ height:15, width:15 }} />
-							<div style={{ width:5 }} />
-							<div>Reset</div>
-						</div>
-					</button>
-				</div>
-
-				<div className="lk-table">
-					{ListTarikDana.length > 0 &&
-					<div className="lk-header">
-						<div>ID / Tanggal</div>
-						<div>Keperluan</div>
-						<div>Jumlah</div>
-						<div>Status</div>
-						<div>Aksi</div>
-					</div>}
-					{ListTarikDana?.length > 0 ?
-					ListTarikDana?.map((item, index) => (
-						<div className="lk-row" key={index}>
-							<div className="lk-order">
-								<div>
-									<strong>{item.id_tarik_dana}</strong>
-								</div>
-								<div>
-									{item.tanggal_input}
-								</div>
-							</div>
-
+				<div className="admin-summary-grid cols-3">
+					{summaryCards.map((item) => (
+						<div className={`admin-summary-card ${item.tone}`} key={item.title}>
 							<div>
-								{item.keperluan}
+								<span>{item.title}</span>
+								<strong>{item.value}</strong>
+								<small>{item.description}</small>
 							</div>
+							<div className="admin-summary-icon">{item.icon}</div>
+						</div>
+					))}
+				</div>
 
-							<div>
-								{formatRupiah(item.jumlah)}
-							</div>
+				<div className="admin-panel">
+					<div className="admin-panel-header">
+						<div>
+							<h2>Daftar Pengajuan Tarik Dana</h2>
+							<p>Total data: {formatNumber(TotalRecords)}</p>
+						</div>
+					</div>
 
-							<div>
-								<div style={{ paddingBottom:10 }}>
-									{statusBadge(item.status, item.tahap)}
-								</div>
-								<div className="stepper">
-									{steps.map((step, index) => (
-										<div className="step-item" key={step}>
-										<div className={`circle ${item.status >= step ? "active" : ""}`}></div>
+					<div className="admin-filter-grid">
+						<div className="admin-search-field">
+							<FaSearch />
+							<input
+								type="text"
+								placeholder="Cari cluster / keperluan..."
+								value={GlobalSearch}
+								onChange={(e) => setGlobalSearch(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === "Enter") handleFilter();
+								}}
+							/>
+						</div>
 
-										{index < steps.length - 1 && (
-											<div className={`line ${item.status > step ? "active" : ""}`}></div>
-										)}
+						<select
+							value={FilterJenisTransaksi}
+							onChange={(e) => setFilterJenisTransaksi(e.target.value)}
+						>
+							<option value="">Status Pengajuan</option>
+							<option value="1">Menunggu</option>
+							<option value="2">Disetujui</option>
+							<option value="3">Ditolak</option>
+						</select>
+
+						<input
+							type="month"
+							value={FilterBulan}
+							onChange={(e) => setFilterBulan(e.target.value)}
+						/>
+
+						<button className="admin-btn-filter" onClick={handleFilter}>
+							<FaFilter /> Filter
+						</button>
+
+						<button className="admin-btn-secondary" onClick={handleReset}>
+							<FaRedoAlt /> Reset
+						</button>
+					</div>
+
+					<div className="admin-table-wrap">
+						<table className="admin-table">
+							<thead>
+								<tr>
+									<th>ID / Tanggal</th>
+									<th>Keperluan</th>
+									<th>Jumlah</th>
+									<th>Status</th>
+									<th>Aksi</th>
+								</tr>
+							</thead>
+							<tbody>
+								{ListData?.length > 0 ? ListData.map((item, index) => (
+									<tr key={item.id_tarik_dana || index}>
+										<td>
+											<strong>{item.id_tarik_dana}</strong>
+											<span>{item.tanggal_input}</span>
+										</td>
+										<td>
+											<strong>{item.keperluan}</strong>
+										</td>
+										<td>
+											<strong>{formatRupiah(item.jumlah)}</strong>
+										</td>
+										<td>
+											{statusBadge(item.status, item.tahap)}
+											<div className="tarik-dana-stepper">
+												{steps.map((step, idx) => (
+													<div className="tarik-dana-step-item" key={step}>
+														<div className={`tarik-dana-circle ${item.status >= step ? "active" : ""}`} />
+														{idx < steps.length - 1 && (
+															<div className={`tarik-dana-line ${item.status > step ? "active" : ""}`} />
+														)}
+													</div>
+												))}
+											</div>
+										</td>
+										<td>
+											<div style={{ display: 'flex', gap: 8 }}>
+												{getCookie("username") == "superadmin" &&
+												<button
+													className="admin-btn-icon"
+													title="Update Status"
+													onClick={() => handleOpenUpdateStatus(item)}
+												>
+													<FaExchangeAlt />
+												</button>}
+												<button
+													className="admin-btn-icon"
+													title="Lihat Detail"
+												>
+													<FaEye />
+												</button>
+											</div>
+										</td>
+									</tr>
+								))
+								:
+								<tr>
+									<td colSpan={5}>
+										<div className="admin-empty-state">
+											<strong>Belum Ada Pengajuan</strong>
+											<span>Pengajuan penarikan dana akan muncul di sini setelah melakukan pengajuan.</span>
 										</div>
-									))}
-								</div>
-							</div>
+									</td>
+								</tr>
+								}
+							</tbody>
+						</table>
+					</div>
 
-							<div>
-								<img src={IconEye} alt="logo" style={{ height:20, width:20, cursor:'pointer' }}  />
-							</div>
-						</div>
-					))
-					:
-					<div className="empty-state">
-						<div className="empty-title">
-							Belum Ada Pengajuan
-						</div>
-						<div className="empty-description">
-							Pengajuan penarikan dana Anda akan muncul di sini
-							setelah melakukan pengajuan ke Superadmin melalui sistem.
-						</div>
-						<div className="empty-action">
-							<button
-								className="btn-add-transaction"
-								onClick={() => setShowModalInputPengajuan(true)}
-							>
-								+ Input Pengajuan
-							</button>
-						</div>
-					</div>}
-
-				</div>
-
-				{ListTarikDana.length > 0 &&
-				<div className="d-flex justify-content-between align-items-center mt-3">
-					<div style={{ fontWeight:'bold' }}>Total Data : {TotalRecords}</div>
-					<div className="d-flex gap-2">
+					<div className="admin-footer">
+						<div>Total Data : {formatNumber(TotalRecords)}</div>
 						<Pagination
 							currentPage={CurrentPage}
-							totalPage={TotalPage}
+							totalPage={Math.max(Number(TotalPage) || 1, 1)}
 							onPageChange={(page) => {
-								if (!LoadingLaporanKeuangan) {
+								if (!Loading) {
 									setCurrentPage(page);
 								}
 							}}
 						/>
 					</div>
-				</div>}
+				</div>
 
 				<ModalInputPengajuan
 					showModal={ShowModalInputPengajuan}
-					
 					keperluan={Keperluan}
 					onChangeKeperluan={(event) => setKeperluan(event.target.value)}
 					jumlah={formatRupiah(Jumlah)}
 					onChangeJumlah={(event) => {
-						const value = event.target.value.replace(/\D/g, "")
-						setJumlah(value)
+						const value = event.target.value.replace(/\D/g, "");
+						setJumlah(value);
 					}}
 					listRekening={ListNomorRekening}
 					rekeningTujuan={RekeningTujuan}
 					onChangeRekeningTujuan={(event) => setRekeningTujuan(event.target.value)}
-
 					onClose={() => setShowModalInputPengajuan(false)}
 					onInsert={() => handleInputPengajuan()}
 				/>
@@ -1037,66 +767,56 @@ const ListTarikDana = () => {
 					confirmMessage={ConfirmMessage}
 				/>
 
-				{/* {SessionMessage !== "" ?
-				<SweetAlert 
-					warning 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						logout()
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{SessionMessage}
-				</SweetAlert>
-				:""}
-	
-				{SuccessMessage !== "" ?
-				<SweetAlert 
-					success 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setSuccessMessage("")
-						history.replace("/dashboard")
-					}}
-					btnSize="sm">
-					{SuccessMessage}
-				</SweetAlert>
-				:""}          
-	
-				{ErrorMessageAlert !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlert("")
-					}}
-					btnSize="sm">
-					{ErrorMessageAlert}
-				</SweetAlert>
-				:""}
-	
-				{ErrorMessageAlertLogout !== "" ?
-				<SweetAlert 
-					danger 
-					show={ShowAlert}
-					onConfirm={() => {
-						setShowAlert(false)
-						setErrorMessageAlertLogout("")
-						window.location.href="/admin/login";
-					}}
-					btnSize="sm">
-					{ErrorMessageAlertLogout}
-				</SweetAlert>
-				:""} */}
-
+				{/* Modal Update Status Pengajuan */}
+				{ShowModalUpdateStatus && (
+					<div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+						<div className="modal-dialog modal-dialog-centered">
+							<div className="modal-content">
+								<div className="modal-header">
+									<h5 className="modal-title">Update Status Pengajuan</h5>
+									<button type="button" className="btn-close" onClick={() => { setShowModalUpdateStatus(false); setSelectedPengajuan(null); setNewStatus(""); }}></button>
+								</div>
+								<div className="modal-body">
+									{SelectedPengajuan && (
+										<div style={{ marginBottom: 16, padding: 12, backgroundColor: '#f8f9fa', borderRadius: 8 }}>
+											<div style={{ marginBottom: 4 }}><strong>ID:</strong> {SelectedPengajuan.id_tarik_dana}</div>
+											<div style={{ marginBottom: 4 }}><strong>Keperluan:</strong> {SelectedPengajuan.keperluan}</div>
+											<div style={{ marginBottom: 4 }}><strong>Jumlah:</strong> {formatRupiah(SelectedPengajuan.jumlah)}</div>
+											<div><strong>Status Saat Ini:</strong> {SelectedPengajuan.tahap}</div>
+										</div>
+									)}
+									<div className="mb-3">
+										<label className="form-label">Pilih Status Baru <span style={{ color: 'red' }}>*</span></label>
+										<select
+											className="form-select"
+											value={NewStatus}
+											onChange={(e) => setNewStatus(e.target.value)}
+										>
+											<option value="">-- Pilih Status --</option>
+											<option value="1">Menunggu Persetujuan</option>
+											<option value="2">Disetujui</option>
+											<option value="3">Cair</option>
+											<option value="4">Ditolak</option>
+										</select>
+									</div>
+								</div>
+								<div className="modal-footer">
+									<button
+										type="button"
+										className="btn btn-primary"
+										disabled={!NewStatus}
+										onClick={handleUpdateStatusPengajuan}
+									>
+										Update Status
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
 			</div>
-		</div>
+		</>
 	);
-}
-
-
+};
 
 export default ListTarikDana;

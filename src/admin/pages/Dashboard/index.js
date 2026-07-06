@@ -1,48 +1,56 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom';
-import { Header, Footer, Input, Button, Gap, CardDashboard } from '../../components';
 import './dashboard.css'
 import { useDispatch } from 'react-redux';
 import { AlertMessage, paths } from '../../utils'
-import { historyConfig, generateSignature, fetchStatus } from '../../utils/functions';
+import { generateSignature, fetchStatus } from '../../utils/functions';
 import { setForm } from '../../redux';
 import SweetAlert from 'react-bootstrap-sweetalert';
-import { FaBars, FaBell, FaCheckCircle, FaClock, FaCreditCard, FaHome, FaMoneyBill, FaMoneyCheck, FaPercent, FaTimesCircle, FaUserCircle, FaUserClock, FaUserFriends, FaUserPlus, FaUsers, FaUserSlash } from 'react-icons/fa';
-import { FcFactory, FcHome } from 'react-icons/fc';
-import { FaBilibili, FaHandHoldingDollar, FaHouseChimneyUser, FaMoneyBill1Wave, FaMoneyBillTransfer, FaMoneyBillWheat, FaPeopleGroup } from 'react-icons/fa6';
-import { HiOutlineHomeModern } from "react-icons/hi2";
-import { BsHouseDoor } from "react-icons/bs";
-import { MdOutlinePayments, MdOutlinePercent, MdPeopleOutline } from "react-icons/md";
-import { GrTransaction } from 'react-icons/gr';
+import {
+	FaArrowDown,
+	FaArrowUp,
+	FaBuilding,
+	FaChartPie,
+	FaCheckCircle,
+	FaClock,
+	FaExchangeAlt,
+	FaExclamationTriangle,
+	FaHome,
+	FaListOl,
+	FaMoneyBillWave,
+	FaUsers,
+	FaWallet,
+} from 'react-icons/fa';
+import {
+	Bar,
+	BarChart,
+	CartesianGrid,
+	Cell,
+	Legend,
+	Pie,
+	PieChart,
+	ResponsiveContainer,
+	Tooltip,
+	XAxis,
+	YAxis,
+} from "recharts";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-
-import { Doughnut } from "react-chartjs-2";
-// import { Chart as ChartJS, ArcElement, Legend } from "chart.js";
-// ChartJS.register(ArcElement, Tooltip, Legend);
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+const STATUS_COLORS = ["#16a34a", "#f59e0b", "#64748b"];
+const BILL_COLORS = ["#2563eb", "#16a34a", "#ef4444"];
 
 const Dashboard = () => {
-    const history = useHistory(historyConfig);
-    const dispatch = useDispatch();
-    const containerRef = useRef(null);
-    // const [cookies, setCookie,removeCookie] = useCookies(['user']);
-	const [cookies, setCookie,removeCookie] = useCookies(['user']);
-	const [Name, setName] = useState("")
-	const [ListSiswa, setListSiswa] = useState([])
-	const [Loading, setLoading] = useState(false)
-	
+	const history = useHistory();
+	const dispatch = useDispatch();
+	const [cookies, , removeCookie] = useCookies(['user']);
+
 	const [ShowAlert, setShowAlert] = useState(true)
-    const [SessionMessage, setSessionMessage] = useState("")
-    const [SuccessMessage, setSuccessMessage] = useState("")
-    const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
-    const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
+	const [SessionMessage, setSessionMessage] = useState("")
+	const [SuccessMessage, setSuccessMessage] = useState("")
+	const [ErrorMessageAlert, setErrorMessageAlert] = useState("")
+	const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState("")
 
 	const [LoadingDashboard, setLoadingDashboard] = useState(false)
-
-	const [open,setOpen] = useState(true)
-
 	const [ListTunggakan, setListTunggakan] = useState([])
 	const [TotalCluster, setTotalCluster] = useState(0)
 	const [TotalRumah, setTotalRumah] = useState(0)
@@ -55,58 +63,9 @@ const Dashboard = () => {
 	const [TotalTagihanTertunda, setTotalTagihanTertunda] = useState(0)
 	const [CollectionRate, setCollectionRate] = useState(0)
 
-    const dataBar = [
-		{ name: "Jan", pemasukan: 130, pengeluaran: 90 },
-		{ name: "Feb", pemasukan: 140, pengeluaran: 100 },
-		{ name: "Mar", pemasukan: 125, pengeluaran: 85 },
-		{ name: "Apr", pemasukan: 145, pengeluaran: 95 },
-		{ name: "May", pemasukan: 135, pengeluaran: 90 },
-		{ name: "Jun", pemasukan: 140, pengeluaran: 100 },
-	];
-
-	const dataLine = [
-		{ name: "Jan", value: 132 },
-		{ name: "Feb", value: 138 },
-		{ name: "Mar", value: 125 },
-		{ name: "Apr", value: 142 },
-		{ name: "May", value: 135 },
-		{ name: "Jun", value: 140 },
-	];
-
-	const dataPie = [
-		{ name: "Lunas", value: 60 },
-		{ name: "Tertunda", value: 20 },
-		{ name: "Terlambat", value: 20 },
-	];
-
-	const COLORS = ["#84cc16", "#94a3b8", "#ef4444"];
-
-	useEffect(() => {
-        window.scrollTo(0, 0)
-
-		console.log("masuk dashboard")
-
-        var CookieNama = getCookie("nama");
-        setName(CookieNama)
-
-		var CookieParamKey = getCookie("paramkey");
-        var CookieUsername = getCookie("username");
-        
-        if (CookieParamKey === null || CookieParamKey === "" || CookieUsername === null || CookieUsername === ""){
-            window.location.href="/admin/login";
-        }else{
-            dispatch(setForm("ParamKey",CookieParamKey))
-            dispatch(setForm("Username",CookieUsername))
-            dispatch(setForm("PageActive","DASHBOARD"))
-        }
-
-		getStatsDashboard()
-
-    },[])
-
-	const getCookie = (tipe) => {
+	const getCookie = useCallback((tipe) => {
 		var SecretCookie = cookies.varCookie;
-		if (SecretCookie !== "" && SecretCookie != null && typeof SecretCookie=="string") {
+		if (SecretCookie !== "" && SecretCookie != null && typeof SecretCookie == "string") {
 			var LongSecretCookie = SecretCookie.split("|");
 			var username = LongSecretCookie[0];
 			var paramKey = LongSecretCookie[1];
@@ -114,7 +73,7 @@ const Dashboard = () => {
 			var accessName = LongSecretCookie[3];
 			var cluster = LongSecretCookie[4];
 			var clusterId = LongSecretCookie[5];
-		
+
 			if (tipe === "username") {
 				return username;
 			} else if (tipe === "paramkey") {
@@ -133,44 +92,36 @@ const Dashboard = () => {
 		} else {
 			return null;
 		}
-	}
+	}, [cookies.varCookie])
 
-	const logout = ()=>{
-        removeCookie('varCookie', { path: '/'})
-        removeCookie('varMerchantId', { path: '/'})
-        removeCookie('varIdVoucher', { path: '/'})
-        dispatch(setForm("ParamKey",''))
-        dispatch(setForm("Username",''))
-        dispatch(setForm("Name",''))
-        dispatch(setForm("Role",''))
-        if(window){
-            sessionStorage.clear();
+	const logout = () => {
+		removeCookie('varCookie', { path: '/' })
+		removeCookie('varMerchantId', { path: '/' })
+		removeCookie('varIdVoucher', { path: '/' })
+		dispatch(setForm("ParamKey", ''))
+		dispatch(setForm("Username", ''))
+		dispatch(setForm("Name", ''))
+		dispatch(setForm("Role", ''))
+		if (window) {
+			sessionStorage.clear();
 		}
-    }
-
-	const toggleSidebar = () =>{
-		setOpen(!open)
 	}
 
-	const getStatsDashboard = () => {
+	const getStatsDashboard = useCallback(() => {
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
 		var cookieAccessLogin = getCookie("access");
-		var cookieCluster = getCookie("cluster");
-		var cookieClusterId = getCookie("cluster_id");
+		var cookieClusterId = Number(getCookie("cluster_id")) || 0;
 
 		var requestBody = JSON.stringify({
 			"username": cookieUsername,
 			"paramkey": cookieParamKey,
 			"method": "SELECT",
-			"access": cookieAccessLogin,
-			"jenis_tagihan": 2,
-			"cluster_id": parseInt(cookieClusterId),
+			"cluster_id": cookieClusterId,
 			"page": 1,
 			"row_page": -1,
 			"order_by": "",
 			"order": ""
-
 		});
 
 		setLoadingDashboard(true)
@@ -191,25 +142,27 @@ const Dashboard = () => {
 		.then((data) => {
 			setLoadingDashboard(false)
 
-			if (data.error_code === "0") {
+			if (data.error_code === '0' || data.error_code === 0) {
+				const totalTagihan = Number(data.total_tagihan) || 0;
+				const totalTagihanTerkumpul = Number(data.total_tagihan_terkumpul) || 0;
 				const collectionRate =
-					data.total_tagihan > 0
-						? (data.total_tagihan_terkumpul / data.total_tagihan) * 100
+					totalTagihan > 0
+						? (totalTagihanTerkumpul / totalTagihan) * 100
 						: 0;
 
-				setListTunggakan(data.result_top_tunggakan)
-				setTotalCluster(data.total_cluster)
-				setTotalRumah(data.total_rumah)
-				setTotalWarga(data.total_warga)
-				setTotalTransaksi(data.total_transaksi)
-				setTotalTransaksiPending(data.total_transaksi_pending)
-				setTotalTransaksiSettlement(data.total_transaksi_settlement)
-				setTotalTagihan(data.total_tagihan)
-				setTotalTagihanTerkumpul(data.total_tagihan_terkumpul)
-				setTotalTagihanTertunda(data.total_tagihan_tertunda)
+				setListTunggakan(data.result_top_tunggakan || [])
+				setTotalCluster(Number(data.total_cluster) || 0)
+				setTotalRumah(Number(data.total_rumah) || 0)
+				setTotalWarga(Number(data.total_warga) || 0)
+				setTotalTransaksi(Number(data.total_transaksi) || 0)
+				setTotalTransaksiPending(Number(data.total_transaksi_pending) || 0)
+				setTotalTransaksiSettlement(Number(data.total_transaksi_settlement) || 0)
+				setTotalTagihan(totalTagihan)
+				setTotalTagihanTerkumpul(totalTagihanTerkumpul)
+				setTotalTagihanTertunda(Number(data.total_tagihan_tertunda) || 0)
 				setCollectionRate(collectionRate)
 			} else {
-				if (data.error_code === "2") {
+				if (data.error_code === '2' || data.error_code === 2) {
 					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
 					setShowAlert(true);
 					return;
@@ -233,115 +186,118 @@ const Dashboard = () => {
 				return false;
 			}
 		});
-	}
+	}, [getCookie])
+
+	useEffect(() => {
+		window.scrollTo(0, 0)
+
+		const cookieParamKey = getCookie("paramkey");
+		const cookieUsername = getCookie("username");
+
+		if (cookieParamKey === null || cookieParamKey === "" || cookieUsername === null || cookieUsername === ""){
+			history.push('/admin/login');
+		} else {
+			dispatch(setForm("ParamKey", cookieParamKey))
+			dispatch(setForm("Username", cookieUsername))
+			dispatch(setForm("PageActive", "DASHBOARD"))
+			getStatsDashboard()
+		}
+	}, [dispatch, getCookie, getStatsDashboard, history])
 
 	const formatRupiah = (value) => {
 		return new Intl.NumberFormat("id-ID", {
 			style: "currency",
 			currency: "IDR",
 			minimumFractionDigits: 0
-		}).format(value);
+		}).format(value || 0);
 	}
 
-    return (
-		// <div className="container-fluid mt-3">
+	const formatNumber = (value) => {
+		return new Intl.NumberFormat("id-ID").format(value || 0);
+	}
 
-		// 	<div>Dashbord</div>
+	const formatPercent = (value) => {
+		return `${Number(value || 0).toFixed(1)}%`;
+	}
 
-		// 	<div className="row g-3">
+	const financialChartData = useMemo(() => ([
+		{ name: "Total", value: TotalTagihan },
+		{ name: "Terkumpul", value: TotalTagihanTerkumpul },
+		{ name: "Tertunda", value: TotalTagihanTertunda },
+	]), [TotalTagihan, TotalTagihanTerkumpul, TotalTagihanTertunda])
 
-		// 		{/* CARD 1 */}
-		// 		<div className="col-12 col-md-6 col-lg-3">
-		// 			<div className="card custom-card">
-		// 				<div className="card-body">
-  
-		// 					<div className="card-content">
-		// 						<div>
-		// 						<p className="label">TOTAL PENDAPATAN</p>
-		// 						<h3 className="value">Rp 132.000.000</h3>
-		// 						</div>
+	const statusChartData = useMemo(() => {
+		const otherStatus = Math.max(TotalTransaksi - TotalTransaksiPending - TotalTransaksiSettlement, 0);
+		return [
+			{ name: "Settlement", value: TotalTransaksiSettlement },
+			{ name: "Pending", value: TotalTransaksiPending },
+			{ name: "Lainnya", value: otherStatus },
+		]
+	}, [TotalTransaksi, TotalTransaksiPending, TotalTransaksiSettlement])
 
-		// 						<div className="d-flex align-items-center gap-2 mt-2">
-		// 						<span className="badge badge-success">+8.2%</span>
-		// 						<span className="subtext">Bulan Ini</span>
-		// 						</div>
-		// 					</div>
+	const topTunggakanChartData = useMemo(() => {
+		return ListTunggakan.map((item, index) => ({
+			name: item.nama || `Warga ${index + 1}`,
+			cluster: item.cluster || "-",
+			total: Number(item.total) || 0,
+		}))
+	}, [ListTunggakan])
 
-		// 					<div className="icon-box">$</div>
+	const totalTagihanRatio = TotalTagihan > 0 ? 100 : 0;
+	const outstandingRate = TotalTagihan > 0 ? (TotalTagihanTertunda / TotalTagihan) * 100 : 0;
+	const settlementRate = TotalTransaksi > 0 ? (TotalTransaksiSettlement / TotalTransaksi) * 100 : 0;
+	const pendingRate = TotalTransaksi > 0 ? (TotalTransaksiPending / TotalTransaksi) * 100 : 0;
+	const hasStatusChartData = statusChartData.some((item) => item.value > 0);
+	const dashboardName = getCookie("access_name") || cookies.varCookie?.split("|")[4] || "Admin";
+	const dashboardCluster = getCookie("cluster") || "Semua Cluster";
 
-		// 				</div>
-		// 			</div>
-		// 		</div>
+	const kpiCards = [
+		{
+			title: "Total Tagihan",
+			value: formatRupiah(TotalTagihan),
+			meta: `${formatPercent(totalTagihanRatio)} dari nilai tagihan`,
+			icon: <FaMoneyBillWave />,
+			tone: "blue",
+		},
+		{
+			title: "Terkumpul",
+			value: formatRupiah(TotalTagihanTerkumpul),
+			meta: `${formatPercent(CollectionRate)} collection rate`,
+			icon: <FaWallet />,
+			tone: "green",
+		},
+		{
+			title: "Tertunda",
+			value: formatRupiah(TotalTagihanTertunda),
+			meta: `${formatPercent(outstandingRate)} outstanding`,
+			icon: <FaExclamationTriangle />,
+			tone: "red",
+		},
+		{
+			title: "Transaksi",
+			value: formatNumber(TotalTransaksi),
+			meta: `${formatNumber(TotalTransaksiSettlement)} settlement`,
+			icon: <FaExchangeAlt />,
+			tone: "purple",
+		},
+	]
 
-		// 		{/* CARD 2 */}
-		// 		<div className="col-12 col-md-6 col-lg-3">
-		// 		<div className="card custom-card">
-		// 			<div className="card-body d-flex justify-content-between">
-		// 			<div>
-		// 				<p className="label">TOTAL WARGA</p>
-		// 				<h3 className="value">24</h3>
+	const operationCards = [
+		{ label: "Warga", value: TotalWarga, icon: <FaUsers /> },
+		{ label: "Rumah", value: TotalRumah, icon: <FaHome /> },
+		{ label: "Cluster", value: TotalCluster, icon: <FaBuilding /> },
+	]
 
-		// 				<div className="d-flex align-items-center gap-2 mt-2">
-		// 				<span className="badge badge-success">+3.5%</span>
-		// 				<span className="subtext">Bulan Ini</span>
-		// 				</div>
-		// 			</div>
-
-		// 			<div className="icon-box">👥</div>
-		// 			</div>
-		// 		</div>
-		// 		</div>
-
-		// 		{/* CARD 3 */}
-		// 		<div className="col-12 col-md-6 col-lg-3">
-		// 		<div className="card custom-card">
-		// 			<div className="card-body d-flex justify-content-between">
-		// 			<div>
-		// 				<p className="label">TOTAL CLUSTER</p>
-		// 				<h3 className="value">4</h3>
-
-		// 				<div className="mt-2">
-		// 				<span className="badge badge-danger">0%</span>
-		// 				</div>
-		// 			</div>
-
-		// 			<div className="icon-box">🏢</div>
-		// 			</div>
-		// 		</div>
-		// 		</div>
-
-		// 		{/* CARD 4 */}
-		// 		<div className="col-12 col-md-6 col-lg-3">
-		// 		<div className="card custom-card">
-		// 			<div className="card-body d-flex justify-content-between">
-		// 			<div>
-		// 				<p className="label">TAGIHAN TERTUNDA</p>
-		// 				<h3 className="value">216</h3>
-
-		// 				<div className="d-flex align-items-center gap-2 mt-2">
-		// 				<span className="badge badge-danger">-12%</span>
-		// 				<span className="subtext">Bulan Lalu</span>
-		// 				</div>
-		// 			</div>
-
-		// 			<div className="icon-box">⚠️</div>
-		// 			</div>
-		// 		</div>
-		// 		</div>
-
-		// 	</div>
-		// </div>
-
-		<div className="container-fluid dashboard-page p-4">
-			
+	return (
+		<div className="dashboard-page">
 			{SessionMessage !== "" ?
-			<SweetAlert 
-				warning 
+			<SweetAlert
+				warning
 				show={ShowAlert}
 				onConfirm={() => {
 					setShowAlert(false)
 					logout()
-					window.location.href="/admin/login";
+					history.push("/admin/login");
 				}}
 				btnSize="sm">
 				{SessionMessage}
@@ -349,22 +305,22 @@ const Dashboard = () => {
 			:""}
 
 			{SuccessMessage !== "" ?
-			<SweetAlert 
-				success 
+			<SweetAlert
+				success
 				show={ShowAlert}
 				onConfirm={() => {
 					setShowAlert(false)
 					setSuccessMessage("")
-					history.replace("/dashboard")
+					history.replace("/admin/dashboard")
 				}}
 				btnSize="sm">
 				{SuccessMessage}
 			</SweetAlert>
-			:""}          
+			:""}
 
 			{ErrorMessageAlert !== "" ?
-			<SweetAlert 
-				danger 
+			<SweetAlert
+				danger
 				show={ShowAlert}
 				onConfirm={() => {
 					setShowAlert(false)
@@ -376,136 +332,214 @@ const Dashboard = () => {
 			:""}
 
 			{ErrorMessageAlertLogout !== "" ?
-			<SweetAlert 
-				danger 
+			<SweetAlert
+				danger
 				show={ShowAlert}
 				onConfirm={() => {
 					setShowAlert(false)
 					setErrorMessageAlertLogout("")
-					window.location.href="/admin/login";
+					history.push("/admin/login");
 				}}
 				btnSize="sm">
 				{ErrorMessageAlertLogout}
 			</SweetAlert>
 			:""}
 
-			{/* Header */}
-			<div className="mb-4">
-				<h3 className="fw-bold">Selamat Datang, {cookies.varCookie?.split("|")[4]} 👋</h3>
-				<p className="text-muted">Ringkasan data seluruh cluster hari ini</p>
+			<div className="dashboard-header">
+				<div>
+					<div className="dashboard-eyebrow">Dashboard</div>
+					<h1>Selamat datang, {dashboardName}</h1>
+					<p>Ringkasan operasional dan pembayaran untuk {dashboardCluster}.</p>
+				</div>
+				<button className="dashboard-refresh" onClick={getStatsDashboard} disabled={LoadingDashboard}>
+					{LoadingDashboard ? "Memuat..." : "Perbarui"}
+				</button>
 			</div>
 
-			{/* Cards */}
-			<div className="row">
-				<CardDashboard title="Total Warga" value={TotalWarga} icon={<FaUserFriends style={{ width:30, height:30 }} />} />
-				<CardDashboard title="Total Cluster" value={TotalCluster} icon={<FaHouseChimneyUser style={{ width:30, height:30 }} />} />
-				<CardDashboard title="Total Rumah" value={TotalRumah} icon={<FaHome style={{ width:30, height:30 }} />} />
-			</div>
-			<div className="row">
-				<CardDashboard title="Total Tagihan" value={formatRupiah(TotalTagihan)} icon={<FaMoneyBill style={{ width:30, height:30 }} />} />
-				<CardDashboard title="Total Tagihan Terkumpul" value={formatRupiah(TotalTagihanTerkumpul)} icon={<FaHandHoldingDollar style={{ width:30, height:30 }} />} />
-				<CardDashboard title="Total Tagihan Tertunda" value={formatRupiah(TotalTagihanTertunda)} icon={<FaMoneyBillWheat style={{ width:30, height:30 }} />} />
-			</div>
-			<div className="row">
-				<CardDashboard title="Total Transaksi" value={TotalTransaksi} icon={<FaMoneyBillTransfer style={{ width:30, height:30 }} />} />
-				<CardDashboard title="Total Transaksi Pending" value={TotalTransaksiPending} icon={<FaTimesCircle style={{ width:30, height:30 }} />} />
-				<CardDashboard title="Total Transaksi Settlement" value={TotalTransaksiSettlement} icon={<FaCheckCircle style={{ width:30, height:30 }} />} />
+			<div className="dashboard-kpi-grid">
+				{kpiCards.map((item) => (
+					<div className={`dashboard-kpi-card ${item.tone}`} key={item.title}>
+						<div className="dashboard-kpi-content">
+							<span>{item.title}</span>
+							<strong>{item.value}</strong>
+							<small>{item.meta}</small>
+						</div>
+						<div className="dashboard-kpi-icon">{item.icon}</div>
+					</div>
+				))}
 			</div>
 
-			{/* <div className="card shadow-sm border-0 rounded-4">
-				<div className="card-body d-flex justify-content-between align-items-center">
-					<div className="card p-3 rounded-4 shadow-sm">
-						<h6 className="fw-bold">Top Tunggakan</h6>
+			<div className="dashboard-overview-grid">
+				<div className="dashboard-panel collection-panel">
+					<div className="panel-title-row">
+						<div>
+							<span className="panel-label">Collection Rate</span>
+							<h2>{formatPercent(CollectionRate)}</h2>
+						</div>
+						<div className={`dashboard-trend ${CollectionRate >= 70 ? "up" : "down"}`}>
+							{CollectionRate >= 70 ? <FaArrowUp /> : <FaArrowDown />}
+							{CollectionRate >= 70 ? "Sehat" : "Perlu Follow Up"}
+						</div>
+					</div>
+					<div className="collection-progress">
+						<div style={{ width: `${Math.min(CollectionRate, 100)}%` }} />
+					</div>
+					<div className="collection-breakdown">
+						<div>
+							<span>Terkumpul</span>
+							<strong>{formatRupiah(TotalTagihanTerkumpul)}</strong>
+						</div>
+						<div>
+							<span>Tertunda</span>
+							<strong>{formatRupiah(TotalTagihanTertunda)}</strong>
+						</div>
+					</div>
+				</div>
 
-						<div style={{ backgroundColor:'#84cc16', padding:1 }} />
-
-						{ListTunggakan.map((item, i) => (
-							<div key={i} className="d-flex justify-content-between">
-								<span style={{ fontWeight:'bold' }}>{item.nama} ({item.cluster})</span>
-								<span className="text-danger">
-									{formatRupiah(item.total)}
-								</span>
+				<div className="dashboard-panel operation-panel">
+					<div className="panel-heading">
+						<FaChartPie />
+						<div>
+							<span className="panel-label">Operasional</span>
+							<h3>Data Hunian</h3>
+						</div>
+					</div>
+					<div className="operation-list">
+						{operationCards.map((item) => (
+							<div className="operation-item" key={item.label}>
+								<div className="operation-icon">{item.icon}</div>
+								<div>
+									<span>{item.label}</span>
+									<strong>{formatNumber(item.value)}</strong>
+								</div>
 							</div>
 						))}
 					</div>
 				</div>
-			</div> */}
+			</div>
 
-			{/* Charts */}
-			{/* <div className="row mt-3">
-				<div className="col-md-6 mb-3">
-				<div className="card shadow-sm border-0 rounded-4">
-					<div className="card-body">
-					<h6 className="fw-bold mb-3">Keuangan per Cluster</h6>
-					<div className="text-center text-muted">(Bar Chart di sini)</div>
-					</div>
-				</div>
-				</div>
-
-				<div className="col-md-6 mb-3">
-				<div className="card shadow-sm border-0 rounded-4">
-					<div className="card-body">
-					<h6 className="fw-bold mb-3">Status Tagihan</h6>
-					<div className="text-center text-muted">(Donut Chart di sini)</div>
-					</div>
-				</div>
-				</div>
-			</div> */}
-
-			{/* Bottom Section */}
-			{/* <div className="row">
-				<div className="col-md-6 mb-3">
-				<div className="card shadow-sm border-0 rounded-4">
-					<div className="card-body">
-					<h6 className="fw-bold mb-3">Tren Pemasukan Bulanan</h6>
-					<div className="text-center text-muted">(Line Chart di sini)</div>
-					</div>
-				</div>
-				</div>
-
-				<div className="col-md-6 mb-3">
-				<div className="card shadow-sm border-0 rounded-4">
-					<div className="card-body">
-					<h6 className="fw-bold mb-3">Ringkasan Cluster</h6>
-
-					<div className="list-group">
-						<div className="list-group-item d-flex justify-content-between align-items-center">
+			<div className="dashboard-chart-grid">
+				<div className="dashboard-panel chart-panel">
+					<div className="panel-heading">
+						<FaMoneyBillWave />
 						<div>
-							<strong>Cluster Harmony</strong>
-							<div className="text-muted small">156 warga • 142 rumah</div>
-						</div>
-						<span className="badge bg-success">Aktif</span>
-						</div>
-
-						<div className="list-group-item d-flex justify-content-between align-items-center">
-						<div>
-							<strong>Cluster Serenity</strong>
-							<div className="text-muted small">203 warga • 187 rumah</div>
-						</div>
-						<span className="badge bg-success">Aktif</span>
-						</div>
-
-						<div className="list-group-item d-flex justify-content-between align-items-center">
-						<div>
-							<strong>Cluster Prestige</strong>
-							<div className="text-muted small">98 warga • 91 rumah</div>
-						</div>
-						<span className="badge bg-success">Aktif</span>
-						</div>
-
-						<div className="list-group-item d-flex justify-content-between align-items-center">
-						<div>
-							<strong>Cluster Elite</strong>
-							<div className="text-muted small">134 warga • 120 rumah</div>
-						</div>
-						<span className="badge bg-danger">Nonaktif</span>
+							<span className="panel-label">Keuangan</span>
+							<h3>Ringkasan Tagihan</h3>
 						</div>
 					</div>
-
+					<div className="chart-area">
+						<ResponsiveContainer width="100%" height={290}>
+							<BarChart data={financialChartData} margin={{ top: 12, right: 12, left: 0, bottom: 0 }}>
+								<CartesianGrid strokeDasharray="3 3" vertical={false} />
+								<XAxis dataKey="name" tickLine={false} axisLine={false} />
+								<YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `${value / 1000000} jt`} />
+								<Tooltip formatter={(value) => formatRupiah(value)} />
+								<Bar dataKey="value" radius={[8, 8, 0, 0]}>
+									{financialChartData.map((entry, index) => (
+										<Cell key={`bill-cell-${entry.name}`} fill={BILL_COLORS[index % BILL_COLORS.length]} />
+									))}
+								</Bar>
+							</BarChart>
+						</ResponsiveContainer>
 					</div>
 				</div>
+
+				<div className="dashboard-panel chart-panel">
+					<div className="panel-heading">
+						<FaExchangeAlt />
+						<div>
+							<span className="panel-label">Transaksi</span>
+							<h3>Status Pembayaran</h3>
+						</div>
+					</div>
+					<div className="chart-area">
+						{hasStatusChartData ?
+						<ResponsiveContainer width="100%" height={290}>
+							<PieChart>
+								<Pie
+									data={statusChartData}
+									cx="50%"
+									cy="48%"
+									innerRadius={68}
+									outerRadius={100}
+									paddingAngle={4}
+									dataKey="value"
+								>
+									{statusChartData.map((entry, index) => (
+										<Cell key={`status-cell-${entry.name}`} fill={STATUS_COLORS[index % STATUS_COLORS.length]} />
+									))}
+								</Pie>
+								<Tooltip formatter={(value) => formatNumber(value)} />
+								<Legend verticalAlign="bottom" height={32} />
+							</PieChart>
+						</ResponsiveContainer>
+						:
+						<div className="empty-chart">Belum ada data transaksi</div>}
+					</div>
+					<div className="status-summary">
+						<div>
+							<FaCheckCircle />
+							<span>Settlement</span>
+							<strong>{formatPercent(settlementRate)}</strong>
+						</div>
+						<div>
+							<FaClock />
+							<span>Pending</span>
+							<strong>{formatPercent(pendingRate)}</strong>
+						</div>
+					</div>
 				</div>
-			</div> */}
+			</div>
+
+			<div className="dashboard-bottom-grid">
+				<div className="dashboard-panel chart-panel">
+					<div className="panel-heading">
+						<FaListOl />
+						<div>
+							<span className="panel-label">Prioritas</span>
+							<h3>Top Tunggakan</h3>
+						</div>
+					</div>
+					{topTunggakanChartData.length > 0 ?
+					<div className="chart-area arrears-chart">
+						<ResponsiveContainer width="100%" height={260}>
+							<BarChart data={topTunggakanChartData} layout="vertical" margin={{ top: 8, right: 24, left: 12, bottom: 8 }}>
+								<CartesianGrid strokeDasharray="3 3" horizontal={false} />
+								<XAxis type="number" tickFormatter={(value) => `${value / 1000000} jt`} />
+								<YAxis type="category" dataKey="name" width={92} tickLine={false} axisLine={false} />
+								<Tooltip formatter={(value) => formatRupiah(value)} />
+								<Bar dataKey="total" fill="#ef4444" radius={[0, 8, 8, 0]} />
+							</BarChart>
+						</ResponsiveContainer>
+					</div>
+					:
+					<div className="empty-chart">Belum ada data tunggakan</div>}
+				</div>
+
+				<div className="dashboard-panel arrears-list-panel">
+					<div className="panel-heading">
+						<FaExclamationTriangle />
+						<div>
+							<span className="panel-label">Daftar</span>
+							<h3>Tunggakan Tertinggi</h3>
+						</div>
+					</div>
+					<div className="arrears-list">
+						{ListTunggakan.length > 0 ? ListTunggakan.map((item, index) => (
+							<div className="arrears-item" key={`${item.nama}-${index}`}>
+								<div className="arrears-rank">{index + 1}</div>
+								<div className="arrears-info">
+									<strong>{item.nama || "-"}</strong>
+									<span>{item.cluster || "-"}</span>
+								</div>
+								<div className="arrears-value">{formatRupiah(item.total)}</div>
+							</div>
+						)) : (
+							<div className="empty-list">Tidak ada tunggakan prioritas.</div>
+						)}
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 }
