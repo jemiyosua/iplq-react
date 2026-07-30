@@ -16,6 +16,7 @@ import {
 	FaFileDownload,
 	FaFilter,
 	FaHandHoldingHeart,
+	FaPlus,
 	FaRedoAlt,
 	FaSearch,
 	FaTimes,
@@ -62,6 +63,14 @@ const Donasi = () => {
 	const [EditTanggalMulai, setEditTanggalMulai] = useState('');
 	const [EditTanggalSelesai, setEditTanggalSelesai] = useState('');
 	const [EditStatus, setEditStatus] = useState('1');
+
+	// Modal Input New Donasi State
+	const [ShowModalInput, setShowModalInput] = useState(false);
+	const [InputNamaDonasi, setInputNamaDonasi] = useState('');
+	const [InputKeterangan, setInputKeterangan] = useState('');
+	const [InputDonasiMinimal, setInputDonasiMinimal] = useState('');
+	const [InputTanggalMulai, setInputTanggalMulai] = useState('');
+	const [InputTanggalSelesai, setInputTanggalSelesai] = useState('');
 
 	// Delete Confirmation State
 	const [ShowConfirmDelete, setShowConfirmDelete] = useState(false);
@@ -247,6 +256,81 @@ const Donasi = () => {
 		history.push('/admin/donasi-detail');
 	};
 
+	// --- Input New Donasi ---
+	const handleOpenInput = () => {
+		setInputNamaDonasi('');
+		setInputKeterangan('');
+		setInputDonasiMinimal('');
+		setInputTanggalMulai('');
+		setInputTanggalSelesai('');
+		setShowModalInput(true);
+	};
+
+	const handleCloseInput = () => {
+		setShowModalInput(false);
+		setInputNamaDonasi('');
+		setInputKeterangan('');
+		setInputDonasiMinimal('');
+		setInputTanggalMulai('');
+		setInputTanggalSelesai('');
+	};
+
+	const handleSubmitInput = () => {
+		if (!InputNamaDonasi.trim()) {
+			setErrorMessageAlert('Nama donasi tidak boleh kosong');
+			setShowAlert(true);
+			return;
+		}
+
+		var cookieUsername = getCookie('username');
+		var cookieParamKey = getCookie('paramkey');
+
+		var requestBody = JSON.stringify({
+			username: cookieUsername,
+			paramkey: cookieParamKey,
+			method: 'INSERT',
+			nama_donasi: InputNamaDonasi,
+			keterangan_donasi: InputKeterangan,
+			donasi_minimal: parseInt(InputDonasiMinimal) || 0,
+			tanggal_mulai_donasi: InputTanggalMulai,
+			tanggal_selesai_donasi: InputTanggalSelesai,
+		});
+
+		setLoadingDonasi(true);
+
+		var url = paths.URL_API_ADMIN + 'Donasi';
+		var Signature = generateSignature(requestBody);
+
+		fetch(url, {
+			method: 'POST',
+			body: requestBody,
+			headers: { 'Content-Type': 'application/json', Signature: Signature },
+		})
+			.then(fetchStatus)
+			.then((response) => response.json())
+			.then((data) => {
+				setLoadingDonasi(false);
+				if (data.error_code === '0' || data.error_code === 0) {
+					handleCloseInput();
+					setSuccessMessage('Program donasi baru berhasil ditambahkan.');
+					setShowAlert(true);
+					getListDonasi('');
+				} else {
+					if (data.error_code === 2) {
+						setSessionMessage('Session Anda Telah Habis. Silahkan Login Kembali.');
+					} else {
+						setErrorMessageAlert(data.error_message || 'Gagal menambahkan donasi.');
+					}
+					setShowAlert(true);
+				}
+			})
+			.catch(() => {
+				setLoadingDonasi(false);
+				setErrorMessageAlert(AlertMessage.failedConnect);
+				setShowAlert(true);
+			});
+	};
+
 	// --- Update Donasi ---
 	const handleOpenUpdate = (item) => {
 		setEditId(item.id);
@@ -413,9 +497,14 @@ const Donasi = () => {
 						<h1>Donasi</h1>
 						<p>Kelola dan pantau semua program donasi warga.</p>
 					</div>
-					<button className="admin-btn-primary" onClick={handleExport} disabled={ListDonasi.length === 0}>
-						<FaFileDownload /> Export Data
-					</button>
+					<div style={{ display: 'flex', gap: 10 }}>
+						<button className="admin-btn-primary" onClick={handleOpenInput}>
+							<FaPlus /> Tambah Donasi
+						</button>
+						<button className="admin-btn-secondary" onClick={handleExport} disabled={ListDonasi.length === 0}>
+							<FaFileDownload /> Export Data
+						</button>
+					</div>
 				</div>
 
 				<div className="admin-summary-grid cols-3">
@@ -494,9 +583,9 @@ const Donasi = () => {
 										<td>{statusBadge(item.status)}</td>
 										<td>
 											<div style={{ display: 'flex', gap: 6 }}>
-												{/* <button className="admin-btn-icon" onClick={() => handleDetailDonasi(item.id)} title="Lihat Detail">
+												<button className="admin-btn-icon" onClick={() => handleDetailDonasi(item.id)} title="Lihat Detail">
 													<FaEye />
-												</button> */}
+												</button>
 												<button className="admin-btn-icon" onClick={() => handleOpenUpdate(item)} title="Edit Data">
 													<FaEdit />
 												</button>
@@ -602,6 +691,75 @@ const Donasi = () => {
 								</button>
 								<button className="admin-btn-primary" onClick={handleSubmitUpdate}>
 									Simpan Perubahan
+								</button>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{/* Modal Input Donasi Baru */}
+				{ShowModalInput && (
+					<div className="donasi-modal-overlay" onClick={handleCloseInput}>
+						<div className="donasi-modal" onClick={(e) => e.stopPropagation()}>
+							<div className="donasi-modal-header">
+								<h3>Tambah Program Donasi Baru</h3>
+								<button className="donasi-modal-close" onClick={handleCloseInput}>
+									<FaTimes />
+								</button>
+							</div>
+							<div className="donasi-modal-body">
+								<div className="donasi-modal-field">
+									<label>Nama Donasi <span style={{ color: 'red' }}>*</span></label>
+									<input
+										type="text"
+										value={InputNamaDonasi}
+										onChange={(e) => setInputNamaDonasi(e.target.value)}
+										placeholder="Masukkan nama donasi"
+									/>
+								</div>
+								<div className="donasi-modal-field">
+									<label>Deskripsi Donasi</label>
+									<textarea
+										value={InputKeterangan}
+										onChange={(e) => setInputKeterangan(e.target.value)}
+										placeholder="Masukkan deskripsi donasi"
+										rows={3}
+									/>
+								</div>
+								<div className="donasi-modal-row">
+									<div className="donasi-modal-field">
+										<label>Tanggal Mulai</label>
+										<input
+											type="date"
+											value={InputTanggalMulai}
+											onChange={(e) => setInputTanggalMulai(e.target.value)}
+										/>
+									</div>
+									<div className="donasi-modal-field">
+										<label>Tanggal Selesai</label>
+										<input
+											type="date"
+											value={InputTanggalSelesai}
+											onChange={(e) => setInputTanggalSelesai(e.target.value)}
+										/>
+									</div>
+								</div>
+								<div className="donasi-modal-field">
+									<label>Jumlah Donasi Minimal (Rp)</label>
+									<input
+										type="number"
+										value={InputDonasiMinimal}
+										onChange={(e) => setInputDonasiMinimal(e.target.value)}
+										placeholder="0"
+									/>
+								</div>
+							</div>
+							<div className="donasi-modal-footer">
+								<button className="admin-btn-secondary" onClick={handleCloseInput}>
+									Batal
+								</button>
+								<button className="admin-btn-primary" onClick={handleSubmitInput} disabled={!InputNamaDonasi.trim()}>
+									Simpan
 								</button>
 							</div>
 						</div>

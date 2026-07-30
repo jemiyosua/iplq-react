@@ -30,6 +30,9 @@ const LaporangKeuanganList = () => {
 	const [cookies, , removeCookie] = useCookies(['user']);
 
 	const [ListLaporanKeuangan, setListLaporanKeuangan] = useState([]);
+	const [ListLaporanKeuanganFilter, setListLaporanKeuanganFilter] = useState([]);
+	const [ListPenggunaanDana, setListPenggunaanDana] = useState([]);
+
 	const [CurrentPage, setCurrentPage] = useState(1);
 	const [RowPage] = useState(10);
 	const [TotalPage, setTotalPage] = useState(1);
@@ -41,6 +44,9 @@ const LaporangKeuanganList = () => {
 	const [TotalKredit, setTotalKredit] = useState(0);
 	const [TotalDebit, setTotalDebit] = useState(0);
 
+	const [SaldoAwalFilter, setSaldoAwalFilter] = useState(0);
+	const [SaldoAkhirFilter, setSaldoAkhirFilter] = useState(0);
+
 	const [LoadingLaporanKeuangan, setLoadingLaporanKeuangan] = useState(false);
 	const [ShowModalUpdateLaporanKeuangan, setShowModalUpdateLaporanKeuangan] = useState(false);
 
@@ -49,6 +55,19 @@ const LaporangKeuanganList = () => {
 	const [FilterBulan, setFilterBulan] = useState('');
 	const [FilterBeginDate, setFilterBeginDate] = useState('');
 	const [FilterEndDate, setFilterEndDate] = useState('');
+
+	// List bulan yang tersedia dari transaksi
+	const [ListBulanTersedia, setListBulanTersedia] = useState([]);
+
+	// Summary keuangan tahun berjalan
+	const [SummaryRekeningKoran, setSummaryRekeningKoran] = useState([]);
+	const [SummaryPenggunaanDana, setSummaryPenggunaanDana] = useState([]);
+	const [FilterBulanSummary, setFilterBulanSummary] = useState('');
+
+	// Pagination summary tables (client-side, 5 per page)
+	const [PageRekeningKoran, setPageRekeningKoran] = useState(1);
+	const [PagePenggunaanDana, setPagePenggunaanDana] = useState(1);
+	const SUMMARY_PER_PAGE = 5;
 
 	// Alert states
 	const [AlertState, setAlertState] = useState("");
@@ -184,6 +203,186 @@ const LaporangKeuanganList = () => {
 		});
 	}, [CurrentPage, FilterBulan, FilterJenisTransaksi, GlobalSearch, RowPage, getCookie]);
 
+	const getListBulanLaporanKeuangan = () => {
+		var cookieUsername = getCookie("username");
+		var cookieParamKey = getCookie("paramkey");
+
+		var requestBody = JSON.stringify({
+			"username": cookieUsername,
+			"paramkey": cookieParamKey,
+			"method": "SELECT"
+		});
+
+		var url = paths.URL_API_ADMIN + 'GetListBulanLaporanKeuanganAdmin';
+		var Signature = generateSignature(requestBody);
+
+		fetch(url, {
+			method: "POST",
+			body: requestBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'Signature': Signature
+			},
+		})
+		.then(fetchStatus)
+		.then(response => response.json())
+		.then((data) => {
+			if (data.error_code === '0' || data.error_code === 0) {
+				setListBulanTersedia(data.result)
+			} else {
+				if (data.error_code === '2' || data.error_code === 2) {
+					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
+					setShowAlert(true);
+					return;
+				} else {
+					setErrorMessageAlert(data.error_message);
+					setShowAlert(true);
+					return;
+				}
+			}
+		})
+		.catch(() => {});
+	};
+
+	const getListLaporanKeuanganFilter = (filterBulanSummary) => {
+		var cookieUsername = getCookie("username");
+		var cookieParamKey = getCookie("paramkey");
+
+		var requestBody = JSON.stringify({
+			"username": cookieUsername,
+			"paramkey": cookieParamKey,
+			"method": "SELECT",
+			"bulan_laporan": filterBulanSummary,
+			"page": CurrentPage,
+			"row_page": RowPage,
+			"order_by": "",
+			"order": ""
+		});
+
+		// setLoadingLaporanKeuangan(true);
+
+		var url = paths.URL_API_ADMIN + 'LaporanKeuangan';
+		var Signature = generateSignature(requestBody);
+
+		fetch(url, {
+			method: "POST",
+			body: requestBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'Signature': Signature
+			},
+		})
+		.then(fetchStatus)
+		.then(response => response.json())
+		.then((data) => {
+			// setLoadingLaporanKeuangan(false);
+
+			if (data.error_code === '0' || data.error_code === 0) {
+				setListLaporanKeuanganFilter(data.result || []);
+				// setTotalSaldo(data.total_saldo);
+				setSaldoAwalFilter(data.saldo_awal);
+				setSaldoAkhirFilter(data.saldo_akhir);
+				// setTotalKredit(data.total_kredit);
+				// setTotalDebit(data.total_debit);
+				// setTotalPage(Number(data.total_page) || 1);
+				// setTotalRecords(Number(data.total_record) || 0);
+				return;
+			} else {
+				if (data.error_code === "2") {
+					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
+					setShowAlert(true);
+					return;
+				} else {
+					setErrorMessageAlert(data.error_message);
+					setShowAlert(true);
+					return;
+				}
+			}
+		})
+		.catch((error) => {
+			// setLoadingLaporanKeuangan(false);
+			if (error.message === 401) {
+				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
+				setShowAlert(true);
+			} else {
+				setErrorMessageAlert(AlertMessage.failedConnect);
+				setShowAlert(true);
+			}
+		});
+	};
+
+	const getListPenggunaanDana = (filterBulanSummary) => {
+		var cookieUsername = getCookie("username");
+		var cookieParamKey = getCookie("paramkey");
+
+		var requestBody = JSON.stringify({
+			"username": cookieUsername,
+			"paramkey": cookieParamKey,
+			"method": "SELECT",
+			"bulan_laporan": filterBulanSummary,
+			"page": CurrentPage,
+			"row_page": RowPage,
+			"order_by": "",
+			"order": ""
+		});
+
+		// setLoadingLaporanKeuangan(true);
+
+		var url = paths.URL_API_ADMIN + 'GetListPenggunaanDana';
+		var Signature = generateSignature(requestBody);
+
+		fetch(url, {
+			method: "POST",
+			body: requestBody,
+			headers: {
+				'Content-Type': 'application/json',
+				'Signature': Signature
+			},
+		})
+		.then(fetchStatus)
+		.then(response => response.json())
+		.then((data) => {
+			// setLoadingLaporanKeuangan(false);
+
+			if (data.error_code === '0' || data.error_code === 0) {
+				setListPenggunaanDana(data.result || []);
+				// setTotalSaldo(data.total_saldo);
+				// setSaldoAwalFilter(data.saldo_awal);
+				// setSaldoAkhirFilter(data.saldo_akhir);
+				// setTotalKredit(data.total_kredit);
+				// setTotalDebit(data.total_debit);
+				// setTotalPage(Number(data.total_page) || 1);
+				// setTotalRecords(Number(data.total_record) || 0);
+				return;
+			} else {
+				if (data.error_code === "2") {
+					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
+					setShowAlert(true);
+					return;
+				} else {
+					setErrorMessageAlert(data.error_message);
+					setShowAlert(true);
+					return;
+				}
+			}
+		})
+		.catch((error) => {
+			// setLoadingLaporanKeuangan(false);
+			if (error.message === 401) {
+				setErrorMessageAlert("Maaf anda tidak memiliki ijin untuk mengakses halaman ini.");
+				setShowAlert(true);
+			} else {
+				setErrorMessageAlert(AlertMessage.failedConnect);
+				setShowAlert(true);
+			}
+		});
+	};
+
+	useEffect(() => {
+		getListLaporanKeuanganFilter(FilterBulanSummary);
+		getListPenggunaanDana(FilterBulanSummary);
+	}, [FilterBulanSummary])
+
 	useEffect(() => {
 		window.scrollTo(0, 0);
 
@@ -196,6 +395,8 @@ const LaporangKeuanganList = () => {
 			dispatch(setForm("ParamKey", cookieParamKey));
 			dispatch(setForm("Username", cookieUsername));
 			dispatch(setForm("PageActive", "LAPORAN_KEUANGAN"));
+
+			getListBulanLaporanKeuangan();
 		}
 	}, [dispatch, getCookie, history]);
 
@@ -207,11 +408,13 @@ const LaporangKeuanganList = () => {
 		var cookieUsername = getCookie("username");
 		var cookieParamKey = getCookie("paramkey");
 
+		let filterBulan = FilterBulan;
+
 		var requestBody = JSON.stringify({
 			"username": cookieUsername,
 			"paramkey": cookieParamKey,
 			"method": "SELECT",
-			"bulan_laporan": "",
+			"bulan_laporan": filterBulan,
 			"bulan_laporan_summary": 0,
 			"bulan_penggunaan_dana": 0,
 			"page": CurrentPage,
@@ -567,14 +770,14 @@ const LaporangKeuanganList = () => {
 		},
 		{
 			title: "Total Pemasukan (Debit)",
-			value: formatRupiah(TotalKredit),
+			value: formatRupiah(TotalDebit),
 			description: "Total Dana Masuk",
 			icon: <FaArrowDown />,
 			tone: "green",
 		},
 		{
 			title: "Total Pengeluaran (Kredit)",
-			value: formatRupiah(TotalDebit),
+			value: formatRupiah(TotalKredit),
 			description: "Total Dana Keluar",
 			icon: <FaArrowUp />,
 			tone: "red",
@@ -591,14 +794,14 @@ const LaporangKeuanganList = () => {
 		},
 		{
 			title: "Total Pemasukan (Debit)",
-			value: formatRupiah(TotalKredit),
+			value: formatRupiah(TotalDebit),
 			description: "Total Dana Masuk",
 			icon: <FaArrowDown />,
 			tone: "green",
 		},
 		{
 			title: "Total Pengeluaran (Kredit)",
-			value: formatRupiah(TotalDebit),
+			value: formatRupiah(TotalKredit),
 			description: "Total Dana Keluar",
 			icon: <FaArrowUp />,
 			tone: "red",
@@ -664,6 +867,128 @@ const LaporangKeuanganList = () => {
 							<div className="admin-summary-icon">{item.icon}</div>
 						</div>
 					))}
+				</div>
+
+				{/* Summary Keuangan Tahun Berjalan */}
+				<div className="admin-panel" style={{ marginBottom: 20 }}>
+					<div className="admin-panel-header">
+						<div>
+							<h2>Summary Keuangan Tahun Berjalan</h2>
+							<p>Saldo Awal: {formatRupiah(SaldoAwalFilter)} | Saldo Akhir: {formatRupiah(SaldoAkhirFilter)}</p>
+						</div>
+						<div>
+							<select
+								className="form-select form-select-sm"
+								style={{ minWidth: 180 }}
+								value={FilterBulanSummary}
+								onChange={(e) => setFilterBulanSummary(e.target.value)}
+							>
+								<option value="">Semua Bulan</option>
+								{ListBulanTersedia.map((item, index) => (
+									<option key={index} value={item.bulan}>{item.filter_teks}</option>
+								))}
+							</select>
+						</div>
+					</div>
+
+					<div className="row">
+						{/* Rekening Koran */}
+						<div className="col-md-6" style={{ marginBottom: 16 }}>
+							<h6 style={{ fontWeight: 700, marginBottom: 4 }}>Rekening Koran</h6>
+							<div style={{ display: 'flex', gap: 16, marginBottom: 8, fontSize: 13 }}>
+								<span>Total Debit: <strong style={{ color: '#16a34a' }}>{formatRupiah(ListLaporanKeuanganFilter.filter(i => i.jenis_transaksi?.toLowerCase() === 'debit').reduce((sum, i) => sum + Number(i.nominal || 0), 0))}</strong></span>
+								<span>Total Kredit: <strong style={{ color: '#dc2626' }}>{formatRupiah(ListLaporanKeuanganFilter.filter(i => i.jenis_transaksi?.toLowerCase() === 'kredit').reduce((sum, i) => sum + Number(i.nominal || 0), 0))}</strong></span>
+							</div>
+							<div className="table-responsive admin-table-wrap">
+								<table className="table admin-table align-middle">
+									<thead>
+										<tr>
+											<th>No</th>
+											<th>Tanggal</th>
+											<th>Keterangan</th>
+											<th style={{ textAlign: 'right' }}>Debit</th>
+											<th style={{ textAlign: 'right' }}>Kredit</th>
+										</tr>
+									</thead>
+									<tbody>
+										{ListLaporanKeuanganFilter.length > 0 ? ListLaporanKeuanganFilter
+											.slice((PageRekeningKoran - 1) * SUMMARY_PER_PAGE, PageRekeningKoran * SUMMARY_PER_PAGE)
+											.map((item, idx) => (
+											<tr key={idx}>
+												<td>{(PageRekeningKoran - 1) * SUMMARY_PER_PAGE + idx + 1}</td>
+												<td>{item.tanggal_bayar || item.tanggal_input || '-'}</td>
+												<td>{item.deskripsi || item.keterangan || '-'}</td>
+												<td style={{ textAlign: 'right', color: '#16a34a', fontWeight: 600 }}>
+													{item.jenis_transaksi?.toLowerCase() === 'debit' ? formatRupiah(item.nominal) : '-'}
+												</td>
+												<td style={{ textAlign: 'right', color: '#dc2626', fontWeight: 600 }}>
+													{item.jenis_transaksi?.toLowerCase() === 'kredit' ? formatRupiah(item.nominal) : '-'}
+												</td>
+											</tr>
+										)) : (
+											<tr><td colSpan={5} style={{ textAlign: 'center', color: '#9ca3af', padding: 20 }}>Belum ada data</td></tr>
+										)}
+									</tbody>
+								</table>
+							</div>
+							{ListLaporanKeuanganFilter.length > SUMMARY_PER_PAGE && (
+								<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, fontSize: 13 }}>
+									<div>
+										<span style={{ color: '#6b7280', fontWeight:'bold' }}>Total Data {ListLaporanKeuanganFilter.length}</span>
+										<br />
+										<span style={{ color: '#6b7280' }}>Page {PageRekeningKoran} / {Math.ceil(ListLaporanKeuanganFilter.length / SUMMARY_PER_PAGE)}</span>
+									</div>
+									<div style={{ display: 'flex', gap: 4 }}>
+										<button className="btn btn-sm btn-outline-secondary" disabled={PageRekeningKoran <= 1} onClick={() => setPageRekeningKoran(PageRekeningKoran - 1)}>←</button>
+										<button className="btn btn-sm btn-outline-secondary" disabled={PageRekeningKoran >= Math.ceil(ListLaporanKeuanganFilter.length / SUMMARY_PER_PAGE)} onClick={() => setPageRekeningKoran(PageRekeningKoran + 1)}>→</button>
+									</div>
+								</div>
+							)}
+						</div>
+
+						{/* Penggunaan Dana */}
+						<div className="col-md-6" style={{ marginBottom: 16 }}>
+							<h6 style={{ fontWeight: 700, marginBottom: 4 }}>Penggunaan Dana</h6>
+							<div style={{ marginBottom: 8, fontSize: 13 }}>
+								<span>Total Penggunaan: <strong style={{ color: '#dc2626' }}>{formatRupiah(ListPenggunaanDana.reduce((sum, i) => sum + Number(i.nominal || 0), 0))}</strong></span>
+							</div>
+							<div className="table-responsive admin-table-wrap">
+								<table className="table admin-table align-middle">
+									<thead>
+										<tr>
+											<th>No</th>
+											<th>Tanggal</th>
+											<th>Keterangan</th>
+											<th style={{ textAlign: 'right' }}>Nominal</th>
+										</tr>
+									</thead>
+									<tbody>
+										{ListPenggunaanDana.length > 0 ? ListPenggunaanDana
+											.slice((PagePenggunaanDana - 1) * SUMMARY_PER_PAGE, PagePenggunaanDana * SUMMARY_PER_PAGE)
+											.map((item, idx) => (
+											<tr key={idx}>
+												<td>{(PagePenggunaanDana - 1) * SUMMARY_PER_PAGE + idx + 1}</td>
+												<td>{item.tanggal_input || item.tanggal_bayar || '-'}</td>
+												<td>{item.deskripsi || item.keterangan || '-'}</td>
+												<td style={{ textAlign: 'right', color: '#dc2626', fontWeight: 600 }}>{formatRupiah(item.nominal)}</td>
+											</tr>
+										)) : (
+											<tr><td colSpan={4} style={{ textAlign: 'center', color: '#9ca3af', padding: 20 }}>Belum ada data</td></tr>
+										)}
+									</tbody>
+								</table>
+							</div>
+							{ListPenggunaanDana.length > SUMMARY_PER_PAGE && (
+								<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, fontSize: 13 }}>
+									<span style={{ color: '#6b7280' }}>Hal {PagePenggunaanDana} / {Math.ceil(ListPenggunaanDana.length / SUMMARY_PER_PAGE)}</span>
+									<div style={{ display: 'flex', gap: 4 }}>
+										<button className="btn btn-sm btn-outline-secondary" disabled={PagePenggunaanDana <= 1} onClick={() => setPagePenggunaanDana(PagePenggunaanDana - 1)}>←</button>
+										<button className="btn btn-sm btn-outline-secondary" disabled={PagePenggunaanDana >= Math.ceil(ListPenggunaanDana.length / SUMMARY_PER_PAGE)} onClick={() => setPagePenggunaanDana(PagePenggunaanDana + 1)}>→</button>
+									</div>
+								</div>
+							)}
+						</div>
+					</div>
 				</div>
 
 				<div className="admin-panel">
