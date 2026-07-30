@@ -491,10 +491,10 @@ const ListProspek = () => {
 
 	const filteredList = ProspekData.filter((item) => {
 		const matchSearch = GlobalSearch === '' || 
-		(item.namaCluster || '').toLowerCase().includes(GlobalSearch.toLowerCase()) ||
+		(item.nama_cluster || '').toLowerCase().includes(GlobalSearch.toLowerCase()) ||
 		(item.pic || '').toLowerCase().includes(GlobalSearch.toLowerCase()) ||
 		(item.alamat || '').toLowerCase().includes(GlobalSearch.toLowerCase());
-		const matchStatus = FilterStatus === '' || item.status === FilterStatus;
+		const matchStatus = FilterStatus === '' || String(item.status) === String(FilterStatus);
 		return matchSearch && matchStatus;
 	});
 
@@ -646,7 +646,7 @@ const ListProspek = () => {
 
 				<select value={FilterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
 					<option value="">Semua Status</option>
-					{STATUS_OPTIONS.map((s) => <option key={s.id} value={s.id}>{s.status}</option>)}
+					{STATUS_OPTIONS.map((s) => <option key={s.id} value={s.status}>{s.status}</option>)}
 				</select>
 
 				<button className="admin-btn-filter" onClick={handleFilter}>
