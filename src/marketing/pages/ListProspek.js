@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useProspekData } from '../hooks/useProspekData';
 import '../../styles/admin-shared.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as XLSX from 'xlsx';
@@ -25,17 +24,40 @@ import {
 import { useCookies } from 'react-cookie';
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 import { useDispatch } from 'react-redux';
-import { AlertMessage, paths } from '../../admin/utils';
-import { fetchStatus, generateSignature } from '../../admin/utils/functions';
+import { AlertMessage, paths } from '../../utils';
+import { fetchStatus, generateSignature } from '../../utils/functions';
+import { setForm as setFormRedux } from '../../redux';
+import SweetAlert from 'react-bootstrap-sweetalert';
 
 const STATUS_OPTIONS = [
-  'Baru',
-  'Tahap Awal',
-  'Follow Up',
-  'Negosiasi',
-  'Proposal Penawaran',
-  'Pending',
-  'Close/Batal',
+	{
+		id:1,
+		status:'Baru'
+	},
+	{
+		id:2,
+		status:'Tahap Awal'
+	},
+	{
+		id:3,
+		status:'Follow Up'
+	},
+	{
+		id:4,
+		status:'Negosiasi'
+	},
+	{
+		id:5,
+		status:'Proposal Penawaran'
+	},
+	{
+		id:6,
+		status:'Pending'
+	},
+	{
+		id:7,
+		status:'Close/Batal'
+	}
 ];
 
 const emptyForm = {
@@ -46,16 +68,25 @@ const emptyForm = {
   jumlahRumah: '',
   tanggalKunjungan: '',
   keterangan: '',
-  status: 'Baru',
+  status: 1,
+};
+
+const getStatusId = (status) => {
+  if (!status) return 1;
+  // Jika sudah berupa angka atau string angka
+  const parsed = parseInt(status);
+  if (!isNaN(parsed) && parsed >= 1 && parsed <= STATUS_OPTIONS.length) return parsed;
+  // Jika berupa string nama status, cari ID-nya
+  const found = STATUS_OPTIONS.find((s) => s.status.toLowerCase() === String(status).toLowerCase());
+  return found ? found.id : 1;
 };
 
 const ListProspek = () => {
-	const { prospekList, setProspekList, summary } = useProspekData();
 	const history = useHistory();
 	const dispatch = useDispatch();
 	const [cookies, setCookie, removeCookie] = useCookies(['user']);
 
-	const [ListProspek, setListProspek] = useState([]);
+	const [ProspekData, setProspekData] = useState([]);
 	const [CurrentPage, setCurrentPage] = useState(1);
 	const [RowPage] = useState(10);
 	const [TotalPage, setTotalPage] = useState(1);
@@ -77,7 +108,7 @@ const ListProspek = () => {
 	const [form, setForm] = useState(emptyForm);
 	const [editIndex, setEditIndex] = useState(null);
 	const [showConfirm, setShowConfirm] = useState(false);
-	const [deleteIndex, setDeleteIndex] = useState(null);
+	const [deleteId, setDeleteId] = useState(null);
 
 	const [GlobalSearch, setGlobalSearch] = useState('');
 	const [FilterStatus, setFilterStatus] = useState('');
@@ -85,6 +116,7 @@ const ListProspek = () => {
 
   	const [Loading, setLoading] = useState(false);
 	const [ShowAlert, setShowAlert] = useState(false);
+	const [AlertState, setAlertState] = useState('');
 	const [ErrorMessage, setErrorMessage] = useState('');
 	const [SessionMessage, setSessionMessage] = useState('');
 	const [SuccessMessage, setSuccessMessage] = useState('');
@@ -146,7 +178,7 @@ const ListProspek = () => {
 				setLoadingProspek(false);
 
 				if (data.error_code === '0' || data.error_code === 0) {
-					setListProspek(data.result || []);
+					setProspekData(data.result || []);
 					setTotalProspekAll(Number(data.total_prospek) || 0);
 					setTotalProspekBaru(Number(data.total_prospek_baru) || 0);
 					setTotalProspekBatal(Number(data.total_prospek_batal) || 0);
@@ -160,9 +192,11 @@ const ListProspek = () => {
 					setTotalRecords(Number(data.total_record) || 0);
 				} else {
 					if (data.error_code === 2) {
+						setAlertState('session');
 						setSessionMessage('Session Anda Telah Habis. Silahkan Login Kembali.');
 						setShowAlert(true);
 					} else {
+						setAlertState('error');
 						setErrorMessageAlert(data.error_message);
 						setShowAlert(true);
 					}
@@ -172,13 +206,221 @@ const ListProspek = () => {
 				setLoadingProspek(false);
 
 				if (error.message === 401) {
+					setAlertState('error');
 					setErrorMessageAlert('Maaf anda tidak memiliki ijin untuk mengakses halaman ini.');
 				} else {
+					setAlertState('error');
 					setErrorMessageAlert(AlertMessage.failedConnect);
 				}
 				setShowAlert(true);
 			});
 	}, [CurrentPage, FilterBulan, FilterStatus, GlobalSearch, RowPage, getCookie]);
+
+	const handleInsertProspek = () => {
+		var cookieUsername = getCookie('username');
+		var cookieParamKey = getCookie('paramkey');
+
+		var requestBody = JSON.stringify({
+			username: cookieUsername,
+			paramkey: cookieParamKey,
+			method: "INSERT",
+			nama_cluster: form.namaCluster,
+			alamat: form.alamat,
+			pic: form.pic,
+			nomor_telepon: form.noTelepon,
+			jumlah_rumah: parseInt(form.jumlahRumah),
+			tanggal_kunjungan: form.tanggalKunjungan,
+			keterangan: form.keterangan,
+			status: parseInt(form.status)
+		});
+
+		var url = paths.URL_API_MARKETING + 'Prospek';
+		var Signature = generateSignature(requestBody);
+
+		setLoadingProspek(true);
+
+		fetch(url, {
+			method: 'POST',
+			body: requestBody,
+			headers: { 
+				'Content-Type': 'application/json', 
+				Signature: Signature
+			},
+		})
+			.then(fetchStatus)
+			.then((response) => response.json())
+			.then((data) => {
+				setLoadingProspek(false);
+
+				if (data.error_code === '0' || data.error_code === 0) {
+					setShowModal(false)
+
+					getListProspek()
+
+					setAlertState("success")
+					setSuccessMessage("Data berhasil diinsert");
+					setShowAlert(true);
+					return;
+				} else {
+					if (data.error_code === 2) {
+						setAlertState('session');
+						setSessionMessage('Session Anda Telah Habis. Silahkan Login Kembali.');
+						setShowAlert(true);
+					} else {
+						setAlertState('error');
+						setErrorMessageAlert(data.error_message);
+						setShowAlert(true);
+					}
+				}
+			})
+			.catch((error) => {
+				setLoadingProspek(false);
+
+				if (error.message === 401) {
+					setAlertState('error');
+					setErrorMessageAlert('Maaf anda tidak memiliki ijin untuk mengakses halaman ini.');
+				} else {
+					setAlertState('error');
+					setErrorMessageAlert(AlertMessage.failedConnect);
+				}
+				setShowAlert(true);
+			});
+	};
+
+	const handleUpdateProspek = () => {
+		var cookieUsername = getCookie('username');
+		var cookieParamKey = getCookie('paramkey');
+
+		var requestBody = JSON.stringify({
+			username: cookieUsername,
+			paramkey: cookieParamKey,
+			method: "UPDATE",
+			id: form.id,
+			nama_cluster: form.namaCluster,
+			alamat: form.alamat,
+			pic: form.pic,
+			nomor_telepon: form.noTelepon,
+			jumlah_rumah: parseInt(form.jumlahRumah),
+			tanggal_kunjungan: form.tanggalKunjungan,
+			keterangan: form.keterangan,
+			status: parseInt(form.status)
+		});
+
+		var url = paths.URL_API_MARKETING + 'Prospek';
+		var Signature = generateSignature(requestBody);
+
+		setLoadingProspek(true);
+
+		fetch(url, {
+			method: 'POST',
+			body: requestBody,
+			headers: { 
+				'Content-Type': 'application/json', 
+				Signature: Signature
+			},
+		})
+			.then(fetchStatus)
+			.then((response) => response.json())
+			.then((data) => {
+				setLoadingProspek(false);
+
+				if (data.error_code === '0' || data.error_code === 0) {
+					setShowModal(false);
+					getListProspek();
+
+					setAlertState("success");
+					setSuccessMessage("Data berhasil diupdate");
+					setShowAlert(true);
+					return;
+				} else {
+					if (data.error_code === 2) {
+						setAlertState('session');
+						setSessionMessage('Session Anda Telah Habis. Silahkan Login Kembali.');
+						setShowAlert(true);
+					} else {
+						setAlertState('error');
+						setErrorMessageAlert(data.error_message);
+						setShowAlert(true);
+					}
+				}
+			})
+			.catch((error) => {
+				setLoadingProspek(false);
+
+				if (error.message === 401) {
+					setAlertState('error');
+					setErrorMessageAlert('Maaf anda tidak memiliki ijin untuk mengakses halaman ini.');
+				} else {
+					setAlertState('error');
+					setErrorMessageAlert(AlertMessage.failedConnect);
+				}
+				setShowAlert(true);
+			});
+	};
+
+	const handleDeleteProspek = (id) => {
+		var cookieUsername = getCookie('username');
+		var cookieParamKey = getCookie('paramkey');
+
+		var requestBody = JSON.stringify({
+			username: cookieUsername,
+			paramkey: cookieParamKey,
+			method: "DELETE",
+			id: id
+		});
+
+		var url = paths.URL_API_MARKETING + 'Prospek';
+		var Signature = generateSignature(requestBody);
+
+		setLoadingProspek(true);
+
+		fetch(url, {
+			method: 'POST',
+			body: requestBody,
+			headers: { 
+				'Content-Type': 'application/json', 
+				Signature: Signature
+			},
+		})
+			.then(fetchStatus)
+			.then((response) => response.json())
+			.then((data) => {
+				setLoadingProspek(false);
+
+				if (data.error_code === '0' || data.error_code === 0) {
+					setShowModal(false)
+
+					getListProspek()
+
+					setAlertState("success")
+					setSuccessMessage("Data berhasil dihapus");
+					setShowAlert(true);
+					return;
+				} else {
+					if (data.error_code === 2) {
+						setAlertState('session');
+						setSessionMessage('Session Anda Telah Habis. Silahkan Login Kembali.');
+						setShowAlert(true);
+					} else {
+						setAlertState('error');
+						setErrorMessageAlert(data.error_message);
+						setShowAlert(true);
+					}
+				}
+			})
+			.catch((error) => {
+				setLoadingProspek(false);
+
+				if (error.message === 401) {
+					setAlertState('error');
+					setErrorMessageAlert('Maaf anda tidak memiliki ijin untuk mengakses halaman ini.');
+				} else {
+					setAlertState('error');
+					setErrorMessageAlert(AlertMessage.failedConnect);
+				}
+				setShowAlert(true);
+			});
+	};
 
 	useEffect(() => {
 		window.scrollTo(0, 0);
@@ -187,9 +429,9 @@ const ListProspek = () => {
 		if (!cookieParamKey || !cookieUsername) {
 			history.push('/marketing/login');
 		} else {
-			dispatch(setForm('ParamKey', cookieParamKey));
-			dispatch(setForm('Username', cookieUsername));
-			dispatch(setForm('PageActive', 'PROSPEK'));
+			dispatch(setFormRedux('ParamKey', cookieParamKey));
+			dispatch(setFormRedux('Username', cookieUsername));
+			dispatch(setFormRedux('PageActive', 'PROSPEK'));
 		}
 	}, [dispatch, getCookie, history]);
 
@@ -198,7 +440,12 @@ const ListProspek = () => {
 	}, [getListProspek]);
 
 	const handleChange = (e) => {
-		setForm({ ...form, [e.target.name]: e.target.value });
+		const { name, value } = e.target;
+		if (name === 'status') {
+			setForm({ ...form, [name]: parseInt(value) });
+		} else {
+			setForm({ ...form, [name]: value });
+		}
 	};
 
 	const openAdd = () => {
@@ -208,47 +455,41 @@ const ListProspek = () => {
 	};
 
 	const openView = (index) => {
-		setForm(filteredList[index]);
+		const item = filteredList[index];
+		setForm({
+			id: item.id || '',
+			namaCluster: item.nama_cluster || '',
+			alamat: item.alamat || '',
+			pic: item.pic || '',
+			noTelepon: item.nomor_telepon || '',
+			jumlahRumah: item.jumlah_rumah || '',
+			tanggalKunjungan: item.tanggal_kunjungan || '',
+			keterangan: item.keterangan || '',
+			status: getStatusId(item.status),
+		});
 		setModalMode('view');
 		setShowModal(true);
 	};
 
 	const openEdit = (index) => {
-		const realIndex = prospekList.indexOf(filteredList[index]);
-		setForm(prospekList[realIndex]);
-		setEditIndex(realIndex);
+		const item = filteredList[index];
+		setForm({
+			id: item.id || '',
+			namaCluster: item.nama_cluster || '',
+			alamat: item.alamat || '',
+			pic: item.pic || '',
+			noTelepon: item.nomor_telepon || '',
+			jumlahRumah: item.jumlah_rumah || '',
+			tanggalKunjungan: item.tanggal_kunjungan || '',
+			keterangan: item.keterangan || '',
+			status: getStatusId(item.status),
+		});
+		setEditIndex(ProspekData.indexOf(filteredList[index]));
 		setModalMode('edit');
 		setShowModal(true);
 	};
 
-	const handleSave = () => {
-		if (!form.namaCluster || !form.alamat) return;
-		if (modalMode === 'add') {
-		setProspekList([...prospekList, { ...form }]);
-		} else if (modalMode === 'edit') {
-		const updated = [...prospekList];
-		updated[editIndex] = { ...form };
-		setProspekList(updated);
-		}
-		setShowModal(false);
-		setForm(emptyForm);
-	};
-
-	const confirmDelete = (index) => {
-		const realIndex = prospekList.indexOf(filteredList[index]);
-		setDeleteIndex(realIndex);
-		setShowConfirm(true);
-	};
-
-	const handleDelete = () => {
-		const updated = prospekList.filter((_, i) => i !== deleteIndex);
-		setProspekList(updated);
-		setShowConfirm(false);
-		setDeleteIndex(null);
-	};
-
-	// Filter & Search
-	const filteredList = prospekList.filter((item) => {
+	const filteredList = ProspekData.filter((item) => {
 		const matchSearch = GlobalSearch === '' || 
 		(item.namaCluster || '').toLowerCase().includes(GlobalSearch.toLowerCase()) ||
 		(item.pic || '').toLowerCase().includes(GlobalSearch.toLowerCase()) ||
@@ -265,14 +506,15 @@ const ListProspek = () => {
 
 	const exportToExcel = () => {
 		const ws = XLSX.utils.json_to_sheet(
-		prospekList.map((p, i) => ({
+		ProspekData.map((p, i) => ({
 			No: i + 1,
-			'Nama Cluster': p.namaCluster,
+			'ID Prospek': p.id_prospek,
+			'Nama Cluster': p.nama_cluster,
 			Alamat: p.alamat,
 			PIC: p.pic,
-			'No Telepon': p.noTelepon,
-			'Jumlah Rumah': p.jumlahRumah,
-			'Tanggal Kunjungan': p.tanggalKunjungan,
+			'No Telepon': p.nomor_telepon,
+			'Jumlah Rumah': p.jumlah_rumah,
+			'Tanggal Kunjungan': p.tanggal_kunjungan,
 			Keterangan: p.keterangan,
 			Status: p.status,
 		}))
@@ -298,50 +540,90 @@ const ListProspek = () => {
 
 	const formatNumber = (value) => new Intl.NumberFormat('id-ID').format(value || 0);
 
+	const handleConfirmAlert = (alertState) => {
+		if (alertState === 'session') {
+			setShowAlert(false);
+			setSessionMessage('');
+			removeCookie('varCookie', { path: '/' });
+			sessionStorage.clear();
+			history.push('/marketing/login');
+		} else if (alertState === 'success') {
+			setShowAlert(false);
+			setSuccessMessage('');
+		} else if (alertState === 'error') {
+			setShowAlert(false);
+			setErrorMessageAlert('');
+		} else if (alertState === 'logout') {
+			setShowAlert(false);
+			setErrorMessageAlertLogout('');
+			history.push('/marketing/login');
+		}
+		setAlertState('');
+	};
+
 	const summaryCards = [
-		{ title: 'Total Prospek', value: formatNumber(summary.total), description: 'Seluruh data prospek', icon: <FaClipboardList />, tone: 'blue' },
-		{ title: 'Baru', value: formatNumber(summary.baru), description: 'Prospek baru masuk', icon: <FaBuilding />, tone: 'green' },
-		{ title: 'Follow Up', value: formatNumber(summary.followUp), description: 'Sedang ditindaklanjuti', icon: <FaPhoneAlt />, tone: 'purple' },
-		{ title: 'Negosiasi', value: formatNumber(summary.negosiasi), description: 'Dalam proses negosiasi', icon: <FaHandshake />, tone: 'yellow' },
-		{ title: 'Proposal', value: formatNumber(summary.proposal), description: 'Sudah kirim penawaran', icon: <FaUserTie />, tone: 'blue' },
-		{ title: 'Pending', value: formatNumber(summary.pending), description: 'Menunggu keputusan', icon: <FaHourglassHalf />, tone: 'yellow' },
-		{ title: 'Close/Batal', value: formatNumber(summary.close), description: 'Tidak dilanjutkan', icon: <FaTimesCircle />, tone: 'red' },
+		{ title: 'Total Prospek', value: formatNumber(TotalProspekAll), description: 'Seluruh data prospek', icon: <FaClipboardList />, tone: 'blue' },
+		{ title: 'Baru', value: formatNumber(TotalProspekBaru), description: 'Prospek baru masuk', icon: <FaBuilding />, tone: 'green' },
+		{ title: 'Follow Up', value: formatNumber(TotalProspekFollowUp), description: 'Sedang ditindaklanjuti', icon: <FaPhoneAlt />, tone: 'purple' },
+		{ title: 'Negosiasi', value: formatNumber(TotalProspekNegosiasi), description: 'Dalam proses negosiasi', icon: <FaHandshake />, tone: 'yellow' },
+		{ title: 'Proposal', value: formatNumber(TotalProspekProposal), description: 'Sudah kirim penawaran', icon: <FaUserTie />, tone: 'blue' },
+		{ title: 'Pending', value: formatNumber(TotalProspekPending), description: 'Menunggu keputusan', icon: <FaHourglassHalf />, tone: 'yellow' },
+		{ title: 'Close/Batal', value: formatNumber(TotalProspekBatal), description: 'Tidak dilanjutkan', icon: <FaTimesCircle />, tone: 'red' },
 	];
 
 	return (
 		<div className="admin-page" style={{ padding: 0, margin: 0, background: '#f7faf9' }}>
-			{/* Header */}
+			{/* Alert Popup */}
+			{ShowAlert && AlertState === 'session' && (
+				<SweetAlert warning show={ShowAlert} onConfirm={() => handleConfirmAlert('session')} btnSize="sm">
+					{SessionMessage}
+				</SweetAlert>
+			)}
+			{ShowAlert && AlertState === 'success' && (
+				<SweetAlert success show={ShowAlert} onConfirm={() => handleConfirmAlert('success')} btnSize="sm">
+					{SuccessMessage}
+				</SweetAlert>
+			)}
+			{ShowAlert && AlertState === 'error' && (
+				<SweetAlert danger show={ShowAlert} onConfirm={() => handleConfirmAlert('error')} btnSize="sm">
+					{ErrorMessageAlert}
+				</SweetAlert>
+			)}
+			{ShowAlert && AlertState === 'logout' && (
+				<SweetAlert danger show={ShowAlert} onConfirm={() => handleConfirmAlert('logout')} btnSize="sm">
+					{ErrorMessageAlertLogout}
+				</SweetAlert>
+			)}
+			
 			<div className="admin-header">
 				<div>
-				<div className="admin-eyebrow">Manajemen Prospek</div>
-				<h1>List Prospek</h1>
-				<p>Pantau daftar prospek, jadwal kunjungan, dan status follow up.</p>
+					<div className="admin-eyebrow">Manajemen Prospek</div>
+					<h1>List Prospek</h1>
+					<p>Pantau daftar prospek, jadwal kunjungan, dan status follow up.</p>
 				</div>
 				<div className="admin-header-actions">
 				<button className="admin-btn-primary" onClick={openAdd}>
 					<FaPlus /> Tambah Prospek
 				</button>
-				<button className="admin-btn-secondary" onClick={exportToExcel} disabled={prospekList.length === 0}>
+				<button className="admin-btn-secondary" onClick={exportToExcel} disabled={ProspekData.length === 0}>
 					<FaFileDownload /> Export Data
 				</button>
 				</div>
 			</div>
 
-			{/* Summary Cards */}
 			<div className="admin-summary-grid">
 				{summaryCards.map((item) => (
 				<div className={`admin-summary-card ${item.tone}`} key={item.title}>
 					<div>
-					<span>{item.title}</span>
-					<strong>{item.value}</strong>
-					<small>{item.description}</small>
+						<span>{item.title}</span>
+						<strong>{item.value}</strong>
+						<small>{item.description}</small>
 					</div>
 					<div className="admin-summary-icon">{item.icon}</div>
 				</div>
 				))}
 			</div>
 
-			{/* Table Panel */}
 			<div className="admin-panel">
 				<div className="admin-panel-header">
 				<div>
@@ -364,7 +646,7 @@ const ListProspek = () => {
 
 				<select value={FilterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
 					<option value="">Semua Status</option>
-					{STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+					{STATUS_OPTIONS.map((s) => <option key={s.id} value={s.id}>{s.status}</option>)}
 				</select>
 
 				<button className="admin-btn-filter" onClick={handleFilter}>
@@ -380,10 +662,11 @@ const ListProspek = () => {
 				<table className="admin-table">
 					<thead>
 					<tr>
+						<th>ID Prospek</th>
 						<th>Nama Cluster</th>
 						<th>Detail</th>
 						<th>PIC / Telepon</th>
-						<th>Jadwal</th>
+						<th>Tanggal Prospek</th>
 						<th>Status</th>
 						<th>Aksi</th>
 					</tr>
@@ -392,30 +675,41 @@ const ListProspek = () => {
 					{paginatedList.length > 0 ? paginatedList.map((item, index) => (
 						<tr key={index}>
 						<td>
-							<strong>{item.namaCluster || '-'}</strong>
+							<strong>{item.id_prospek || '-'}</strong>
+						</td>
+						<td>
+							<strong>{item.nama_cluster || '-'}</strong>
 							<span>{item.alamat || '-'}</span>
 						</td>
 						<td>
-							<span>Jumlah Rumah: {item.jumlahRumah || '-'}</span>
+							<span>Jumlah Rumah: {item.jumlah_rumah || '-'}</span>
 							<span style={{ maxWidth: 200, display: 'block', whiteSpace: 'normal', color: '#6b7280' }}>{item.keterangan || '-'}</span>
 						</td>
 						<td>
 							<strong>{item.pic || '-'}</strong>
-							<span>{item.noTelepon || '-'}</span>
+							<span>{item.nomor_telepon  || '-'}</span>
 						</td>
 						<td>
-							<span>{item.tanggalKunjungan || '-'}</span>
+							<span>{item.tanggal_kunjungan || '-'}</span>
 						</td>
 						<td>{statusBadge(item.status)}</td>
 						<td>
 							<div style={{ display: 'flex', gap: 6 }}>
-							<button className="admin-btn-icon" onClick={() => openView(index)} title="Lihat Detail">
+							{/* <button className="admin-btn-icon" onClick={() => openView(index)} title="Lihat Detail">
 								<FaEye />
-							</button>
+							</button> */}
 							<button className="admin-btn-icon" onClick={() => openEdit(index)} title="Edit">
 								<FaEdit />
 							</button>
-							<button className="admin-btn-icon danger" onClick={() => confirmDelete(index)} title="Hapus">
+							<button 
+								className="admin-btn-icon danger" 
+								onClick={() => { 
+									setDeleteId(item.id); 
+									setShowConfirm(true); 
+									// handleDeleteProspek
+								}}
+								title="Hapus"
+							>
 								<FaTrash />
 							</button>
 							</div>
@@ -423,7 +717,7 @@ const ListProspek = () => {
 						</tr>
 					)) : (
 						<tr>
-						<td colSpan={6}>
+						<td colSpan={7}>
 							<div className="admin-empty-state">
 							<strong>Belum ada data prospek</strong>
 							<span>Klik tombol "Tambah Prospek" untuk menambahkan data baru.</span>
@@ -446,89 +740,94 @@ const ListProspek = () => {
 				)}
 			</div>
 
-			{/* Modal Form / View */}
 			{showModal && (
 				<div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999 }}>
-				<div className="modal-dialog modal-dialog-centered modal-lg">
-					<div className="modal-content">
-					<div className="modal-header">
-						<h5 className="modal-title" style={{ fontWeight: 700 }}>
-						{modalMode === 'add' ? 'Tambah Prospek' : modalMode === 'edit' ? 'Edit Prospek' : 'Detail Prospek'}
-						</h5>
-						<button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+					<div className="modal-dialog modal-dialog-centered modal-lg">
+						<div className="modal-content">
+							<div className="modal-header">
+								<h5 className="modal-title" style={{ fontWeight: 700 }}>
+								{modalMode === 'add' ? 'Tambah Prospek' : modalMode === 'edit' ? 'Edit Prospek' : 'Detail Prospek'}
+								</h5>
+								<button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+							</div>
+							<div className="modal-body">
+								<div className="row">
+									<div className="col-md-6 mb-3">
+										<label className="form-label">Nama Cluster <span style={{ color: 'red' }}>*</span></label>
+										<input className="form-control" name="namaCluster" value={form.namaCluster} onChange={handleChange} disabled={modalMode === 'view'} />
+									</div>
+									<div className="col-md-6 mb-3">
+										<label className="form-label">Alamat <span style={{ color: 'red' }}>*</span></label>
+										<input className="form-control" name="alamat" value={form.alamat} onChange={handleChange} disabled={modalMode === 'view'} />
+									</div>
+									<div className="col-md-6 mb-3">
+										<label className="form-label">PIC yang Ditemui</label>
+										<input className="form-control" name="pic" value={form.pic} onChange={handleChange} disabled={modalMode === 'view'} />
+									</div>
+									<div className="col-md-6 mb-3">
+										<label className="form-label">No Telepon</label>
+										<input className="form-control" name="noTelepon" value={form.noTelepon} onChange={handleChange} disabled={modalMode === 'view'} />
+									</div>
+									<div className="col-md-4 mb-3">
+										<label className="form-label">Jumlah Rumah</label>
+										<input className="form-control" name="jumlahRumah" type="number" value={form.jumlahRumah} onChange={handleChange} disabled={modalMode === 'view'} />
+									</div>
+									<div className="col-md-4 mb-3">
+										<label className="form-label">Tanggal Kunjungan</label>
+										<input className="form-control" name="tanggalKunjungan" type="date" value={form.tanggalKunjungan} onChange={handleChange} disabled={modalMode === 'view'} />
+									</div>
+									<div className="col-md-4 mb-3">
+										<label className="form-label">Status</label>
+										<select 
+											className="form-select" 
+											name="status" value={form.status} onChange={handleChange} disabled={modalMode === 'view'}>
+										{STATUS_OPTIONS.map((s) => <option key={s.id} value={s.id}>{s.status}</option>)}
+										</select>
+									</div>
+									<div className="col-md-12 mb-3">
+										<label className="form-label">Keterangan</label>
+										<textarea className="form-control" name="keterangan" value={form.keterangan} onChange={handleChange} disabled={modalMode === 'view'} rows={3} />
+									</div>
+								</div>
+							</div>
+							<div className="modal-footer">
+								{modalMode === 'add' && (
+								<button type="button" className="btn btn-primary" onClick={handleInsertProspek} disabled={!form.namaCluster || !form.alamat}>
+									Simpan
+								</button>
+								)}
+								{modalMode === 'edit' && (
+								<button type="button" className="btn btn-primary" onClick={handleUpdateProspek} disabled={!form.namaCluster || !form.alamat}>
+									Update
+								</button>
+								)}
+							</div>
+						</div>
 					</div>
-					<div className="modal-body">
-						<div className="row">
-						<div className="col-md-6 mb-3">
-							<label className="form-label">Nama Cluster <span style={{ color: 'red' }}>*</span></label>
-							<input className="form-control" name="namaCluster" value={form.namaCluster} onChange={handleChange} disabled={modalMode === 'view'} />
-						</div>
-						<div className="col-md-6 mb-3">
-							<label className="form-label">Alamat <span style={{ color: 'red' }}>*</span></label>
-							<input className="form-control" name="alamat" value={form.alamat} onChange={handleChange} disabled={modalMode === 'view'} />
-						</div>
-						<div className="col-md-6 mb-3">
-							<label className="form-label">PIC yang Ditemui</label>
-							<input className="form-control" name="pic" value={form.pic} onChange={handleChange} disabled={modalMode === 'view'} />
-						</div>
-						<div className="col-md-6 mb-3">
-							<label className="form-label">No Telepon</label>
-							<input className="form-control" name="noTelepon" value={form.noTelepon} onChange={handleChange} disabled={modalMode === 'view'} />
-						</div>
-						<div className="col-md-4 mb-3">
-							<label className="form-label">Jumlah Rumah</label>
-							<input className="form-control" name="jumlahRumah" type="number" value={form.jumlahRumah} onChange={handleChange} disabled={modalMode === 'view'} />
-						</div>
-						<div className="col-md-4 mb-3">
-							<label className="form-label">Tanggal Kunjungan</label>
-							<input className="form-control" name="tanggalKunjungan" type="date" value={form.tanggalKunjungan} onChange={handleChange} disabled={modalMode === 'view'} />
-						</div>
-						<div className="col-md-4 mb-3">
-							<label className="form-label">Status</label>
-							<select className="form-select" name="status" value={form.status} onChange={handleChange} disabled={modalMode === 'view'}>
-							{STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-							</select>
-						</div>
-						<div className="col-md-12 mb-3">
-							<label className="form-label">Keterangan</label>
-							<textarea className="form-control" name="keterangan" value={form.keterangan} onChange={handleChange} disabled={modalMode === 'view'} rows={3} />
-						</div>
-						</div>
-					</div>
-					<div className="modal-footer">
-						<button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
-						{modalMode === 'view' ? 'Tutup' : 'Batal'}
-						</button>
-						{modalMode !== 'view' && (
-						<button type="button" className="btn btn-primary" onClick={handleSave} disabled={!form.namaCluster || !form.alamat}>
-							Simpan
-						</button>
-						)}
-					</div>
-					</div>
-				</div>
 				</div>
 			)}
 
-			{/* Confirm Delete */}
 			{showConfirm && (
-				<div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999 }}>
-				<div className="modal-dialog modal-dialog-centered modal-sm">
-					<div className="modal-content">
-					<div className="modal-header">
-						<h5 className="modal-title" style={{ fontWeight: 700 }}>Konfirmasi Hapus</h5>
-						<button type="button" className="btn-close" onClick={() => setShowConfirm(false)}></button>
-					</div>
-					<div className="modal-body">
-						<p>Apakah Anda yakin ingin menghapus data prospek ini?</p>
-					</div>
-					<div className="modal-footer">
-						<button type="button" className="btn btn-secondary" onClick={() => setShowConfirm(false)}>Batal</button>
-						<button type="button" className="btn btn-danger" onClick={handleDelete}>Ya, Hapus</button>
-					</div>
-					</div>
-				</div>
-				</div>
+				<SweetAlert
+					warning
+					showCancel
+					show={showConfirm}
+					confirmBtnText="Ya, Hapus"
+					confirmBtnBsStyle="danger"
+					cancelBtnText="Batal"
+					title="Konfirmasi Hapus"
+					onConfirm={() => {
+						setShowConfirm(false);
+						handleDeleteProspek(deleteId);
+						setDeleteId(null);
+					}}
+					onCancel={() => {
+						setShowConfirm(false);
+						setDeleteId(null);
+					}}
+				>
+					Apakah Anda yakin ingin menghapus data prospek ini?
+				</SweetAlert>
 			)}
 		</div>
 	);
