@@ -28,6 +28,7 @@ import ListNomorRekening from '../TarikDana/ListNomorRekening'
 import ListBank from '../TarikDana/ListBank'
 import MenuAdmin from '../ManajemenMenu/MenuAdmin'
 import MenuAplikasi from '../ManajemenMenu/MenuAplikasi'
+import PengumumanList from '../Pengumuman/PengumumanList'
 
 const MainApp = () => {
     const {form}=useSelector(state=>state.PaketReducer);
@@ -149,6 +150,9 @@ const MainApp = () => {
                             </Route>
                             <Route exact path="/admin/menu-aplikasi">
                                 <MenuAplikasi />
+                            </Route>
+                            <Route exact path="/admin/pengumuman">
+                                <PengumumanList />
                             </Route>
                         </Switch>
                     </div>

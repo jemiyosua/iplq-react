@@ -10,14 +10,15 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import SweetAlert from 'react-bootstrap-sweetalert';
 import {
 	FaArrowLeft,
+	FaCalendarAlt,
 	FaChartLine,
-	FaCheckCircle,
 	FaFileDownload,
 	FaFilter,
 	FaHandHoldingHeart,
+	FaMoneyBillWave,
 	FaRedoAlt,
 	FaSearch,
-	FaTimesCircle,
+	FaUsers,
 } from 'react-icons/fa';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -27,29 +28,27 @@ import { Pagination } from '../../../components';
 const DonasiDetail = () => {
 	const history = useHistory();
 	const dispatch = useDispatch();
-	const [cookies, setCookie, removeCookie] = useCookies(['user']);
+	const [cookies, , removeCookie] = useCookies(['user']);
 
-	const [ListDonasiDetail, setListDonasiDetail] = useState([]);
+	const [DetailDonasi, setDetailDonasi] = useState(null);
+	const [ListDonatur, setListDonatur] = useState([]);
 	const [CurrentPage, setCurrentPage] = useState(1);
 	const [RowPage] = useState(10);
 	const [TotalPage, setTotalPage] = useState(1);
 	const [TotalRecords, setTotalRecords] = useState(0);
-	const [TotalSettlement, setTotalSettlement] = useState(0);
+
+	const [TotalTerkumpul, setTotalTerkumpul] = useState(0);
+	const [TotalDonatur, setTotalDonatur] = useState(0);
 	const [TotalPending, setTotalPending] = useState(0);
 	const [CollectionRate, setCollectionRate] = useState(0);
 
-	const [LoadingDonasiDetail, setLoadingDonasiDetail] = useState(false);
-
-	const [ShowAlert, setShowAlert] = useState(true);
-	const [SessionMessage, setSessionMessage] = useState('');
-	const [SuccessMessage, setSuccessMessage] = useState('');
-	const [ErrorMessageAlert, setErrorMessageAlert] = useState('');
-	const [ErrorMessageAlertLogout, setErrorMessageAlertLogout] = useState('');
-
+	const [Loading, setLoading] = useState(false);
 	const [GlobalSearch, setGlobalSearch] = useState('');
 	const [FilterStatus, setFilterStatus] = useState('');
-	const [FilterPembayaran, setFilterPembayaran] = useState('');
-	const [FilterBulan, setFilterBulan] = useState('');
+
+	const [ShowAlert, setShowAlert] = useState(false);
+	const [SessionMessage, setSessionMessage] = useState('');
+	const [ErrorMessageAlert, setErrorMessageAlert] = useState('');
 
 	const getCookie = useCallback((tipe) => {
 		var SecretCookie = cookies.varCookie;
@@ -77,8 +76,6 @@ const DonasiDetail = () => {
 		removeCookie('varCookie', { path: '/' });
 		removeCookie('varMerchantId', { path: '/' });
 		removeCookie('varIdVoucher', { path: '/' });
-		removeCookie('varCookieFasilitasId', { path: '/' });
-		removeCookie('varCookieDonasiId', { path: '/' });
 		dispatch(setForm('ParamKey', ''));
 		dispatch(setForm('Username', ''));
 		dispatch(setForm('Name', ''));
@@ -86,38 +83,37 @@ const DonasiDetail = () => {
 		if (window) { sessionStorage.clear(); }
 	}, [dispatch, removeCookie]);
 
-	const getListDonasiDetail = useCallback((posisi = '') => {
+	const getDetailDonasi = useCallback((posisi = '') => {
 		var cookieUsername = getCookie('username');
 		var cookieParamKey = getCookie('paramkey');
-		let donasiId = cookies.varCookieDonasiId;
+		var donasiId = cookies.varCookieDonasiId;
+
+		if (!donasiId) {
+			history.push('/admin/donasi');
+			return;
+		}
 
 		let globalSearch = GlobalSearch;
 		let filterStatus = FilterStatus;
-		let filterPembayaran = FilterPembayaran;
-		let filterBulan = FilterBulan;
 		if (posisi === 'reset') {
 			globalSearch = '';
 			filterStatus = '';
-			filterPembayaran = '';
-			filterBulan = '';
 		}
 
 		var requestBody = JSON.stringify({
 			username: cookieUsername,
 			paramkey: cookieParamKey,
 			method: 'SELECT',
-			id_donasi: parseInt(donasiId),
+			id: parseInt(donasiId),
 			global_search: globalSearch,
-			status_transaksi: filterStatus,
-			metode_pembayaran: filterPembayaran,
-			bulan_invoice: filterBulan,
+			status: filterStatus,
 			page: CurrentPage,
 			row_page: RowPage,
 			order_by: '',
 			order: '',
 		});
 
-		setLoadingDonasiDetail(true);
+		setLoading(true);
 
 		var url = paths.URL_API_ADMIN + 'DonasiDetail';
 		var Signature = generateSignature(requestBody);
@@ -130,16 +126,18 @@ const DonasiDetail = () => {
 			.then(fetchStatus)
 			.then((response) => response.json())
 			.then((data) => {
-				setLoadingDonasiDetail(false);
+				setLoading(false);
 				if (data.error_code === '0' || data.error_code === 0) {
-					setListDonasiDetail(data.result || []);
-					setTotalSettlement(Number(data.total_settlement) || 0);
+					setDetailDonasi(data.detail || null);
+					setListDonatur(data.result || []);
+					setTotalTerkumpul(Number(data.total_terkumpul) || 0);
+					setTotalDonatur(Number(data.total_donatur) || 0);
 					setTotalPending(Number(data.total_pending) || 0);
 					setCollectionRate(Number(data.collection_rate) || 0);
 					setTotalPage(Number(data.total_page) || 1);
 					setTotalRecords(Number(data.total_record) || 0);
 				} else {
-					if (data.error_code === 2) {
+					if (data.error_code === '2' || data.error_code === 2) {
 						setSessionMessage('Session Anda Telah Habis. Silahkan Login Kembali.');
 						setShowAlert(true);
 					} else {
@@ -149,7 +147,7 @@ const DonasiDetail = () => {
 				}
 			})
 			.catch((error) => {
-				setLoadingDonasiDetail(false);
+				setLoading(false);
 				if (error.message === 401) {
 					setErrorMessageAlert('Maaf anda tidak memiliki ijin untuk mengakses halaman ini.');
 				} else {
@@ -157,7 +155,7 @@ const DonasiDetail = () => {
 				}
 				setShowAlert(true);
 			});
-	}, [CurrentPage, FilterBulan, FilterPembayaran, FilterStatus, GlobalSearch, RowPage, getCookie, cookies.varCookieDonasiId]);
+	}, [CurrentPage, FilterStatus, GlobalSearch, RowPage, cookies.varCookieDonasiId, getCookie, history]);
 
 	useEffect(() => {
 		window.scrollTo(0, 0);
@@ -177,10 +175,8 @@ const DonasiDetail = () => {
 	}, [dispatch, getCookie, history, cookies.varCookieDonasiId]);
 
 	useEffect(() => {
-		if (cookies.varCookieDonasiId) {
-			getListDonasiDetail('');
-		}
-	}, [getListDonasiDetail]);
+		getDetailDonasi('');
+	}, [getDetailDonasi]);
 
 	const formatRupiah = (value) => {
 		return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value || 0);
@@ -190,72 +186,55 @@ const DonasiDetail = () => {
 		return new Intl.NumberFormat('id-ID').format(value || 0);
 	};
 
-	const statusBadge = (status) => {
-		switch (status) {
-			case 'settlement':
-				return <span className="admin-status-badge settlement">settlement</span>;
-			case 'pending':
-				return <span className="admin-status-badge pending">pending</span>;
-			default:
-				return <span className="admin-status-badge">{status || '-'}</span>;
-		}
-	};
-
-	const exportToExcel = (data, fileName = 'data') => {
-		const worksheet = XLSX.utils.json_to_sheet(data);
-		const workbook = XLSX.utils.book_new();
-		XLSX.utils.book_append_sheet(workbook, worksheet, 'DonasiDetail');
-		const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-		const fileData = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-		saveAs(fileData, `${fileName}.xlsx`);
-	};
-
-	const handleExport = () => {
-		const formatted = ListDonasiDetail.map((item) => ({
-			'Order ID': item.order_id || '-',
-			'Nominal Donasi': item.tagihan || 0,
-			'Metode Pembayaran': item.metode_pembayaran || '-',
-			Cluster: item.cluster || '-',
-			Nama: item.nama_user || '-',
-			'Tanggal Transaksi': item.tanggal_transaksi || '-',
-			'Tanggal Bayar': item.tanggal_bayar || '-',
-			'Status Transaksi': item.transaction_status || '-',
-		}));
-		const now = new Date();
-		const day = String(now.getDate()).padStart(2, '0');
-		const month = String(now.getMonth() + 1).padStart(2, '0');
-		const year = now.getFullYear();
-		exportToExcel(formatted, `export-data-DonasiDetail-${day}-${month}-${year}`);
-	};
-
 	const handleFilter = () => {
-		setListDonasiDetail([]);
-		if (CurrentPage === 1) { getListDonasiDetail(''); } else { setCurrentPage(1); }
+		setListDonatur([]);
+		if (CurrentPage === 1) { getDetailDonasi(''); } else { setCurrentPage(1); }
 	};
 
 	const handleReset = () => {
 		setGlobalSearch('');
 		setFilterStatus('');
-		setFilterPembayaran('');
-		setFilterBulan('');
-		setListDonasiDetail([]);
-		if (CurrentPage === 1) { getListDonasiDetail('reset'); } else { setCurrentPage(1); }
+		setListDonatur([]);
+		if (CurrentPage === 1) { getDetailDonasi('reset'); } else { setCurrentPage(1); }
 	};
 
-	const handleBack = () => {
-		removeCookie('varCookieDonasiId', { path: '/' });
-		history.push('/admin/donasi');
+	const handleExport = () => {
+		const formatted = ListDonatur.map((item) => ({
+			'Nama Donatur': item.nama || '-',
+			'Cluster': item.cluster || '-',
+			'Nominal': item.nominal || 0,
+			'Status': item.transaction_status || '-',
+			'Tanggal': item.tanggal_bayar || '-',
+		}));
+		const now = new Date();
+		const day = String(now.getDate()).padStart(2, '0');
+		const month = String(now.getMonth() + 1).padStart(2, '0');
+		const year = now.getFullYear();
+		const worksheet = XLSX.utils.json_to_sheet(formatted);
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, 'Detail Donasi');
+		const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+		const fileData = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+		saveAs(fileData, `export-detail-donasi-${day}-${month}-${year}.xlsx`);
+	};
+
+	const statusBadge = (status) => {
+		if (status === 'settlement') return <span className="admin-status-badge active">Settlement</span>;
+		if (status === 'pending') return <span className="admin-status-badge pending">Pending</span>;
+		if (status === 'expire' || status === 'cancel') return <span className="admin-status-badge inactive">{status}</span>;
+		return <span className="admin-status-badge info">{status || '-'}</span>;
 	};
 
 	const summaryCards = [
-		{ title: 'Total Donasi Terkumpul', value: formatRupiah(TotalSettlement), description: 'Saldo Dana Masuk', icon: <FaHandHoldingHeart />, tone: 'green' },
-		{ title: 'Total Donasi Pending', value: formatRupiah(TotalPending), description: 'Total Dana Belum Masuk', icon: <FaTimesCircle />, tone: 'red' },
-		{ title: 'Collection Rate', value: `${CollectionRate.toFixed(1)}%`, description: 'Kolektibilitas Dana Terkumpul', icon: <FaChartLine />, tone: 'blue' },
+		{ title: 'Total Donasi Terkumpul', value: formatRupiah(TotalTerkumpul), description: 'Dana yang sudah masuk', icon: <FaHandHoldingHeart />, tone: 'green' },
+		{ title: 'Total Donatur', value: formatNumber(TotalDonatur), description: 'Orang yang berdonasi', icon: <FaUsers />, tone: 'blue' },
+		{ title: 'Donasi Pending', value: formatRupiah(TotalPending), description: 'Belum settlement', icon: <FaMoneyBillWave />, tone: 'yellow' },
+		{ title: 'Collection Rate', value: `${CollectionRate.toFixed(1)}%`, description: 'Kolektibilitas donasi', icon: <FaChartLine />, tone: 'purple' },
 	];
 
 	return (
 		<>
-			{LoadingDonasiDetail && <LoadingLogo />}
+			{Loading && <LoadingLogo />}
 
 			<div className="admin-page">
 				{SessionMessage !== '' && (
@@ -263,39 +242,61 @@ const DonasiDetail = () => {
 						{SessionMessage}
 					</SweetAlert>
 				)}
-				{SuccessMessage !== '' && (
-					<SweetAlert success show={ShowAlert} onConfirm={() => { setShowAlert(false); setSuccessMessage(''); }} btnSize="sm">
-						{SuccessMessage}
-					</SweetAlert>
-				)}
 				{ErrorMessageAlert !== '' && (
 					<SweetAlert danger show={ShowAlert} onConfirm={() => { setShowAlert(false); setErrorMessageAlert(''); }} btnSize="sm">
 						{ErrorMessageAlert}
 					</SweetAlert>
 				)}
-				{ErrorMessageAlertLogout !== '' && (
-					<SweetAlert danger show={ShowAlert} onConfirm={() => { setShowAlert(false); setErrorMessageAlertLogout(''); history.push('/admin/login'); }} btnSize="sm">
-						{ErrorMessageAlertLogout}
-					</SweetAlert>
-				)}
 
 				<div className="admin-header">
 					<div>
-						<div className="admin-eyebrow">Detail Donasi</div>
-						<h1>Detail Transaksi Donasi</h1>
-						<p>Lihat rincian transaksi dan status pembayaran donasi.</p>
-					</div>
-					<div className="admin-header-actions">
-						<button className="admin-btn-secondary" onClick={handleBack}>
-							<FaArrowLeft /> Kembali
+						<button
+							onClick={() => { removeCookie('varCookieDonasiId', { path: '/' }); history.push('/admin/donasi'); }}
+							style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', color: '#2563eb', fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, marginBottom: 8 }}
+						>
+							<FaArrowLeft /> Kembali ke Daftar Donasi
 						</button>
-						<button className="admin-btn-primary" onClick={handleExport} disabled={ListDonasiDetail.length === 0}>
-							<FaFileDownload /> Export Data
-						</button>
+						<div className="admin-eyebrow">Detail Program Donasi</div>
+						<h1>{DetailDonasi?.nama_donasi || 'Detail Donasi'}</h1>
+						<p>{DetailDonasi?.keterangan_donasi || 'Lihat detail dan statistik program donasi.'}</p>
 					</div>
+					<button className="admin-btn-secondary" onClick={handleExport} disabled={ListDonatur.length === 0}>
+						<FaFileDownload /> Export Data
+					</button>
 				</div>
 
-				<div className="admin-summary-grid cols-3">
+				{/* Info Donasi */}
+				{DetailDonasi && (
+					<div className="admin-panel" style={{ marginBottom: 20 }}>
+						<div style={{ padding: 16 }}>
+							<div className="row">
+								<div className="col-md-3 mb-2">
+									<small style={{ color: '#6b7280' }}>Nama Donasi</small>
+									<div style={{ fontWeight: 700 }}>{DetailDonasi.nama_donasi || '-'}</div>
+								</div>
+								<div className="col-md-3 mb-2">
+									<small style={{ color: '#6b7280' }}>Keterangan</small>
+									<div style={{ fontWeight: 600 }}>{DetailDonasi.keterangan_donasi || '-'}</div>
+								</div>
+								<div className="col-md-2 mb-2">
+									<small style={{ color: '#6b7280' }}><FaCalendarAlt /> Tanggal Mulai</small>
+									<div style={{ fontWeight: 600 }}>{DetailDonasi.tanggal_mulai_donasi || '-'}</div>
+								</div>
+								<div className="col-md-2 mb-2">
+									<small style={{ color: '#6b7280' }}><FaCalendarAlt /> Tanggal Selesai</small>
+									<div style={{ fontWeight: 600 }}>{DetailDonasi.tanggal_selesai_donasi || '-'}</div>
+								</div>
+								<div className="col-md-2 mb-2">
+									<small style={{ color: '#6b7280' }}>Minimal Donasi</small>
+									<div style={{ fontWeight: 700, color: '#2563eb' }}>{formatRupiah(DetailDonasi.donasi_minimal)}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{/* Summary Cards */}
+				<div className="admin-summary-grid">
 					{summaryCards.map((item) => (
 						<div className={`admin-summary-card ${item.tone}`} key={item.title}>
 							<div>
@@ -308,10 +309,11 @@ const DonasiDetail = () => {
 					))}
 				</div>
 
+				{/* Tabel Donatur */}
 				<div className="admin-panel">
 					<div className="admin-panel-header">
 						<div>
-							<h2>Daftar Transaksi Donasi</h2>
+							<h2>Daftar Donatur</h2>
 							<p>Total data: {formatNumber(TotalRecords)}</p>
 						</div>
 					</div>
@@ -321,26 +323,18 @@ const DonasiDetail = () => {
 							<FaSearch />
 							<input
 								type="text"
-								placeholder="Cari nama warga"
+								placeholder="Cari nama donatur..."
 								value={GlobalSearch}
 								onChange={(e) => setGlobalSearch(e.target.value)}
 								onKeyDown={(e) => { if (e.key === 'Enter') handleFilter(); }}
 							/>
 						</div>
 
-						<select value={FilterPembayaran} onChange={(e) => setFilterPembayaran(e.target.value)}>
-							<option value="">Metode Pembayaran</option>
-							<option value="qris">QRIS</option>
-							<option value="va">Virtual Account</option>
-						</select>
-
 						<select value={FilterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-							<option value="">Status Transaksi</option>
+							<option value="">Semua Status</option>
 							<option value="settlement">Settlement</option>
 							<option value="pending">Pending</option>
 						</select>
-
-						<input type="month" value={FilterBulan} onChange={(e) => setFilterBulan(e.target.value)} />
 
 						<button className="admin-btn-filter" onClick={handleFilter}>
 							<FaFilter /> Filter
@@ -351,38 +345,36 @@ const DonasiDetail = () => {
 						</button>
 					</div>
 
-					<div className="admin-table-wrap">
-						<table className="admin-table">
+					<div className="table-responsive admin-table-wrap">
+						<table className="table admin-table align-middle">
 							<thead>
 								<tr>
+									<th>No</th>
 									<th>Order ID</th>
-									<th>Nominal Donasi</th>
-									<th>Metode Pembayaran</th>
+									<th>Nama Donatur</th>
 									<th>Cluster</th>
-									<th>Nama</th>
-									<th>Tanggal Transaksi</th>
-									<th>Tanggal Bayar</th>
-									<th>Status Transaksi</th>
+									<th>Nominal</th>
+									<th>Status</th>
+									<th>Tanggal</th>
 								</tr>
 							</thead>
 							<tbody>
-								{ListDonasiDetail?.length > 0 ? ListDonasiDetail.map((item, index) => (
-									<tr key={item.order_id || index}>
-										<td><strong>{item.order_id || '-'}</strong></td>
-										<td><strong>{formatRupiah(item.tagihan)}</strong></td>
-										<td>{item.metode_pembayaran || '-'}</td>
+								{ListDonatur?.length > 0 ? ListDonatur.map((item, index) => (
+									<tr key={item.id || index}>
+										<td>{(CurrentPage - 1) * RowPage + index + 1}</td>
+										<td>{item.order_id || '-'}</td>
+										<td><strong>{item.nama || '-'}</strong></td>
 										<td>{item.cluster || '-'}</td>
-										<td><strong>{item.nama_user || '-'}</strong></td>
-										<td>{item.tanggal_transaksi || '-'}</td>
-										<td>{item.tanggal_bayar || '-'}</td>
-										<td>{statusBadge(item.transaction_status)}</td>
+										<td><strong style={{ color: '#16a34a' }}>{formatRupiah(item.nominal_donasi)}</strong></td>
+										<td>{statusBadge(item.status_transaksi)}</td>
+										<td>{item.tgl_bayar || '-'}</td>
 									</tr>
 								)) : (
 									<tr>
-										<td colSpan={8}>
+										<td colSpan={6}>
 											<div className="admin-empty-state">
-												<strong>Data tidak ditemukan</strong>
-												<span>Coba ubah filter atau kata pencarian.</span>
+												<strong>Belum ada donatur</strong>
+												<span>Data donatur akan muncul setelah ada warga yang berdonasi.</span>
 											</div>
 										</td>
 									</tr>
@@ -396,7 +388,7 @@ const DonasiDetail = () => {
 						<Pagination
 							currentPage={CurrentPage}
 							totalPage={Math.max(Number(TotalPage) || 1, 1)}
-							onPageChange={(page) => { if (!LoadingDonasiDetail) setCurrentPage(page); }}
+							onPageChange={(page) => { if (!Loading) setCurrentPage(page); }}
 						/>
 					</div>
 				</div>

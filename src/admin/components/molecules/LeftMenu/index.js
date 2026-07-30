@@ -38,6 +38,7 @@ const getMenuIcon = (item) => {
 	if (hasKeyword(keyword, ['tarik dana'])) return <FaWallet />;
 	if (hasKeyword(keyword, ['rekening'])) return <FaUniversity />;
 	if (hasKeyword(keyword, ['bank', 'list bank'])) return <FaUniversity />;
+	if (hasKeyword(keyword, ['pengumuman', 'berita'])) return <FaClipboardList />;
 	if (hasKeyword(keyword, ['midtrans', 'payment', 'pembayaran'])) return <FaCreditCard />;
 	if (hasKeyword(keyword, ['user'])) return <FaUserCog />;
 	if (hasKeyword(keyword, ['menu', 'manajemen menu'])) return <FaListAlt />;
@@ -197,7 +198,25 @@ const LeftMenu = ({ children }) => {
 		.then(response => response.json())
 		.then((data) => {
 			if (data.error_code === '0' || data.error_code === 0) {
-				setListMenu(data.result)
+				// Tambahkan menu Pengumuman jika belum ada dari API
+				const menuFromApi = data.result || [];
+				const hasPengumuman = menuFromApi.some((item) => {
+					const keyword = (item.menu || '').toLowerCase();
+					const subMenuMatch = item.list_sub_menu?.some((sub) => (sub.sub_menu || '').toLowerCase().includes('pengumuman'));
+					return keyword.includes('pengumuman') || subMenuMatch;
+				});
+
+				if (!hasPengumuman) {
+					menuFromApi.push({
+						id: 'pengumuman-static',
+						menu: 'Pengumuman',
+						page_active: 'PENGUMUMAN',
+						href_page: 'pengumuman',
+						list_sub_menu: [],
+					});
+				}
+
+				setListMenu(menuFromApi);
 			} else {
 				if (data.error_code === 2) {
 					setSessionMessage("Session Anda Telah Habis. Silahkan Login Kembali.");
