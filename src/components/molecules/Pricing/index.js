@@ -115,9 +115,9 @@ const Pricing = ({ pageActive, onClickSection, pageAnchor }) => {
                     <ul className="feature-list">
                         <li><Check color="#5cff9d" /> Layanan aktif 365 hari</li>
                         <li><Check color="#5cff9d" /> Hemat 200K</li>
-                        <li><Check color="#5cff9d" /> Integrasi Nomor WA</li>
+                        <li><Check color="#5cff9d" /> Integrasi Tagihan</li>
                         <li><Check color="#5cff9d" /> Tagihan Otomatis</li>
-                        <li><Check color="#5cff9d" /> KIrim informasi via WA</li>
+                        <li><Check color="#5cff9d" /> KIrim informasi via Push Notification</li>
                         {/* <li className="disabled">✖ RSVP Tamu Lanjutan</li> */}
                     </ul>
                 </div>
